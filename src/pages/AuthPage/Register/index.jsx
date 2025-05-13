@@ -1,0 +1,145 @@
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import logo from "@assets/logo.png";
+import { FaUserAlt, FaLock, FaUserPlus, FaEnvelope } from "react-icons/fa";
+
+const Register = ({ onSwitchToLogin }) => {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+  };
+
+  const formVariants = {
+    hidden: { opacity: 0, x: 100 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      variants={formVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+    >
+
+      <motion.div className="w-full max-w-md px-8 pb-8 pt-6 bg-white rounded-2xl shadow-2xl relative z-10">
+        <div className="flex flex-col items-center mb-5">
+          <motion.div>
+            <img src={logo} alt="Logo" className="object-contain mb-2" />
+          </motion.div>
+
+          <h2 className="text-2xl font-bold text-blue-900">
+            Create your account
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="relative">
+            <FaUserAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300"
+              placeholder="Username"
+              required
+            />
+          </div>
+
+          <div className="relative">
+            <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300"
+              placeholder="Email"
+              required
+            />
+          </div>
+
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300"
+              placeholder="Password"
+              required
+            />
+          </div>
+
+          <div className="relative">
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300"
+              placeholder="Confirm Password"
+              required
+            />
+          </div>
+
+          <motion.button
+            type="submit"
+            className="w-full py-3 bg-gradient-to-r from-red-700 via-red-600 to-orange-600 text-white rounded-lg font-semibold shadow-lg hover:from-red-800 hover:via-red-700 hover:to-orange-700 transition-all duration-300"
+            whileHover={{ scale: 1.02, brightness: 1.1 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            Register
+          </motion.button>
+
+          <div className="flex flex-col items-center gap-4 mt-6">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-600">Already have an account?</span>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault(); // Ngăn reload trang
+                  onSwitchToLogin(); // Gọi hàm chuyển sang Login
+                }}
+                className="text-yellow-900 hover:text-blue-900 flex items-center gap-1"
+              >
+                <FaUserAlt className="inline" />
+                Login now
+              </a>
+            </div>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default Register;
