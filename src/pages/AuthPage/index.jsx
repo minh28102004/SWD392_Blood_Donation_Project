@@ -1,28 +1,13 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Login from "./Login";
-import Register from "./Register";
 import image from "@assets/image2.jpg";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-
-  const slideVariants = {
-    hidden: (direction) => ({
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
-    exit: (direction) => ({
-      x: direction < 0 ? "50%" : "-30%", // Chỉ di chuyển một nửa màn hình
-      opacity: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    }),
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isLogin = location.pathname.includes("login");
+  const direction = isLogin ? 1 : -1;
 
   const backgroundVariants = {
     animate: {
@@ -35,39 +20,8 @@ const AuthPage = () => {
     },
   };
 
-  const contentVariants = {
-    hidden: {
-      opacity: 0,
-      y: 50, // Di chuyển lên một chút khi ẩn
-    },
-    visible: {
-      opacity: 1,
-      y: 0, // Đặt về vị trí ban đầu
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
-  };
-
-  const imgVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 1.1,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 1.5, ease: "easeOut" },
-    },
-  };
-  const backdropVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.9,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
+  const handleToHomePage = () => {
+    navigate("/homepage");
   };
 
   return (
@@ -79,7 +33,6 @@ const AuthPage = () => {
           className="absolute inset-0 bg-black"
           initial="hidden"
           animate="visible"
-          variants={backdropVariants}
         />
 
         {/* Nội dung chính với hiệu ứng trượt lên và mờ dần */}
@@ -87,7 +40,6 @@ const AuthPage = () => {
           className="relative z-10 bg-white bg-opacity-90 rounded-xl p-8 max-w-lg text-center shadow-lg"
           initial="hidden"
           animate="visible"
-          variants={contentVariants}
           whileHover={{
             scale: 1.02,
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
@@ -104,7 +56,10 @@ const AuthPage = () => {
             surgeries, and ongoing medical treatments. Your small act can have a
             profound impact, providing hope and strength to others.
           </p>
-          <button className="mt3 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition">
+          <button
+            onClick={handleToHomePage}
+            className="mt3 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition"
+          >
             See More {">>"}
           </button>
         </motion.div>
@@ -116,7 +71,6 @@ const AuthPage = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-70 brightness-75"
           initial="hidden"
           animate="visible"
-          variants={imgVariants}
         />
       </div>
 
@@ -151,23 +105,16 @@ const AuthPage = () => {
             />
           ))}
         </motion.div>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={isLogin ? "login" : "register"}
-            custom={isLogin ? 1 : -1} // Pass direction value
-            variants={slideVariants}
+            key={location.pathname}
+            custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit"
+            className="w-full max-w-md z-20"
           >
-            {isLogin ? (
-              <Login key="login" onSwitchToRegister={() => setIsLogin(false)} />
-            ) : (
-              <Register
-                key="register"
-                onSwitchToLogin={() => setIsLogin(true)}
-              />
-            )}
+            <Outlet />
           </motion.div>
         </AnimatePresence>
       </div>

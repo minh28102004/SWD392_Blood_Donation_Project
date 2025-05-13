@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import logo from "@assets/logo.png";
-import { FaUserAlt, FaLock, FaUserPlus, FaEnvelope } from "react-icons/fa";
+import { FaUserAlt, FaLock, FaEnvelope } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-const Register = ({ onSwitchToLogin }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -26,6 +28,10 @@ const Register = ({ onSwitchToLogin }) => {
     }
   };
 
+  const handleLoginClick = () => {
+    navigate("/authPage/login"); 
+  };
+
   const formVariants = {
     hidden: { opacity: 0, x: 100 },
     visible: {
@@ -46,7 +52,6 @@ const Register = ({ onSwitchToLogin }) => {
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
     >
-
       <motion.div className="w-full max-w-md px-8 pb-8 pt-6 bg-white rounded-2xl shadow-2xl relative z-10">
         <div className="flex flex-col items-center mb-5">
           <motion.div>
@@ -124,11 +129,7 @@ const Register = ({ onSwitchToLogin }) => {
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-600">Already have an account?</span>
               <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault(); // Ngăn reload trang
-                  onSwitchToLogin(); // Gọi hàm chuyển sang Login
-                }}
+                onClick={handleLoginClick}
                 className="text-yellow-900 hover:text-blue-900 flex items-center gap-1"
               >
                 <FaUserAlt className="inline" />
