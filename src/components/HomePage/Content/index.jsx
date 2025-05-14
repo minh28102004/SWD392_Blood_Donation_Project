@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { motion } from "framer-motion";
-import { blogPosts } from "@components/HomePage/Blog/blogData";
-import { slides, criteriaList, tips } from "./contentData";
+import { blogPosts } from "@components/HomePage/Blog/blog_Data";
+import { slides, criteriaList, tips } from "./content_Data";
+import AOS from "aos";
+import "aos/dist/aos.css"; // Đảm bảo rằng bạn đã import CSS của AOS
+import { motion, AnimatePresence } from "framer-motion";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const previewPosts = blogPosts.slice(0, 3); 
+  const previewPosts = blogPosts.slice(0, 3);
 
   useEffect(() => {
+    AOS.init({ duration: 1000, once: true }); // Khởi tạo AOS
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
@@ -22,15 +25,21 @@ const Content = () => {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
+
   return (
     <div>
       {/* Hero Slider */}
-      <div className="relative h-screen pt-16 mb-6">
+      <motion.div
+        className="relative h-screen pt-8 mb-4"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
         {slides.map((slide, index) => (
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
+              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
             <div className="absolute inset-0 bg-black opacity-50"></div>
@@ -39,35 +48,56 @@ const Content = () => {
               alt={slide.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white px-4">
-                <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                  {slide.title}
-                </h1>
-                <p className="text-xl md:text-2xl mb-8">{slide.description}</p>
-                <button className="font-semibold bg-red-700 hover:bg-red-900  text-white px-8 py-3 rounded-full transition duration-300">
-                  Donate Blood Now
-                </button>
+
+            {index === currentSlide && (
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <div className="text-center text-white px-4">
+                  <motion.h1
+                    className="text-4xl md:text-6xl font-bold mb-4"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+                  >
+                    {slide.title}
+                  </motion.h1>
+
+                  <motion.p
+                    className="text-xl md:text-2xl mb-8"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+                  >
+                    {slide.description}
+                  </motion.p>
+
+                  <button className="font-semibold bg-red-700 hover:bg-red-900 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300">
+                    Donate Blood Now
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
+
         <button
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-full"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-full z-30"
         >
           <FiChevronLeft size={24} />
         </button>
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-full"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-full z-30"
         >
           <FiChevronRight size={24} />
         </button>
-      </div>
+      </motion.div>
 
-      {/*blood donation standards*/}
-      <section className="bg-gray-100 pb-8 pt-5 px-4 md:px-8 ">
+      {/* Eligibility Criteria */}
+      <section
+        className="bg-gray-100 pb-8 pt-5 px-4 md:px-8"
+        data-aos="fade-up"
+      >
         <div className="max-w-6xl mx-auto text-center mb-10">
           <h2 className="text-3xl font-bold text-black mb-4">
             Eligibility Criteria for Blood Donation
@@ -83,6 +113,7 @@ const Content = () => {
             <div
               key={index}
               className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl hover:scale-105 transition-transform duration-300"
+              data-aos="zoom-in" // Hiệu ứng zoom-in khi xuất hiện
             >
               <div className="flex items-center mb-4 space-x-3">
                 <div className="bg-red-100 p-3 rounded-full">{item.icon}</div>
@@ -96,19 +127,21 @@ const Content = () => {
         </div>
       </section>
 
-      {/*Advances & Disadvantages*/}
-      <div className="bg-gray-700 py-10 px-4 mt-8 sm:px-8 text-gray-800">
+      {/* Blood Donation Tips */}
+      <div
+        className="bg-gray-700 py-10 px-4 mt-8 sm:px-8 text-gray-800"
+        data-aos="fade-up"
+      >
         <h2 className="text-3xl font-bold mb-10 text-center text-white">
           💉 Blood Donation Tips & Precautions
         </h2>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {tips.map((section, idx) => (
-            <motion.div
+            <div
               key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: idx * 0.2 }}
               className={`border-l-4 p-6 rounded-lg shadow-md ${section.color}`}
+              data-aos="flip-left" // Thêm hiệu ứng flip-left cho mỗi mục
+              data-aos-delay={idx * 200} // Thêm độ trễ cho mỗi mục
             >
               <div className="flex items-center mb-4 gap-2">
                 {section.icon}
@@ -119,7 +152,7 @@ const Content = () => {
                   <li key={i}>{item}</li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -130,7 +163,7 @@ const Content = () => {
       </div>
 
       {/* Blog & Stories */}
-      <section className="py-6 bg-gray-50">
+      <section className="py-6 bg-gray-50" data-aos="fade-up">
         <div className="container mx-auto px-6 pt-5">
           <h2 className="text-4xl font-bold text-center text-black mb-8">
             Latest Stories & Updates
@@ -141,6 +174,8 @@ const Content = () => {
               <div
                 key={index}
                 className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
+                data-aos="fade-up" // Thêm hiệu ứng fade-up cho mỗi bài viết
+                data-aos-delay={index * 200} // Thêm độ trễ cho mỗi bài viết
               >
                 <img
                   src={post.image}
