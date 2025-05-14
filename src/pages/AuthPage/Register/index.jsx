@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import logo from "@assets/logo.png";
 import { FaUserAlt, FaLock, FaEnvelope } from "react-icons/fa";
@@ -12,6 +12,13 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    // This will trigger once when the component is mounted
+    setHasAnimated(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -29,7 +36,7 @@ const Register = () => {
   };
 
   const handleLoginClick = () => {
-    navigate("/authPage/login"); 
+    navigate("/authPage/login");
   };
 
   const formVariants = {
@@ -48,7 +55,7 @@ const Register = () => {
     <motion.div
       variants={formVariants}
       initial="hidden"
-      animate="visible"
+      animate={hasAnimated ? "visible" : "hidden"}  
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
     >

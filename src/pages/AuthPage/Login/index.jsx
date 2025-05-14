@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import logo from "@assets/logo.png";
 import { FaUserAlt, FaLock, FaUserPlus } from "react-icons/fa";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,6 +10,13 @@ const Login = () => {
     username: "",
     password: "",
   });
+
+  const [animationState, setAnimationState] = useState("hidden");
+
+  useEffect(() => {
+    // Trigger the animation after the first render
+    setAnimationState("visible");
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -23,7 +30,7 @@ const Login = () => {
   };
 
   const handleRegisterClick = () => {
-    navigate("/authPage/register"); 
+    navigate("/authPage/register");
   };
 
   const formVariants = {
@@ -42,7 +49,7 @@ const Login = () => {
     <motion.div
       variants={formVariants}
       initial="hidden"
-      animate="visible"
+      animate={animationState}  // Use the animation state from useEffect
       whileHover={{ scale: 1.02 }} // Slight scaling of the entire form container on hover
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
       className="relative"

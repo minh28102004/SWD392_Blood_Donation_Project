@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import image from "@assets/Background_Image/image2.jpg";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const AuthPage = () => {
   const location = useLocation();
@@ -20,6 +22,10 @@ const AuthPage = () => {
     },
   };
 
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true }); 
+  }, []);
+
   const handleToHomePage = () => {
     navigate("/homepage");
   };
@@ -28,23 +34,15 @@ const AuthPage = () => {
     <div className="min-h-screen flex bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
       {/* Left side content */}
       <div className="hidden lg:flex w-4/5 flex-col items-center justify-center p-12 relative z-10">
-        {/* Phần nền với hiệu ứng mờ và phóng to */}
-        <motion.div
-          className="absolute inset-0 bg-black"
-          initial="hidden"
-          animate="visible"
+        <div
+          className="absolute inset-0 bg-black opacity-50"
+          data-aos="fade"
+          data-aos-duration="1500"
         />
-
-        {/* Nội dung chính với hiệu ứng trượt lên và mờ dần */}
-        <motion.div
+        <div
           className="relative z-10 bg-white bg-opacity-90 rounded-xl p-8 max-w-lg text-center shadow-lg"
-          initial="hidden"
-          animate="visible"
-          whileHover={{
-            scale: 1.02,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            transition: { duration: 0.3 },
-          }} // Thêm hiệu ứng hover cho phần nội dung
+          data-aos="fade-up"
+          data-aos-duration="800"
         >
           <h2 className="text-3xl font-bold text-black mb-5">
             Donate Blood, Save Lives
@@ -58,19 +56,20 @@ const AuthPage = () => {
           </p>
           <button
             onClick={handleToHomePage}
-            className="mt3 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition"
+            className="mt-3 px-6 py-2 bg-gray-800 text-white rounded-full hover:bg-black hover:text-yellow-400 hover:scale-105 transition"
           >
             See More {">>"}
           </button>
-        </motion.div>
-
-        {/* Hình ảnh với hiệu ứng mờ dần và phóng to */}
-        <motion.img
-          src={image}
-          alt="Image"
+        </div>
+        <div
+          data-aos="fade"
+          data-aos-duration="2000"
           className="absolute inset-0 w-full h-full object-cover opacity-70 brightness-75"
-          initial="hidden"
-          animate="visible"
+          style={{
+            backgroundImage: `url(${image})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          }}
         />
       </div>
 
@@ -78,7 +77,7 @@ const AuthPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center relative z-10">
         {/* Phần nền chuyển động */}
         <motion.div
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           variants={backgroundVariants}
           animate="animate"
           style={{ zIndex: -1 }} // Đặt z-index để phần nền không che phủ form
