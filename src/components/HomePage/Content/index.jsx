@@ -1,183 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
-import {
-  FaIdCard,
-  FaUserShield,
-  FaVirusSlash,
-  FaWeight,
-  FaHeartbeat,
-  FaVial,
-  FaBirthdayCake,
-  FaHistory,
-  FaMicroscope,
-  FaClock,
-  FaUtensils,
-  FaHandsHelping,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaExclamationTriangle,
-} from "react-icons/fa";
-import imagebg from "@assets/image3.jpg";
-import imagebg4 from "@assets/image4.jpg";
-import imagepost from "@assets/image5.jpg";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { blogPosts } from "@components/HomePage/Blog/blogData";
+import { slides, criteriaList, tips } from "./contentData";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const slides = [
-    {
-      image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4",
-      title: "Save Lives Through Blood Donation",
-      description:
-        "Your donation can save up to three lives. Join our mission today.",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1584744982491-665216d95f8b",
-      title: "Every Drop Counts",
-      description: "Be a hero in someone's story. Donate blood regularly.",
-    },
-    {
-      image: imagebg4,
-      title: "A Drop of Blood – A Million Hopes",
-      description:
-        "Donating blood not only saves lives but also brings hope to others.",
-    },
-    {
-      image: imagebg,
-      title: "Together We Can Make a Difference",
-      description: "Join our community of life-savers.",
-    },
-  ];
-
-  const blogPosts = [
-    {
-      image: "https://images.unsplash.com/photo-1584515933487-779824d29309",
-      title: "Impact of Regular Blood Donation",
-      excerpt: "Discover how regular blood donation helps save lives...",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1607746882042-944635dfe10e",
-      title: "Breaking Myths About Blood Donation",
-      excerpt: "Learn the truth about common blood donation myths...",
-    },
-    {
-      image: imagepost,
-      title: "Stories of Hope",
-      excerpt: "Read inspiring stories from blood recipients...",
-    },
-  ];
-
-  const criteriaList = [
-    {
-      icon: <FaIdCard size={24} className="text-red-600" />,
-      title: "Identification Required",
-      description: "Please bring a valid ID card or passport for verification.",
-    },
-    {
-      icon: <FaUserShield size={24} className="text-red-600" />,
-      title: "Substance-Free",
-      description: "No use of illegal drugs, excessive alcohol, or stimulants.",
-    },
-    {
-      icon: <FaVirusSlash size={24} className="text-red-600" />,
-      title: "Free from Infectious Risks",
-      description:
-        "No HIV, Hepatitis B/C, or risky blood-borne infection behaviors.",
-    },
-    {
-      icon: <FaWeight size={24} className="text-red-600" />,
-      title: "Minimum Weight",
-      description:
-        "You must weigh at least 45 kg (99 lbs), regardless of gender.",
-    },
-    {
-      icon: <FaHeartbeat size={24} className="text-red-600" />,
-      title: "Good Health",
-      description:
-        "No chronic or acute illnesses (heart, respiratory, gastric, etc.).",
-    },
-    {
-      icon: <FaVial size={24} className="text-red-600" />,
-      title: "Healthy Hemoglobin",
-      description:
-        "Hemoglobin level must be ≥ 120g/L (≥125g/L if donating 350ml+).",
-    },
-    {
-      icon: <FaBirthdayCake size={24} className="text-red-600" />,
-      title: "Age Requirement",
-      description:
-        "Donors must be between 18 and 60 years old and in good health.",
-    },
-    {
-      icon: <FaHistory size={24} className="text-red-600" />,
-      title: "Donation Interval",
-      description: "At least 12 weeks must pass between two donations.",
-    },
-    {
-      icon: <FaMicroscope size={24} className="text-red-600" />,
-      title: "Negative Hepatitis B Test",
-      description: "Must test negative for Hepatitis B surface antigen.",
-    },
-    {
-      icon: <FaClock size={24} className="text-red-600" />,
-      title: "Rest Before Donation",
-      description:
-        "Ensure you’ve had enough sleep and feel well-rested before donating.",
-    },
-    {
-      icon: <FaUtensils size={24} className="text-red-600" />,
-      title: "Light Meal Before Donation",
-      description:
-        "Eat a light, low-fat meal before donating blood. Avoid fasting.",
-    },
-    {
-      icon: <FaHandsHelping size={24} className="text-red-600" />,
-      title: "Voluntary Participation",
-      description:
-        "Donation must be completely voluntary without any coercion or compensation.",
-    },
-  ];
-
-  const tips = [
-    {
-      type: "Don’t",
-      color: "border-yellow-400 bg-yellow-50 text-yellow-700",
-      icon: <FaTimesCircle className="text-yellow-500 text-2xl" />,
-      title: "Avoid Before/After Donation",
-      items: [
-        "Do not drink milk, alcohol, or stimulants before donating.",
-        "Avoid long-distance driving, heavy lifting, or intense workouts on donation day.",
-      ],
-    },
-    {
-      type: "Do",
-      color: "border-green-400 bg-green-50 text-green-700",
-      icon: <FaCheckCircle className="text-green-500 text-2xl" />,
-      title: "Recommended Actions",
-      items: [
-        "Eat a light meal and drink 300–500ml of water before donating.",
-        "Apply firm pressure on the needle site for 10 minutes, keep the bandage on for 4–6 hours.",
-        "Rest for 10 minutes after donating.",
-        "Lie down with feet elevated if feeling dizzy or nauseated.",
-        "Apply a cold compress if bruising or swelling occurs.",
-      ],
-    },
-    {
-      type: "Emergency",
-      color: "border-red-400 bg-red-50 text-red-700",
-      icon: <FaExclamationTriangle className="text-red-500 text-2xl" />,
-      title: "In Case of Bleeding",
-      items: [
-        "Raise your arm above heart level.",
-        "Press the cotton/bandage with your other hand.",
-        "Seek help from medical staff immediately.",
-      ],
-    },
-  ];
+  const previewPosts = blogPosts.slice(0, 3); 
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -268,7 +97,7 @@ const Content = () => {
       </section>
 
       {/*Advances & Disadvantages*/}
-      <div className="bg-gray-700 py-10 px-4 mt-14 sm:px-8 text-gray-800">
+      <div className="bg-gray-700 py-10 px-4 mt-8 sm:px-8 text-gray-800">
         <h2 className="text-3xl font-bold mb-10 text-center text-white">
           💉 Blood Donation Tips & Precautions
         </h2>
@@ -301,16 +130,17 @@ const Content = () => {
       </div>
 
       {/* Blog & Stories */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-12">
+      <section className="py-6 bg-gray-50">
+        <div className="container mx-auto px-6 pt-5">
+          <h2 className="text-4xl font-bold text-center text-black mb-8">
             Latest Stories & Updates
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {blogPosts.map((post, index) => (
+
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {previewPosts.map((post, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300"
+                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
               >
                 <img
                   src={post.image}
@@ -318,14 +148,30 @@ const Content = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-2">{post.title}</h3>
+                  <h3 className="text-xl font-bold text-black mb-2">
+                    {post.title}
+                  </h3>
                   <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                  <button className="text-white bg-gray-800 font-semibold hover:text-yellow-500 hover:bg-gray-900">
+                  <button
+                    onClick={() => window.open(post.link, "_blank")}
+                    className="text-white bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 transition"
+                  >
                     Read More →
                   </button>
                 </div>
               </div>
             ))}
+          </div>
+          <div className="text-center pb-2">
+            <a
+              href="/homepage/blog"
+              className="inline-block relative text-blue-600 text-base font-normal transition-all duration-300 hover:text-blue-700 group"
+            >
+              <span className="inline-flex items-center transition-transform duration-300 group-hover:translate-x-1">
+                Xem thêm&nbsp;&gt;&gt;
+              </span>
+              <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full"></span>
+            </a>
           </div>
         </div>
       </section>

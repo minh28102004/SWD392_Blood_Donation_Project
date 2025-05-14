@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import image from "@assets/image2.jpg";
+import image from "@assets/Background_Image/image2.jpg";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const AuthPage = () => {
