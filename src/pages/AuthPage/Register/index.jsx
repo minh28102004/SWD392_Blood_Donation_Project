@@ -62,9 +62,11 @@ const Register = () => {
       <motion.div className="w-full max-w-md px-8 pb-8 pt-6 bg-white rounded-2xl shadow-2xl relative z-10">
         <div className="flex flex-col items-center mb-5">
           <motion.div>
-            <img src={logo} alt="Logo" className="object-contain mb-2" />
+            <img src={logo} alt="Logo" className="object-contain" />
           </motion.div>
-
+ <p className="text-md text-red-500 italic mb-1 tracking-wide">
+           - Give life, Share hope -
+          </p>
           <h2 className="text-2xl font-bold text-blue-900">
             Create your account
           </h2>

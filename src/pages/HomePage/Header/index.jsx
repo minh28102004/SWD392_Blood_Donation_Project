@@ -95,7 +95,7 @@ const Header = () => {
               { label: "Home", path: "/homepage" },
               { label: "FAQs", path: "/homepage/faqs" },
               { label: "Blog", path: "/homepage/blog" },
-              { label: "News", path: "/homepage/news" },
+              { label: "Contact", path: "/homepage/contact" },
             ].map(({ label, path }, index) => {
               const isActive = location.pathname === path;
 
@@ -110,7 +110,7 @@ const Header = () => {
                   }`}
                 >
                   {label}
-                  {/* Chỉ hiển thị underline khi KHÔNG active */}
+                  {/* Active */}
                   {!isActive && (
                     <span className="absolute left-0 -bottom-1 h-0.5 bg-blue-600 w-0 group-hover:w-full transition-all duration-300 ease-in-out" />
                   )}

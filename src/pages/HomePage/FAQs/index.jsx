@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiChevronDown, FiChevronUp, FiSearch } from "react-icons/fi";
 import { faqData } from "./faqs_Data";
-import { motion } from "framer-motion"; // Import motion from framer-motion
+import { motion } from "framer-motion";
 
 const FAQs = () => {
   const [openIndexes, setOpenIndexes] = useState([]);

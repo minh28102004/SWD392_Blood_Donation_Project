@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { blogPosts } from "@components/HomePage/Blog/blog_Data";
+import { blogPosts } from "@pages/HomePage/Blog/blog_Data";
 import { slides, criteriaList, tips } from "./content_Data";
 import AOS from "aos";
-import "aos/dist/aos.css"; // Đảm bảo rằng bạn đã import CSS của AOS
+import "aos/dist/aos.css"; 
 import { motion, AnimatePresence } from "framer-motion";
 
 const Content = () => {
@@ -203,7 +203,7 @@ const Content = () => {
               className="inline-block relative text-blue-600 text-base font-normal transition-all duration-300 hover:text-blue-700 group"
             >
               <span className="inline-flex items-center transition-transform duration-300 group-hover:translate-x-1">
-                Xem thêm&nbsp;&gt;&gt;
+                View more&nbsp;&gt;&gt;
               </span>
               <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full"></span>
             </a>
