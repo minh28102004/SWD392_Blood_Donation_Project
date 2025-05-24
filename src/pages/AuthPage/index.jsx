@@ -1,28 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Login from "./Login";
-import Register from "./Register";
-import image from "@assets/image2.jpg";
+import image from "@assets/Background_Image/image2.jpg";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const AuthPage = () => {
-  const [isLogin, setIsLogin] = useState(true);
-
-  const slideVariants = {
-    hidden: (direction) => ({
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 0,
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
-    exit: (direction) => ({
-      x: direction < 0 ? "50%" : "-30%", // Chỉ di chuyển một nửa màn hình
-      opacity: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    }),
-  };
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isLogin = location.pathname.includes("login");
+  const direction = isLogin ? 1 : -1;
 
   const backgroundVariants = {
     animate: {
@@ -35,64 +22,27 @@ const AuthPage = () => {
     },
   };
 
-  const contentVariants = {
-    hidden: {
-      opacity: 0,
-      y: 50, // Di chuyển lên một chút khi ẩn
-    },
-    visible: {
-      opacity: 1,
-      y: 0, // Đặt về vị trí ban đầu
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
-  };
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true }); 
+  }, []);
 
-  const imgVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 1.1,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 1.5, ease: "easeOut" },
-    },
-  };
-  const backdropVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.9,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
+  const handleToHomePage = () => {
+    navigate("/homepage");
   };
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
       {/* Left side content */}
       <div className="hidden lg:flex w-4/5 flex-col items-center justify-center p-12 relative z-10">
-        {/* Phần nền với hiệu ứng mờ và phóng to */}
-        <motion.div
-          className="absolute inset-0 bg-black"
-          initial="hidden"
-          animate="visible"
-          variants={backdropVariants}
+        <div
+          className="absolute inset-0 bg-black opacity-50"
+          data-aos="fade"
+          data-aos-duration="1500"
         />
-
-        {/* Nội dung chính với hiệu ứng trượt lên và mờ dần */}
-        <motion.div
+        <div
           className="relative z-10 bg-white bg-opacity-90 rounded-xl p-8 max-w-lg text-center shadow-lg"
-          initial="hidden"
-          animate="visible"
-          variants={contentVariants}
-          whileHover={{
-            scale: 1.02,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            transition: { duration: 0.3 },
-          }} // Thêm hiệu ứng hover cho phần nội dung
+          data-aos="fade-up"
+          data-aos-duration="800"
         >
           <h2 className="text-3xl font-bold text-black mb-5">
             Donate Blood, Save Lives
@@ -104,19 +54,22 @@ const AuthPage = () => {
             surgeries, and ongoing medical treatments. Your small act can have a
             profound impact, providing hope and strength to others.
           </p>
-          <button className="mt3 px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition">
+          <button
+            onClick={handleToHomePage}
+            className="mt-3 px-6 py-2 bg-gray-800 text-white rounded-full hover:bg-black hover:text-yellow-400 hover:scale-105 transition"
+          >
             See More {">>"}
           </button>
-        </motion.div>
-
-        {/* Hình ảnh với hiệu ứng mờ dần và phóng to */}
-        <motion.img
-          src={image}
-          alt="Image"
+        </div>
+        <div
+          data-aos="fade"
+          data-aos-duration="2000"
           className="absolute inset-0 w-full h-full object-cover opacity-70 brightness-75"
-          initial="hidden"
-          animate="visible"
-          variants={imgVariants}
+          style={{
+            backgroundImage: `url(${image})`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+          }}
         />
       </div>
 
@@ -124,7 +77,7 @@ const AuthPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center relative z-10">
         {/* Phần nền chuyển động */}
         <motion.div
-          className="absolute inset-0"
+          className="absolute inset-0 overflow-hidden"
           variants={backgroundVariants}
           animate="animate"
           style={{ zIndex: -1 }} // Đặt z-index để phần nền không che phủ form
@@ -151,23 +104,16 @@ const AuthPage = () => {
             />
           ))}
         </motion.div>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
-            key={isLogin ? "login" : "register"}
-            custom={isLogin ? 1 : -1} // Pass direction value
-            variants={slideVariants}
+            key={location.pathname}
+            custom={direction}
             initial="hidden"
             animate="visible"
             exit="exit"
+            className="w-full max-w-md z-20"
           >
-            {isLogin ? (
-              <Login key="login" onSwitchToRegister={() => setIsLogin(false)} />
-            ) : (
-              <Register
-                key="register"
-                onSwitchToLogin={() => setIsLogin(true)}
-              />
-            )}
+            <Outlet />
           </motion.div>
         </AnimatePresence>
       </div>

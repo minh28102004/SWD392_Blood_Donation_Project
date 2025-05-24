@@ -1,15 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import logo from "@assets/logo.png";
-import { FaUserAlt, FaLock, FaUserPlus, FaEnvelope } from "react-icons/fa";
+import { FaUserAlt, FaLock, FaEnvelope } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-const Register = ({ onSwitchToLogin }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    // This will trigger once when the component is mounted
+    setHasAnimated(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -24,6 +33,10 @@ const Register = ({ onSwitchToLogin }) => {
       alert("Passwords do not match!");
       return;
     }
+  };
+
+  const handleLoginClick = () => {
+    navigate("/authPage/login");
   };
 
   const formVariants = {
@@ -42,17 +55,18 @@ const Register = ({ onSwitchToLogin }) => {
     <motion.div
       variants={formVariants}
       initial="hidden"
-      animate="visible"
+      animate={hasAnimated ? "visible" : "hidden"}  
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
     >
-
       <motion.div className="w-full max-w-md px-8 pb-8 pt-6 bg-white rounded-2xl shadow-2xl relative z-10">
         <div className="flex flex-col items-center mb-5">
           <motion.div>
-            <img src={logo} alt="Logo" className="object-contain mb-2" />
+            <img src={logo} alt="Logo" className="object-contain" />
           </motion.div>
-
+ <p className="text-md text-red-500 italic mb-1 tracking-wide">
+           - Give life, Share hope -
+          </p>
           <h2 className="text-2xl font-bold text-blue-900">
             Create your account
           </h2>
@@ -124,11 +138,7 @@ const Register = ({ onSwitchToLogin }) => {
             <div className="flex items-center gap-2 text-sm">
               <span className="text-gray-600">Already have an account?</span>
               <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault(); // Ngăn reload trang
-                  onSwitchToLogin(); // Gọi hàm chuyển sang Login
-                }}
+                onClick={handleLoginClick}
                 className="text-yellow-900 hover:text-blue-900 flex items-center gap-1"
               >
                 <FaUserAlt className="inline" />
