@@ -3,15 +3,16 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { blogPosts } from "@pages/HomePage/Blog/blog_Data";
 import { slides, criteriaList, tips } from "./content_Data";
 import AOS from "aos";
-import "aos/dist/aos.css"; 
-import { motion, AnimatePresence } from "framer-motion";
+import "aos/dist/aos.css";
+import { motion } from "framer-motion";
+import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const previewPosts = blogPosts.slice(0, 3);
 
   useEffect(() => {
-    AOS.init({ duration: 1000, once: true }); // Khởi tạo AOS
+    AOS.init({ duration: 1000, once: true });
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
@@ -27,7 +28,7 @@ const Content = () => {
   };
 
   return (
-    <div>
+    <div className="transition-colors duration-300">
       {/* Hero Slider */}
       <motion.div
         className="relative h-screen pt-8 mb-4"
@@ -42,7 +43,7 @@ const Content = () => {
               index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
-            <div className="absolute inset-0 bg-black opacity-50"></div>
+            <div className="absolute inset-0 bg-black dark:bg-black opacity-50 transition-colors duration-300"></div>
             <img
               src={slide.image}
               alt={slide.title}
@@ -95,14 +96,16 @@ const Content = () => {
 
       {/* Eligibility Criteria */}
       <section
-        className="bg-gray-100 pb-8 pt-5 px-4 md:px-8"
+        className="bg-gray-100 dark:bg-gray-800 pb-8 pt-5 px-4 md:px-8 transition-colors duration-300"
         data-aos="fade-up"
       >
         <div className="max-w-6xl mx-auto text-center mb-10">
-          <h2 className="text-3xl font-bold text-black mb-4">
+          <h2 className="text-3xl font-bold text-black dark:text-white mb-4 flex items-center justify-center gap-2">
+            <FaHeartbeat className="text-red-600 dark:text-rose-300 text-2xl" />
             Eligibility Criteria for Blood Donation
           </h2>
-          <p className="text-gray-600 text-lg">
+
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
             Help save lives by ensuring you meet these health and safety
             standards.
           </p>
@@ -112,16 +115,18 @@ const Content = () => {
           {criteriaList.map((item, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl hover:scale-105 transition-transform duration-300"
-              data-aos="zoom-in" // Hiệu ứng zoom-in khi xuất hiện
+              className="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 hover:shadow-xl hover:scale-105 transition-transform duration-300"
+              data-aos="zoom-in"
             >
               <div className="flex items-center mb-4 space-x-3">
                 <div className="bg-red-100 p-3 rounded-full">{item.icon}</div>
-                <h4 className="text-lg font-semibold text-gray-800">
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                   {item.title}
                 </h4>
               </div>
-              <p className="text-gray-600 text-sm">{item.description}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
+                {item.description}
+              </p>
             </div>
           ))}
         </div>
@@ -129,7 +134,7 @@ const Content = () => {
 
       {/* Blood Donation Tips */}
       <div
-        className="bg-gray-700 py-10 px-4 mt-8 sm:px-8 text-gray-800"
+        className="bg-gray-700 dark:bg-gray-800 py-10 px-4 mt-8 sm:px-8 text-gray-800 dark:text-gray-100 transition-colors duration-300"
         data-aos="fade-up"
       >
         <h2 className="text-3xl font-bold mb-10 text-center text-white">
@@ -140,8 +145,8 @@ const Content = () => {
             <div
               key={idx}
               className={`border-l-4 p-6 rounded-lg shadow-md ${section.color}`}
-              data-aos="flip-left" // Thêm hiệu ứng flip-left cho mỗi mục
-              data-aos-delay={idx * 200} // Thêm độ trễ cho mỗi mục
+              data-aos="flip-left"
+              data-aos-delay={idx * 200}
             >
               <div className="flex items-center mb-4 gap-2">
                 {section.icon}
@@ -163,9 +168,13 @@ const Content = () => {
       </div>
 
       {/* Blog & Stories */}
-      <section className="py-6 bg-gray-50" data-aos="fade-up">
+      <section
+        className="py-6 bg-gray-50 dark:bg-gray-900 transition-colors duration-300"
+        data-aos="fade-up"
+      >
         <div className="container mx-auto px-6 pt-5">
-          <h2 className="text-4xl font-bold text-center text-black mb-8">
+          <h2 className="text-4xl font-bold text-center text-black dark:text-white mb-8 flex items-center justify-center gap-2">
+            <FaBookOpen className="text-black dark:text-blue-300 text-2xl" />
             Latest Stories & Updates
           </h2>
 
@@ -173,9 +182,9 @@ const Content = () => {
             {previewPosts.map((post, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
-                data-aos="fade-up" // Thêm hiệu ứng fade-up cho mỗi bài viết
-                data-aos-delay={index * 200} // Thêm độ trễ cho mỗi bài viết
+                className="bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
+                data-aos="fade-up"
+                data-aos-delay={index * 200}
               >
                 <img
                   src={post.image}
@@ -183,13 +192,15 @@ const Content = () => {
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-black mb-2">
+                  <h3 className="text-xl font-bold text-black dark:text-white mb-2">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">
+                    {post.excerpt}
+                  </p>
                   <button
                     onClick={() => window.open(post.link, "_blank")}
-                    className="text-white bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 transition"
+                    className="text-white bg-gray-800 dark:bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 dark:hover:text-white dark:hover:bg-blue-900 transition"
                   >
                     Read More →
                   </button>
@@ -197,15 +208,16 @@ const Content = () => {
               </div>
             ))}
           </div>
+
           <div className="text-center pb-2">
             <a
               href="/homepage/blog"
-              className="inline-block relative text-blue-600 text-base font-normal transition-all duration-300 hover:text-blue-700 group"
+              className="inline-block relative text-blue-600 dark:text-white text-base font-normal transition-all duration-300 hover:text-blue-700 dark:hover:text-blue-300 group"
             >
               <span className="inline-flex items-center transition-transform duration-300 group-hover:translate-x-1">
                 View more&nbsp;&gt;&gt;
               </span>
-              <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-blue-900 transition-all duration-300 group-hover:w-full"></span>
+              <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-blue-500 dark:bg-blue-400  transition-all duration-300 group-hover:w-full"></span>
             </a>
           </div>
         </div>

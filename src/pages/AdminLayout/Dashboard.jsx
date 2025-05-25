@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   FiUsers,
   FiSettings,
@@ -7,22 +7,21 @@ import {
   FiMoon,
   FiChevronDown,
 } from "react-icons/fi";
-import { Outlet } from "react-router-dom";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
 import logo from "@assets/logo.png";
+import { useTheme } from "@components/Theme_Context"; 
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [themeLoaded, setThemeLoaded] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Mock user & menu
+  const { darkMode, toggleTheme } = useTheme(); 
+
   const user = {
     name: "Nguyễn Văn A",
     email: "a.nguyen@example.com",
@@ -34,20 +33,14 @@ const DashboardLayout = () => {
     { label: "Đăng xuất", href: "#", isDanger: true },
   ];
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const isDark = savedTheme === "dark";
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-    setThemeLoaded(true);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = !darkMode;
-    setDarkMode(nextTheme);
-    document.documentElement.classList.toggle("dark", nextTheme);
-    localStorage.setItem("theme", nextTheme ? "dark" : "light");
-  };
+  const menuItems = [
+    { name: "Statistic", icon: <BarChartOutlined />, path: "/adminlayout" },
+    {
+      name: "User Management",
+      icon: <UserOutlined />,
+      path: "/adminlayout/userManagement",
+    },
+  ];
 
   const toggleMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
 
@@ -65,17 +58,6 @@ const DashboardLayout = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const menuItems = [
-    { name: "Statistic", icon: <BarChartOutlined />, path: "/adminlayout" },
-    {
-      name: "User Management",
-      icon: <UserOutlined />,
-      path: "/adminlayout/userManagement",
-    },
-  ];
-
-  if (!themeLoaded) return null;
-
   return (
     <div
       className={`flex h-screen transition-colors duration-300 ${
@@ -84,20 +66,14 @@ const DashboardLayout = () => {
     >
       {/* Sidebar */}
       <aside
-        className={`
-    ${sidebarOpen ? "min-w-60 max-w-60" : "min-w-20 max-w-20"}
-    transition-all duration-500 ease-in-out 
-    bg-white dark:bg-gray-800 p-4 shadow-xl
-    overflow-hidden
-  `}
+        className={`${
+          sidebarOpen ? "min-w-60 max-w-60" : "min-w-20 max-w-20"
+        } transition-all duration-500 ease-in-out 
+        bg-white dark:bg-gray-800 p-4 shadow-xl overflow-hidden`}
       >
         <div className="flex items-center justify-between mb-5">
           {sidebarOpen && (
-            <img
-              src={logo}
-              alt="Logo"
-              className="object-contain"
-            />
+            <img src={logo} alt="Logo" className="object-contain" />
           )}
         </div>
         <nav>
@@ -136,9 +112,9 @@ const DashboardLayout = () => {
               className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             >
               {darkMode ? (
-                <FiSun className="text-xl" />
+                <FiSun className="text-yellow-400 text-xl" />
               ) : (
-                <FiMoon className="text-xl" />
+                <FiMoon className="text-gray-800 dark:text-white text-xl" />
               )}
             </button>
 
@@ -149,12 +125,12 @@ const DashboardLayout = () => {
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
                 <img
-                  src={user?.avatar || "https://i.pravatar.cc/100?u=guest"}
+                  src={user?.avatar}
                   alt="User Avatar"
                   className="w-9 h-9 rounded-full object-cover border-2 border-yellow-600"
                 />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
-                  {user?.name || "Khách"}
+                  {user?.name}
                 </span>
                 <FiChevronDown className="text-gray-500 dark:text-gray-300" />
               </button>

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import { fetchUsers } from "@redux/features/userSlice";
-import LoadingSpinner from "@components/Loading_Component";
-import ErrorMessage from "@components/Error_Message_Component";
-import TableComponent from "@components/Table_Component";
+import LoadingSpinner from "@components/Loading";
+import ErrorMessage from "@components/Error_Message";
+import TableComponent from "@components/Table";
 
 const UserManagement = () => {
   const { darkMode } = useOutletContext();

@@ -10,7 +10,7 @@ import HomePage from "@pages/HomePage/HomePage";
 import Content from "@pages/HomePage/Content";
 import FAQs from "@pages/HomePage/FAQs";
 import Blog from "@pages/HomePage/Blog";
-import Contact from "@pages/HomePage/Contact";
+import About_blood from "@pages/HomePage/About_blood";
 import AdminLayout from "@pages/AdminLayout/Dashboard";
 import Statistic from "@pages/AdminLayout/Statistics";
 import UserManagement from "@pages/AdminLayout/User_Management";
@@ -24,7 +24,7 @@ function AppRoutes() {
           <Route index element={<Content />} />
           <Route path="faqs" element={<FAQs />} />
           <Route path="blog" element={<Blog />} />
-          <Route path="contact" element={<Contact />} />
+          <Route path="about_blood" element={<About_blood />} />
         </Route>
         <Route path={endPoint.ADMINLAYOUT} element={<AdminLayout />}>
           <Route index element={<Statistic />} />
