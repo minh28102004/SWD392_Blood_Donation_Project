@@ -6,9 +6,11 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
+import BloodDonationModal from "../Modal_Donate_Request";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const previewPosts = blogPosts.slice(0, 3);
 
   useEffect(() => {
@@ -71,7 +73,10 @@ const Content = () => {
                     {slide.description}
                   </motion.p>
 
-                  <button className="font-semibold bg-red-700 hover:bg-red-900 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300">
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="font-semibold bg-red-700 hover:bg-red-900 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300"
+                  >
                     Donate Blood Now
                   </button>
                 </div>
@@ -79,7 +84,6 @@ const Content = () => {
             )}
           </div>
         ))}
-
         <button
           onClick={prevSlide}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/50 p-2 rounded-full z-30"
@@ -93,6 +97,11 @@ const Content = () => {
           <FiChevronRight size={24} />
         </button>
       </motion.div>
+
+      {/*Modal Registration*/}
+      {showModal && (
+        <BloodDonationModal isOpen={showModal} setIsOpen={setShowModal} />
+      )}
 
       {/* Eligibility Criteria */}
       <section

@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "@redux/store/store";
 import endPoint from "./routers/router";
+import ErrorBoundary from "@components/Error_Boundary";
 // Pages
 import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";
@@ -42,7 +43,9 @@ function AppRoutes() {
 function App() {
   return (
     <Provider store={store}>
-      <AppRoutes />
+      <ErrorBoundary>
+        <AppRoutes />
+      </ErrorBoundary>
     </Provider>
   );
 }
