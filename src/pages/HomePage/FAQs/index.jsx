@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiChevronDown, FiChevronUp, FiSearch } from "react-icons/fi";
 import { faqData } from "./faqs_Data";
 import { motion } from "framer-motion";
+import { FaQuestionCircle } from "react-icons/fa";
 
 const FAQs = () => {
   const [openIndexes, setOpenIndexes] = useState([]);
@@ -23,14 +24,16 @@ const FAQs = () => {
         {/* Tiêu đề */}
         <motion.div
           className="text-center w-full"
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8 }} 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <h2 className="text-3xl font-bold text-red-800 mb-2">
+          <h2 className="text-3xl font-bold text-red-800 dark:text-rose-400 mb-2 flex items-center justify-center gap-3">
+            <FaQuestionCircle className="text-red-700 dark:text-rose-400 text-2xl" />
             Blood Donation FAQs
           </h2>
-          <p className="text-gray-600">
+
+          <p className="text-gray-600 dark:text-white">
             Everything you need to know about blood donation
           </p>
         </motion.div>
@@ -39,10 +42,10 @@ const FAQs = () => {
         <motion.div
           className="relative w-full max-w-md ml-6"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8 }} 
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-black text-xl">
             <FiSearch />
           </span>
           <input
@@ -50,7 +53,7 @@ const FAQs = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search questions..."
-            className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-md text-gray-800 focus:outline-none focus:border-blue-400"
+            className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 rounded-md text-gray-800 focus:outline-none focus:border-blue-400 "
           />
         </motion.div>
       </div>
@@ -72,7 +75,7 @@ const FAQs = () => {
               >
                 <button
                   onClick={() => toggle(index)}
-                  className="flex justify-between items-center w-full px-6 py-2 text-left bg-red-50 hover:bg-red-100 transition-colors duration-300"
+                  className="flex justify-between items-center w-full px-6 py-2 text-left bg-red-50 hover:bg-red-100 dark:bg-rose-100 dark:hover:bg-rose-200  rounded-none transition-colors duration-300"
                 >
                   <span className="text-md font-semibold text-gray-800">
                     {index + 1}. {item.question}
@@ -83,7 +86,7 @@ const FAQs = () => {
                 </button>
 
                 <motion.div
-                  className={`px-6 text-gray-700 bg-white border-t border-red-200 text-base overflow-hidden transition-all duration-500 ease-in-out ${
+                  className={`px-6 text-gray-700 bg-white border-t  border-red-200 text-base overflow-hidden transition-all duration-500 ease-in-out ${
                     isOpen
                       ? "max-h-[1000px] py-3 opacity-100"
                       : "max-h-0 py-0 opacity-0"

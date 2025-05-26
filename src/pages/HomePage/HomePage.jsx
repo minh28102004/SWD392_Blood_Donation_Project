@@ -5,11 +5,11 @@ import Footer from "@pages/HomePage/Footer";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
       <Header />
       {/* Main */}
-      <Outlet />
+      <Outlet  />
       {/* Footer */}
       <Footer />
     </div>
