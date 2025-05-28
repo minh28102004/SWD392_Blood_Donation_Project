@@ -15,6 +15,7 @@ import About_blood from "@pages/HomePage/About_blood";
 import AdminLayout from "@pages/AdminLayout/Dashboard";
 import Statistic from "@pages/AdminLayout/Statistics";
 import UserManagement from "@pages/AdminLayout/User_Management";
+import UserProfile from "@pages/HomePage/User_Profile";
 
 function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ function AppRoutes() {
           <Route path="blog" element={<Blog />} />
           <Route path="about_blood" element={<About_blood />} />
         </Route>
+        <Route path="/userprofile" element={<UserProfile />} />
         <Route path={endPoint.ADMINLAYOUT} element={<AdminLayout />}>
           <Route index element={<Statistic />} />
           <Route path="userManagement" element={<UserManagement />} />

@@ -51,20 +51,23 @@ const UserManagement = () => {
     return () => clearTimeout(timer);
   };
 
-  const getStatusBadge = (status) => {
-    const isActive = status.toLowerCase() === "active";
-    return (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-          isActive
-            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-        }`}
-      >
-        {status}
-      </span>
-    );
-  };
+ const getStatusBadge = (status) => {
+  if (!status) return <span>N/A</span>; 
+
+  const isActive = status.toLowerCase() === "active";
+  return (
+    <span
+      className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+        isActive
+          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+      }`}
+    >
+      {status}
+    </span>
+  );
+};
+
 
   return (
     <div>

@@ -4,7 +4,8 @@ const endPoint = {
   LOGIN:"/login",
   REGISTER:"/register",
   HOMEPAGE:"/homepage",
-  ADMINLAYOUT:"/adminlayout"
+  ADMINLAYOUT:"/adminlayout",
+  USERPROFILE:"/userprofile",
 };
 
 export default endPoint;

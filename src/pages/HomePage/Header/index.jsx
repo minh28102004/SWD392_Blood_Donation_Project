@@ -6,6 +6,7 @@ import {
   FiUserPlus,
   FiChevronDown,
   FiMoon,
+  FiList,
   FiSun,
 } from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
@@ -52,14 +53,14 @@ const Header = () => {
 
   const userMenuItems = [
     {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: <MdDashboard className="mr-2 text-lg" />,
+      label: "User Profile",
+      href: "/userprofile",
+      icon: <FiUserPlus className="mr-2 text-lg" />,
     },
     {
-      label: "Settings",
-      href: "/settings",
-      icon: <FiSettings className="mr-2 text-lg" />,
+      label: "User History",
+      href: "/history",
+      icon: <FiList className="mr-2 text-lg" />,
     },
     {
       label: "Logout",
@@ -72,12 +73,12 @@ const Header = () => {
   // Trường hợp chưa đăng nhập:
   const guestMenuItems = [
     {
-      label: "Đăng nhập",
+      label: "Log In",
       href: "/authPage/login",
       icon: <FiLogIn className="mr-2 text-lg" />,
     },
     {
-      label: "Đăng ký",
+      label: "Register",
       href: "/authPage/register",
       icon: <FiUserPlus className="mr-2 text-lg" />,
     },
@@ -175,7 +176,7 @@ const Header = () => {
                 )}
 
                 <div className="py-1">
-                  {(user ? guestMenuItems : guestMenuItems).map(
+                  {(user ? userMenuItems : guestMenuItems).map(
                     (item, index) => (
                       <a
                         key={index}
@@ -183,7 +184,7 @@ const Header = () => {
                         className={`flex items-center px-4 py-2 text-sm ${
                           item.isDanger
                             ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
                         }`}
                       >
                         {item.icon && item.icon}
