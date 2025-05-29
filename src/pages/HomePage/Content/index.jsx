@@ -6,7 +6,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
-import BloodDonationModal from "../Modal_Donate_Request";
+import BloodDonationModal from "@pages/Modal_Form_Registration/ModalForm";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
