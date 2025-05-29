@@ -15,6 +15,9 @@ import About_blood from "@pages/HomePage/About_blood";
 import AdminLayout from "@pages/AdminLayout/Dashboard";
 import Statistic from "@pages/AdminLayout/Statistics";
 import UserManagement from "@pages/AdminLayout/User_Management";
+import StaffLayout from "@pages/StaffLayout/Dashboard";
+import StaffStatistic from "@pages/StaffLayout/Statistics";
+import StaffManagement from "@pages/StaffLayout/User_Management";
 import UserProfile from "@pages/HomePage/User_Profile";
 
 function AppRoutes() {
@@ -32,6 +35,10 @@ function AppRoutes() {
         <Route path={endPoint.ADMINLAYOUT} element={<AdminLayout />}>
           <Route index element={<Statistic />} />
           <Route path="userManagement" element={<UserManagement />} />
+        </Route>
+        <Route path={endPoint.STAFFLAYOUT} element={<StaffLayout />}>
+          <Route index element={<StaffStatistic />} />
+          <Route path="staffManagement" element={<StaffManagement />} />
         </Route>
         <Route path={endPoint.AUTHPAGE} element={<AuthPage />}>
           <Route path="login" element={<Login />} />

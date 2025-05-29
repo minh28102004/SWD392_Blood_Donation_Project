@@ -6,6 +6,7 @@ const endPoint = {
   HOMEPAGE:"/homepage",
   ADMINLAYOUT:"/adminlayout",
   USERPROFILE:"/userprofile",
+  STAFFLAYOUT:"/stafflayout",
 };
 
 export default endPoint;
