@@ -1,11 +1,18 @@
 const TableComponent = ({ columns, data, darkMode }) => {
   return (
     <div className="overflow-x-auto p-2">
-      <table className="w-full text-sm border">
+      <table
+        className="w-full text-sm border"
+        style={{ tableLayout: "fixed" }}
+      >
         <thead>
           <tr className="bg-red-100 border border-red-50 dark:bg-gray-800">
             {columns.map((col) => (
-              <th key={col.key} className="text-center p-3">
+              <th
+                key={col.key}
+                className="text-center p-3"
+                style={{ width: col.width || "auto" }}
+              >
                 {col.title}
               </th>
             ))}
@@ -18,7 +25,14 @@ const TableComponent = ({ columns, data, darkMode }) => {
               className="border border-red-100 hover:bg-gray-100 dark:hover:bg-gray-700 transform transition duration-200 hover:scale-[1.01]"
             >
               {columns.map((col) => (
-                <td key={col.key} className="p-3 text-center">
+                <td
+                  key={col.key}
+                  className={`p-3 text-center ${
+                    col.key === "address" ? "break-words" : ""
+                  }`}
+                  style={{ width: col.width || "auto" }}
+                  title={item[col.key]}
+                >
                   {typeof col.render === "function"
                     ? col.render(item[col.key], item)
                     : item[col.key]}

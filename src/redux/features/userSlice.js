@@ -71,10 +71,38 @@ export const deleteUser = createAsyncThunk(
   }
 );
 
+// [ENUM] Role (e.g: admin, staff,...)
+export const fetchUserRoles = createAsyncThunk(
+  "referenceData/fetchUserRoles",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getRequest("/api/ReferenceData/userroles");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// [ENUM] status (e.g: active & inactive)
+export const fetchUserStatuses = createAsyncThunk(
+  "referenceData/fetchUserStatuses",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getRequest("/api/ReferenceData/userstatuses");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
     userList: [],
+    userRole: [],
+    userStatus: [],
     selectedUser: null,
     loading: false,
     error: null,
@@ -116,6 +144,34 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+      // --- FETCH USER ROLES ---
+    .addCase(fetchUserRoles.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(fetchUserRoles.fulfilled, (state, action) => {
+      state.loading = false;
+      state.userRole = action.payload;
+    })
+    .addCase(fetchUserRoles.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+
+    // --- FETCH USER STATUSES ---
+    .addCase(fetchUserStatuses.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(fetchUserStatuses.fulfilled, (state, action) => {
+      state.loading = false;
+      state.userStatus = action.payload;
+    })
+    .addCase(fetchUserStatuses.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
 
       // --- CREATE USER ---
       .addCase(createUser.pending, (state) => {

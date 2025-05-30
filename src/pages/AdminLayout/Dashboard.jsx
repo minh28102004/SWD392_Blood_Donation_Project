@@ -10,7 +10,8 @@ import {
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
 import logo from "@assets/logo.png";
-import { useTheme } from "@components/Theme_Context"; 
+import { useTheme } from "@components/Theme_Context";
+import Tooltip from "@mui/material/Tooltip";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -20,7 +21,7 @@ const DashboardLayout = () => {
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  const { darkMode, toggleTheme } = useTheme(); 
+  const { darkMode, toggleTheme } = useTheme();
 
   const user = {
     name: "Nguyễn Văn A",
@@ -67,9 +68,9 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? "min-w-60 max-w-60" : "min-w-20 max-w-20"
+          sidebarOpen ? "min-w-60 max-w-60" : "min-w-16 max-w-16"
         } transition-all duration-500 ease-in-out 
-        bg-white dark:bg-gray-800 p-4 shadow-xl overflow-hidden`}
+        bg-white dark:bg-gray-800 p-2 shadow-xl overflow-hidden`}
       >
         <div className="flex items-center justify-between mb-5">
           {sidebarOpen && (
@@ -85,10 +86,22 @@ const DashboardLayout = () => {
                 location.pathname === item.path
                   ? "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
+              } justify-start`}
+              style={
+                sidebarOpen
+                  ? {}
+                  : { paddingLeft: "0.85rem", paddingRight: "0.75rem" }
+              } 
             >
               <span className="text-xl">{item.icon}</span>
-              {sidebarOpen && <span className="ml-3">{item.name}</span>}
+              <span
+                className={`ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
+                  sidebarOpen ? "opacity-100 max-w-xs" : "opacity-0 max-w-0"
+                }`}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                {item.name}
+              </span>
             </button>
           ))}
         </nav>
@@ -98,12 +111,14 @@ const DashboardLayout = () => {
       <main className="flex-1 p-3 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <FiMenu />
-          </button>
+          <Tooltip title={sidebarOpen ? "Close" : "Open"}>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              <FiMenu />
+            </button>
+          </Tooltip>
 
           <div className="flex items-center space-x-4 relative">
             <button
