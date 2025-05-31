@@ -12,7 +12,6 @@ import {
   FiActivity,
   FiFilter,
 } from "react-icons/fi";
-import ReactSlider from "react-slider";
 import TableComponent from "@components/Table";
 
 const BloodDonationTracker = () => {
@@ -21,11 +20,9 @@ const BloodDonationTracker = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Filter states
-  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [bloodTypeFilter, setBloodTypeFilter] = useState("all");
   const [submissionTypeFilter, setSubmissionTypeFilter] = useState("all");
-  const [ageRange, setAgeRange] = useState([0, 100]);
   const [dateFilter, setDateFilter] = useState("");
 
   useEffect(() => {
@@ -48,8 +45,8 @@ const BloodDonationTracker = () => {
       },
       {
         id: 2,
-        fullName: "Jane Smith",
-        age: 35,
+        fullName: "John Doe",
+        age: 28,
         bloodType: "O-",
         phone: "2345678901",
         height: "162cm",
@@ -63,8 +60,8 @@ const BloodDonationTracker = () => {
       },
       {
         id: 3,
-        fullName: "Robert Johnson",
-        age: 45,
+        fullName: "John Doe",
+        age: 28,
         bloodType: "B+",
         phone: "345678902",
         height: "180cm",
@@ -82,12 +79,18 @@ const BloodDonationTracker = () => {
 
   const getStatusColor = (status) => {
     const statusColors = {
-      pending: "bg-yellow-100 text-yellow-800",
-      approved: "bg-green-100 text-green-800",
-      rejected: "bg-red-100 text-red-800",
-      inProgress: "bg-blue-100 text-blue-800",
+      pending:
+        "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200",
+      approved:
+        "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+      rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+      inProgress:
+        "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     };
-    return statusColors[status] || "bg-gray-100 text-gray-800";
+    return (
+      statusColors[status] ||
+      "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100"
+    );
   };
 
   const getDetailBgColor = (status) => {
@@ -134,10 +137,6 @@ const BloodDonationTracker = () => {
 
   // Lọc dữ liệu
   const filteredSubmissions = submissions.filter((submission) => {
-    const matchesSearch =
-      submission.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      submission.bloodType.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesStatus =
       statusFilter === "all" || submission.status === statusFilter;
 
@@ -148,19 +147,11 @@ const BloodDonationTracker = () => {
       submissionTypeFilter === "all" ||
       submission.submissionType === submissionTypeFilter;
 
-    const matchesAgeRange =
-      submission.age >= ageRange[0] && submission.age <= ageRange[1];
-
     const matchesDate =
       dateFilter === "" || submission.preferredDate === dateFilter;
 
     return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesBloodType &&
-      matchesSubmissionType &&
-      matchesAgeRange &&
-      matchesDate
+      matchesStatus && matchesBloodType && matchesSubmissionType && matchesDate
     );
   });
 
@@ -219,11 +210,9 @@ const BloodDonationTracker = () => {
 
   // Nút reset filter
   const clearFilters = () => {
-    setSearchTerm("");
     setStatusFilter("all");
     setBloodTypeFilter("all");
     setSubmissionTypeFilter("all");
-    setAgeRange([0, 100]);
     setDateFilter("");
   };
 
@@ -376,23 +365,10 @@ const BloodDonationTracker = () => {
       <div className="max-w-7xl mx-auto">
         <div className="bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow-md p-6 mb-8 space-y-6">
           <h1 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white select-none">
-            Blood Donation Tracker
+            Request History
           </h1>
           {/* Filters & Search */}
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-            {/* Search input */}
-            <div className="relative flex-shrink-0 min-w-[140px] max-w-md w-full md:w-auto">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-              <input
-                type="search"
-                placeholder="Search by name or blood type..."
-                className="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-400 bg-gray-50 dark:bg-gray-700 pl-12 pr-4 text-gray-900 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                spellCheck={false}
-              />
-            </div>
-
             {/* Status filter */}
             <select
               className="flex-shrink-0 h-10 rounded-lg border border-gray-300 dark:border-gray-400 bg-gray-50 dark:bg-gray-700 px-4 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition min-w-[140px]"
@@ -431,27 +407,6 @@ const BloodDonationTracker = () => {
                 </option>
               ))}
             </select>
-
-            {/* Age filter with slider */}
-            <div className="flex flex-col items-center min-w-[150px]">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Age Range: {ageRange[0]} - {ageRange[1]}
-              </label>
-              <ReactSlider
-                className="w-full h-2 rounded-md bg-gray-300 dark:bg-gray-600"
-                thumbClassName="h-2 w-2 bg-blue-700 rounded-full cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400"
-                trackClassName="bg-blue-500"
-                defaultValue={[0, 100]}
-                min={0}
-                max={100}
-                step={1}
-                ariaLabel={["Lower thumb", "Upper thumb"]}
-                pearling
-                minDistance={1}
-                value={ageRange}
-                onChange={setAgeRange}
-              />
-            </div>
 
             {/* Date filter */}
             <input

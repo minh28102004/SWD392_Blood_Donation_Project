@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import {
@@ -41,11 +41,19 @@ const statusOptions = [
   { value: "0", label: "Inactive" }, // 0 = false
 ];
 
-const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
+const UserCreationModal = ({
+  isOpen,
+  onClose,
+  selectedUser,
+  onSuccess,
+  bloodTypes = [],
+  bloodComponents = [],
+}) => {
   const dispatch = useDispatch();
   const [showAdditional, setShowAdditional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const modalRef = useRef(null);
 
   const {
     register,
@@ -65,19 +73,22 @@ const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
         email: selectedUser.email || "",
         roleBit:
           selectedUser.roleBit != null ? selectedUser.roleBit.toString() : "0",
-        status: selectedUser.statusBit ? "1" : "0", // Boolean -> "1"/"0"
+        status: selectedUser.statusBit ? "1" : "0",
         phone: selectedUser.phone || "",
         dateOfBirth: selectedUser.dateOfBirth
           ? format(new Date(selectedUser.dateOfBirth), "yyyy-MM-dd")
           : "",
         identification: selectedUser.identification || "",
-        bloodType: selectedUser.bloodType?.toString() || "",
-        bloodComponent: selectedUser.bloodComponent?.toString() || "",
-        height: selectedUser.height || "",
-        weight: selectedUser.weight || "",
+        bloodType: selectedUser.bloodTypeId?.toString() || "",
+        bloodComponent: selectedUser.bloodComponentId?.toString() || "",
+        height:
+          selectedUser.heightCm != null ? selectedUser.heightCm.toString() : "",
+        weight:
+          selectedUser.weightKg != null ? selectedUser.weightKg.toString() : "",
         address: selectedUser.address || "",
         medicalHistory: selectedUser.medicalHistory || "",
       });
+
       setShowAdditional(true);
     } else {
       reset();
@@ -97,20 +108,51 @@ const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
     setPasswordStrength(strength);
   }, [password]);
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose();
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    // Map lại status và roleBit đúng kiểu backend mong muốn
+    // Hàm helper chuyển chuỗi trống thành null
+    const normalizeNull = (value) =>
+      value === "" || value === undefined || value === null ? null : value;
     const payload = {
-      ...data,
-      statusBit: data.status === "1", // "1" -> true, "0" -> false
+      userName: normalizeNull(data.userName),
+      name: normalizeNull(data.name),
+      email: normalizeNull(data.email),
+      phone: normalizeNull(data.phone),
+      dateOfBirth: normalizeNull(data.dateOfBirth),
+      address: normalizeNull(data.address),
+      identification: normalizeNull(data.identification),
+      medicalHistory: normalizeNull(data.medicalHistory),
+      statusBit: data.status === "1" ? 1 : 0,
+
       roleBit: Number(data.roleBit),
+      heightCm: data.height ? Number(data.height) : null,
+      weightKg: data.weight ? Number(data.weight) : null,
+      bloodTypeId: data.bloodType ? Number(data.bloodType) : null,
+      bloodComponentId: data.bloodComponent
+        ? Number(data.bloodComponent)
+        : null,
     };
-
-    // Nếu password để trống khi edit thì xóa trường password (giữ nguyên mật khẩu cũ)
-    if (selectedUser && !payload.password) {
-      delete payload.password;
+    // Nếu password tồn tại thì thêm vào payload, ngược lại xóa khi edit
+    if (selectedUser && !data.password) {
+    } else {
+      payload.password = data.password;
     }
-
     try {
       if (selectedUser) {
         const resultAction = await dispatch(
@@ -187,11 +229,24 @@ const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
     "status",
   ];
 
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6">
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6"
+        ref={modalRef}
+      >
         <div className="relative mb-4 pb-4">
           <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-gray-800 dark:text-white">
             {selectedUser
@@ -369,16 +424,7 @@ const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
                   name="bloodType"
                   register={register}
                   errors={errors}
-                  options={[
-                    { value: "1", label: "A+" },
-                    { value: "2", label: "A-" },
-                    { value: "3", label: "B+" },
-                    { value: "4", label: "B-" },
-                    { value: "5", label: "AB+" },
-                    { value: "6", label: "AB-" },
-                    { value: "7", label: "O+" },
-                    { value: "8", label: "O-" },
-                  ]}
+                  options={bloodTypeOptions}
                   placeholder="Select blood type"
                   icon={FaTint}
                 />
@@ -388,12 +434,7 @@ const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
                   name="bloodComponent"
                   register={register}
                   errors={errors}
-                  options={[
-                    { value: "1", label: "Whole Blood" },
-                    { value: "2", label: "Plasma" },
-                    { value: "3", label: "Platelets" },
-                    { value: "4", label: "Red Blood Cells" },
-                  ]}
+                  options={bloodComponentOptions}
                   placeholder="Select blood component"
                   icon={FaTint}
                 />

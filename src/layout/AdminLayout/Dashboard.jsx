@@ -8,7 +8,11 @@ import {
   FiChevronDown,
 } from "react-icons/fi";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  BarChartOutlined,
+  UserOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
 import logo from "@assets/logo.png";
 import { useTheme } from "@components/Theme_Context";
 import Tooltip from "@mui/material/Tooltip";
@@ -40,6 +44,11 @@ const DashboardLayout = () => {
       name: "User Management",
       icon: <UserOutlined />,
       path: "/adminLayout/userManagement",
+    },
+    {
+      name: "Blog Management",
+      icon: <FileTextOutlined />,
+      path: "/adminLayout/blogManagement",
     },
   ];
 
@@ -91,7 +100,7 @@ const DashboardLayout = () => {
                 sidebarOpen
                   ? {}
                   : { paddingLeft: "0.85rem", paddingRight: "0.75rem" }
-              } 
+              }
             >
               <span className="text-xl">{item.icon}</span>
               <span

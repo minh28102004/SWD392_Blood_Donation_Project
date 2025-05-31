@@ -58,7 +58,7 @@ const Header = () => {
       icon: <FiUserPlus className="mr-2 text-lg" />,
     },
     {
-      label: "User History",
+      label: "Request History",
       href: "/userHistory",
       icon: <FiList className="mr-2 text-lg" />,
     },

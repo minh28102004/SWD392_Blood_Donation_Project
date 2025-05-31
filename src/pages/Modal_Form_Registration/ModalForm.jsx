@@ -7,12 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import DonateForm from "./Donate_Form";
 import RequestForm from "./Request_Form";
 import SuccessModal from "./Success_Modal";
+import { useNavigate } from "react-router-dom";  // <-- import useNavigate
 
 const BloodDonationModal = ({ isOpen, setIsOpen }) => {
   const [modalSuccess, setModalSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("donate");
   const [formData, setFormData] = useState({});
   const modalRef = useRef();
+  const navigate = useNavigate(); // <-- khởi tạo useNavigate
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -38,7 +40,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-   setModalSuccess(true);
+    setModalSuccess(true);
   };
 
   return (
@@ -61,6 +63,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
                 ref={modalRef}
                 className="inline-block w-full max-w-2xl px-8 py-6 text-left align-middle bg-white dark:bg-gray-900 shadow-2xl rounded-3xl border border-gray-200 dark:border-gray-700 relative z-50"
               >
+                {/* Content */}
                 <div className="flex justify-between items-center mb-4">
                   <Dialog.Title className="w-full text-2xl ml-9 text-center font-bold text-gray-900 dark:text-white">
                     Blood Donation & Request Portal
@@ -94,7 +97,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
                     <FaHospital className="text-xl" /> Request
                   </button>
                 </div>
-                {/*Modal Form*/}
+
                 <form
                   onSubmit={handleSubmit}
                   className="custom-scrollbar space-y-4 max-h-[65vh] overflow-y-auto pl-1 pr-1"
@@ -136,12 +139,12 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
         }}
         onContinue={() => {
           setModalSuccess(false);
-          setIsOpen(true); 
+          setIsOpen(true);
         }}
         onViewHistory={() => {
           setModalSuccess(false);
           setIsOpen(false);
-          alert("Redirect to request history");
+          navigate("/userHistory"); 
         }}
       />
     </div>

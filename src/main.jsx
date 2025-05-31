@@ -11,6 +11,6 @@ const root = createRoot(container);
 root.render(
   <ThemeProvider>
     <App />
-    <ToastContainer autoClose={2000} />
+    <ToastContainer autoClose={3000} />
   </ThemeProvider>
 );

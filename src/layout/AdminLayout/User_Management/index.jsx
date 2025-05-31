@@ -6,13 +6,20 @@ import {
   fetchUsers,
   fetchUserRoles,
   fetchUserStatuses,
+  deleteUser,
 } from "@redux/features/userSlice";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
 import ActionButtons from "@components/Action_Button";
 import Tooltip from "@mui/material/Tooltip";
 import UserCreationModal from "./Modal_User";
+import { Modal } from "antd";
+import { toast } from "react-toastify";
 
 const UserManagement = () => {
   const { darkMode } = useOutletContext();
@@ -20,11 +27,30 @@ const UserManagement = () => {
   const { userList, userRole, userStatus, loading, error } = useSelector(
     (state) => state.user
   );
-
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [formKey, setFormKey] = useState(0); // key để reset form modal
+  const [formKey, setFormKey] = useState(0);
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Users
+    dispatch(fetchUsers());
+    dispatch(fetchUserRoles());
+    dispatch(fetchUserStatuses());
+    // BloodTypes, BloodComponents
+    dispatch(fetchBloodComponents());
+    dispatch(fetchBloodTypes());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setLoadingDelay(true);
+    dispatch(fetchUsers());
+    const timer = setTimeout(() => {
+      setLoadingDelay(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [dispatch]);
 
   // Map role và status sang object để lookup nhanh
   const roleMap = userRole.reduce((acc, item) => {
@@ -93,22 +119,6 @@ const UserManagement = () => {
     },
   ];
 
-  useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchUserRoles());
-    dispatch(fetchUserStatuses());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setLoadingDelay(true);
-    dispatch(fetchUsers());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [dispatch]);
-
   // [CREATE]
   const handleCreateUser = () => {
     setSelectedUser(null);
@@ -124,11 +134,25 @@ const UserManagement = () => {
   };
 
   // [DELETE]
-  const handleDelete = (user) => {
-    if (window.confirm(`Delete user ${user.name}?`)) {
-      alert(`Deleted user: ${user.name}`);
-      // Bạn có thể dispatch action delete ở đây
-    }
+  const handleDelete = async (user) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this user?",
+      content: "(Note: The user will be removed from the list)",
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteUser(user.userId)).unwrap();
+          toast.success("User has been deleted!");
+          dispatch(fetchUsers());
+        } catch (error) {
+          toast.error(
+            error?.message || "An error occurred while deleting the user!"
+          );
+        }
+      },
+      style: { top: "30%" },
+    });
   };
 
   const handleRefresh = () => {
@@ -188,11 +212,13 @@ const UserManagement = () => {
         />
         {/*Modal*/}
         <UserCreationModal
-          key={formKey} // key để reset modal form mỗi lần mở
+          key={formKey}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedUser={selectedUser}
           onSuccess={() => dispatch(fetchUsers())}
+          bloodTypes={bloodTypes} // thêm prop bloodTypes
+          bloodComponents={bloodComponents} // thêm prop bloodComponents
         />
       </div>
     </div>
