@@ -8,17 +8,18 @@ import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";
 import Register from "@pages/AuthPage/Register";
 import HomePage from "@pages/HomePage/HomePage";
-import Content from "@pages/HomePage/Content";
+import Home from "@pages/HomePage/Home";
 import FAQs from "@pages/HomePage/FAQs";
 import Blog from "@pages/HomePage/Blog";
 import About_blood from "@pages/HomePage/About_blood";
-import AdminLayout from "@pages/AdminLayout/Dashboard";
-import Statistic from "@pages/AdminLayout/Statistics";
-import UserManagement from "@pages/AdminLayout/User_Management";
-import StaffLayout from "@pages/StaffLayout/Dashboard";
-import StaffStatistic from "@pages/StaffLayout/Statistics";
-import StaffManagement from "@pages/StaffLayout/User_Management";
-import UserProfile from "@pages/HomePage/User_Profile";
+import AdminLayout from "@layout/AdminLayout/Dashboard";
+import Statistic from "@layout/AdminLayout/Statistics";
+import UserManagement from "@layout/AdminLayout/User_Management";
+import StaffLayout from "@layout/StaffLayout/Dashboard";
+import StaffStatistic from "@layout/StaffLayout/Statistics";
+import StaffManagement from "@layout/StaffLayout/User_Management";
+import UserProfile from "@pages/User_Profile";
+import UserHistory from "@pages/User_Request_History";
 
 function AppRoutes() {
   return (
@@ -26,12 +27,13 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Navigate to={endPoint.HOMEPAGE} replace />} />
         <Route path={endPoint.HOMEPAGE} element={<HomePage />}>
-          <Route index element={<Content />} />
+          <Route index element={<Home />} />
           <Route path="faqs" element={<FAQs />} />
           <Route path="blog" element={<Blog />} />
-          <Route path="about_blood" element={<About_blood />} />
+          <Route path="aboutBlood" element={<About_blood />} />
         </Route>
-        <Route path="/userprofile" element={<UserProfile />} />
+        <Route path={endPoint.USERPROFILE} element={<UserProfile />} />
+        <Route path={endPoint.USERHISTORY} element={<UserHistory />} />
         <Route path={endPoint.ADMINLAYOUT} element={<AdminLayout />}>
           <Route index element={<Statistic />} />
           <Route path="userManagement" element={<UserManagement />} />
@@ -41,8 +43,8 @@ function AppRoutes() {
           <Route path="staffManagement" element={<StaffManagement />} />
         </Route>
         <Route path={endPoint.AUTHPAGE} element={<AuthPage />}>
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          <Route path={endPoint.LOGIN} element={<Login />} />
+          <Route path={endPoint.REGISTER} element={<Register />} />
         </Route>
       </Routes>
     </BrowserRouter>

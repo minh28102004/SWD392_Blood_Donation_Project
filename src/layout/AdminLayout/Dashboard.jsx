@@ -35,11 +35,11 @@ const DashboardLayout = () => {
   ];
 
   const menuItems = [
-    { name: "Statistic", icon: <BarChartOutlined />, path: "/adminlayout" },
+    { name: "Statistic", icon: <BarChartOutlined />, path: "/adminLayout" },
     {
       name: "User Management",
       icon: <UserOutlined />,
-      path: "/adminlayout/userManagement",
+      path: "/adminLayout/userManagement",
     },
   ];
 

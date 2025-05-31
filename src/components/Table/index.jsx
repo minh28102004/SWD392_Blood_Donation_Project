@@ -1,4 +1,4 @@
-const TableComponent = ({ columns, data, darkMode }) => {
+const TableComponent = ({ columns, data }) => {
   return (
     <div className="overflow-x-auto p-2">
       <table
@@ -6,7 +6,7 @@ const TableComponent = ({ columns, data, darkMode }) => {
         style={{ tableLayout: "fixed" }}
       >
         <thead>
-          <tr className="bg-red-100 border border-red-50 dark:bg-gray-800">
+          <tr className="bg-red-100 border border-red-50 dark:bg-gray-800 dark:text-white">
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -22,7 +22,7 @@ const TableComponent = ({ columns, data, darkMode }) => {
           {data.map((item, idx) => (
             <tr
               key={item.id || idx}
-              className="border border-red-100 hover:bg-gray-100 dark:hover:bg-gray-700 transform transition duration-200 hover:scale-[1.01]"
+              className="border border-red-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white transform transition duration-200 hover:scale-[1.01]"
             >
               {columns.map((col) => (
                 <td

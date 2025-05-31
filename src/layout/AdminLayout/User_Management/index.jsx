@@ -20,6 +20,9 @@ const UserManagement = () => {
   const { userList, userRole, userStatus, loading, error } = useSelector(
     (state) => state.user
   );
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [formKey, setFormKey] = useState(0); // key để reset form modal
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -41,7 +44,6 @@ const UserManagement = () => {
     statusName: statusMap[user.statusBit ? 1 : 0] || "N/A", // convert true/false => 1/0
   }));
 
-  console.log("userRole: ", statusMap);
   // Columns
   const columns = [
     { key: "identification", title: "Identification", width: "12%" },
@@ -109,18 +111,23 @@ const UserManagement = () => {
 
   // [CREATE]
   const handleCreateUser = () => {
+    setSelectedUser(null);
+    setFormKey((prev) => prev + 1); // đổi key để reset form
     setModalOpen(true);
   };
 
   // [EDIT]
   const handleEdit = (user) => {
-    alert(`Edit user: ${user.name}`);
+    setSelectedUser(user);
+    setFormKey((prev) => prev + 1); // đổi key để reset form
+    setModalOpen(true);
   };
 
   // [DELETE]
   const handleDelete = (user) => {
     if (window.confirm(`Delete user ${user.name}?`)) {
       alert(`Deleted user: ${user.name}`);
+      // Bạn có thể dispatch action delete ở đây
     }
   };
 
@@ -168,11 +175,7 @@ const UserManagement = () => {
           ) : userList.length === 0 ? (
             <p>No users found.</p>
           ) : (
-            <TableComponent
-              columns={columns}
-              data={usersWithNames}
-              darkMode={darkMode}
-            />
+            <TableComponent columns={columns} data={usersWithNames} />
           )}
         </div>
         {/*Button*/}
@@ -184,7 +187,13 @@ const UserManagement = () => {
           createLabel="User"
         />
         {/*Modal*/}
-        <UserCreationModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+        <UserCreationModal
+          key={formKey} // key để reset modal form mỗi lần mở
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          selectedUser={selectedUser}
+          onSuccess={() => dispatch(fetchUsers())}
+        />
       </div>
     </div>
   );

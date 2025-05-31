@@ -227,7 +227,7 @@ const UserProfile = () => {
             </h3>
             <button
               onClick={() => setIsEditing((e) => !e)}
-              className="absolute right-4 top-6 px-4 py-2 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-lg hover:brightness-110 hover:scale-105 transform transition-transform duration-300 ease-in-out flex items-center gap-2"
+              className="absolute right-4 top-6 px-2 py-1 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-lg hover:brightness-90 hover:scale-105 transform transition-transform duration-300 ease-in-out flex items-center gap-2"
             >
               <FaEdit className="inline-block" />
               {isEditing ? "Save Changes" : "Edit Profile"}

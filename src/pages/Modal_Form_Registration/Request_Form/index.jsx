@@ -25,14 +25,14 @@ const RequestForm = ({ onChange }) => (
     </FormRow>
     <FormRow columns={2}>
       <SelectField
-        label="Required Blood Type"
-        name="requiredBloodType"
+        label="Blood Type"
+        name="bloodType"
         options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]}
         onChange={onChange}
         required
       />
       <SelectField
-        label="Required Blood Component"
+        label="Blood Component"
         name="bloodComponent"
         options={["Plasma", "Red Blood Cell", "White Blood Cell", "Platelet"]}
         onChange={onChange}

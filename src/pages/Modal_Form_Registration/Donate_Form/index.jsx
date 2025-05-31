@@ -66,7 +66,7 @@ const DonateForm = ({ onChange }) => (
       />
       <InputField
         label="Weight (kg)"
-        name="weight"
+        name="height"
         type="number"
         onChange={onChange}
         required

@@ -54,17 +54,17 @@ const Header = () => {
   const userMenuItems = [
     {
       label: "User Profile",
-      href: "/userprofile",
+      href: "/userProfile",
       icon: <FiUserPlus className="mr-2 text-lg" />,
     },
     {
       label: "User History",
-      href: "/history",
+      href: "/userHistory",
       icon: <FiList className="mr-2 text-lg" />,
     },
     {
       label: "Logout",
-      href: "/logout",
+      href: "/authPage/login",
       icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
       isDanger: true,
     },
@@ -96,10 +96,10 @@ const Header = () => {
           {/* Navigation */}
           <div className="hidden md:flex space-x-10 text-base font-semibold">
             {[
-              { label: "Home", path: "/homepage" },
-              { label: "FAQs", path: "/homepage/faqs" },
-              { label: "Blog", path: "/homepage/blog" },
-              { label: "About blood", path: "/homepage/about_blood" },
+              { label: "Home", path: "/homePage" },
+              { label: "FAQs", path: "/homePage/faqs" },
+              { label: "Blog", path: "/homePage/blog" },
+              { label: "About blood", path: "/homePage/aboutBlood" },
             ].map(({ label, path }, index) => {
               const isActive = location.pathname === path;
 

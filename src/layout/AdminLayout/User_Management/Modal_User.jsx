@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import {
   FaUser,
   FaEnvelope,
@@ -25,8 +26,23 @@ import {
   DateInput,
   TextAreaInput,
 } from "@components/Form_Input";
+import { createUser, updateUser } from "@redux/features/userSlice";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const UserCreationModal = ({ isOpen, onClose }) => {
+const roleOptions = [
+  { value: "0", label: "User" },
+  { value: "1", label: "Staff" },
+  { value: "2", label: "Admin" },
+];
+
+const statusOptions = [
+  { value: "1", label: "Active" }, // 1 = true
+  { value: "0", label: "Inactive" }, // 0 = false
+];
+
+const UserCreationModal = ({ isOpen, onClose, selectedUser, onSuccess }) => {
+  const dispatch = useDispatch();
   const [showAdditional, setShowAdditional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -36,9 +52,38 @@ const UserCreationModal = ({ isOpen, onClose }) => {
     handleSubmit,
     watch,
     formState: { errors },
+    reset,
   } = useForm();
 
   const password = watch("password");
+
+  useEffect(() => {
+    if (selectedUser) {
+      reset({
+        userName: selectedUser.userName || "",
+        name: selectedUser.name || "",
+        email: selectedUser.email || "",
+        roleBit:
+          selectedUser.roleBit != null ? selectedUser.roleBit.toString() : "0",
+        status: selectedUser.statusBit ? "1" : "0", // Boolean -> "1"/"0"
+        phone: selectedUser.phone || "",
+        dateOfBirth: selectedUser.dateOfBirth
+          ? format(new Date(selectedUser.dateOfBirth), "yyyy-MM-dd")
+          : "",
+        identification: selectedUser.identification || "",
+        bloodType: selectedUser.bloodType?.toString() || "",
+        bloodComponent: selectedUser.bloodComponent?.toString() || "",
+        height: selectedUser.height || "",
+        weight: selectedUser.weight || "",
+        address: selectedUser.address || "",
+        medicalHistory: selectedUser.medicalHistory || "",
+      });
+      setShowAdditional(true);
+    } else {
+      reset();
+      setShowAdditional(false);
+    }
+  }, [selectedUser, reset]);
 
   useEffect(() => {
     let strength = 0;
@@ -54,12 +99,42 @@ const UserCreationModal = ({ isOpen, onClose }) => {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    // Map lại status và roleBit đúng kiểu backend mong muốn
+    const payload = {
+      ...data,
+      statusBit: data.status === "1", // "1" -> true, "0" -> false
+      roleBit: Number(data.roleBit),
+    };
+
+    // Nếu password để trống khi edit thì xóa trường password (giữ nguyên mật khẩu cũ)
+    if (selectedUser && !payload.password) {
+      delete payload.password;
+    }
+
     try {
-      console.log("Form data:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      onClose();
+      if (selectedUser) {
+        const resultAction = await dispatch(
+          updateUser({ id: selectedUser.id, data: payload })
+        );
+        if (updateUser.fulfilled.match(resultAction)) {
+          toast.success("User updated successfully!");
+          onSuccess && onSuccess();
+          onClose();
+        } else {
+          toast.error("Update failed: " + resultAction.payload);
+        }
+      } else {
+        const resultAction = await dispatch(createUser(payload));
+        if (createUser.fulfilled.match(resultAction)) {
+          toast.success("User created successfully!");
+          onSuccess && onSuccess();
+          onClose();
+        } else {
+          toast.error("Create failed: " + resultAction.payload);
+        }
+      }
     } catch (error) {
-      console.error(error);
+      toast.error("Unexpected error: " + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -68,6 +143,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
   const getPasswordStrengthColor = () => {
     switch (passwordStrength) {
       case 0:
+        return "bg-gray-300 w-0";
       case 1:
         return "bg-red-500 w-1/5";
       case 2:
@@ -86,27 +162,28 @@ const UserCreationModal = ({ isOpen, onClose }) => {
   const getPasswordStrengthLabel = () => {
     switch (passwordStrength) {
       case 0:
+        return "0%";
       case 1:
-        return "Very Weak";
+        return "20% - Very Weak";
       case 2:
-        return "Weak";
+        return "40% - Weak";
       case 3:
-        return "Moderate";
+        return "60% - Moderate";
       case 4:
-        return "Strong";
+        return "80% - Strong";
       case 5:
-        return "Very Strong";
+        return "100% - Very Strong";
       default:
         return "";
     }
   };
 
   const importantFields = [
-    "user_name",
+    "userName",
     "name",
     "email",
     "password",
-    "role_bit",
+    "roleBit",
     "status",
   ];
 
@@ -114,10 +191,12 @@ const UserCreationModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl p-6">
+      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6">
         <div className="relative mb-4 pb-4">
-          <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-gray-800">
-            Create New User
+          <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-gray-800 dark:text-white">
+            {selectedUser
+              ? `Edit User - [ ${selectedUser.name} ]`
+              : "Create New User"}
           </h2>
           <button
             onClick={onClose}
@@ -130,46 +209,6 @@ const UserCreationModal = ({ isOpen, onClose }) => {
         <hr className="border-gray-100 mb-6" />
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TextInput
-              label={
-                <>
-                  {importantFields.includes("user_name") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Username :
-                </>
-              }
-              name="user_name"
-              register={register}
-              errors={errors}
-              validation={{
-                required: "Username is required",
-                minLength: { value: 3, message: "At least 3 characters" },
-                maxLength: { value: 50, message: "Max 50 characters" },
-              }}
-              placeholder="Enter username"
-              icon={FaUser}
-            />
-            <SelectInput
-              label={
-                <>
-                  {importantFields.includes("role_bit") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Role :
-                </>
-              }
-              name="role_bit"
-              register={register}
-              errors={errors}
-              options={[
-                { value: "1", label: "Admin" },
-                { value: "2", label: "User" },
-                { value: "3", label: "Donor" },
-              ]}
-              placeholder="Select role"
-              icon={FaUserTag}
-            />
             <TextInput
               label={
                 <>
@@ -196,19 +235,52 @@ const UserCreationModal = ({ isOpen, onClose }) => {
             <SelectInput
               label={
                 <>
+                  {importantFields.includes("roleBit") && (
+                    <span className="text-red-600 mr-1">*</span>
+                  )}
+                  Role :
+                </>
+              }
+              name="roleBit"
+              register={register}
+              errors={errors}
+              options={roleOptions}
+              placeholder="Select role"
+              icon={FaUserTag}
+            />
+            <TextInput
+              label={
+                <>
+                  {importantFields.includes("userName") && (
+                    <span className="text-red-600 mr-1">*</span>
+                  )}
+                  Username :
+                </>
+              }
+              name="userName"
+              register={register}
+              errors={errors}
+              validation={{
+                required: "Username is required",
+                minLength: { value: 3, message: "At least 3 characters" },
+                maxLength: { value: 50, message: "Max 50 characters" },
+              }}
+              placeholder="Enter username"
+              icon={FaUser}
+            />
+            <SelectInput
+              label={
+                <>
                   {importantFields.includes("status") && (
                     <span className="text-red-600 mr-1">*</span>
                   )}
-                 Status :
+                  Status :
                 </>
               }
               name="status"
               register={register}
               errors={errors}
-              options={[
-                { value: "1", label: "Active" },
-                { value: "2", label: "Inactive" },
-              ]}
+              options={statusOptions}
               placeholder="Select status"
               icon={FaToggleOn}
             />
@@ -225,48 +297,49 @@ const UserCreationModal = ({ isOpen, onClose }) => {
               register={register}
               errors={errors}
               validation={{
-                required: "Password is required",
-                minLength: { value: 8, message: "At least 8 characters" },
-                pattern: {
-                  value:
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                  message:
-                    "Must contain uppercase, lowercase, number, special char",
-                },
+                required: selectedUser ? false : "Password is required",
+                minLength: { value: 4, message: "At least 4 characters" },
+                // pattern: {
+                //   value:
+                //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                //   message:
+                //     "Must contain uppercase, lowercase, number, special char",
+                // },
               }}
-              placeholder="Enter password"
+              placeholder={
+                selectedUser ? "Leave blank to keep current" : "Enter password"
+              }
               icon={FaLock}
             />
-            {/* Password strength bar */}
-            <div className="mt-2">
-              <span className="text-sm font-medium text-gray-700">
-                Strength: {getPasswordStrengthLabel()}
-              </span>
-              <div className="h-2 rounded-full bg-gray-200 mt-1">
-                <div
-                  className={`${getPasswordStrengthColor()} h-2 rounded-full transition-all duration-300`}
-                />
+            {!selectedUser && (
+              <div className="mt-2">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  Strength: {getPasswordStrengthLabel()}
+                </span>
+                <div className="h-2 rounded-full bg-gray-200 mt-1">
+                  <div
+                    className={`${getPasswordStrengthColor()} h-2 rounded-full transition-all duration-300`}
+                  />
+                </div>
+                {passwordStrength === 0 ? (
+                  <p className="mt-1 text-xs text-red-600 italic">
+                    * Please enter a password
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-300 italic">
+                    {passwordStrength <= 1 &&
+                      "Password is very weak, try adding uppercase letters, numbers, or special characters."}
+                    {passwordStrength === 2 &&
+                      "Weak password, consider adding more character types."}
+                    {passwordStrength === 3 &&
+                      "Moderate strength, can be improved with more variety."}
+                    {passwordStrength === 4 && "Strong password, good job!"}
+                    {passwordStrength === 5 && "Very strong password!"}
+                  </p>
+                )}
               </div>
-              {passwordStrength === 0 ? (
-                <p className="mt-1 text-xs text-red-600 italic">
-                  * Please enter a password
-                </p>
-              ) : (
-                <p className="mt-1 text-xs text-gray-500 italic">
-                  {passwordStrength <= 1 &&
-                    "Password is very weak, try adding uppercase letters, numbers, or special characters."}
-                  {passwordStrength === 2 &&
-                    "Weak password, consider adding more character types."}
-                  {passwordStrength === 3 &&
-                    "Moderate strength, can be improved with more variety."}
-                  {passwordStrength === 4 && "Strong password, good job!"}
-                  {passwordStrength === 5 && "Very strong password!"}
-                </p>
-              )}
-            </div>
+            )}
           </div>
-
-          {/* ... Additions ... */}
 
           <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
             <input
@@ -278,7 +351,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
             />
             <label
               htmlFor="showAdditional"
-              className="text-sm font-medium text-gray-700 flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:hover:text-yellow-500 flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors"
             >
               <span>Show Additional Information</span>
               <FaInfoCircle
@@ -293,7 +366,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SelectInput
                   label="Blood Type :"
-                  name="blood_type_id"
+                  name="bloodType"
                   register={register}
                   errors={errors}
                   options={[
@@ -312,7 +385,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
 
                 <SelectInput
                   label="Blood Component :"
-                  name="blood_component_id"
+                  name="bloodComponent"
                   register={register}
                   errors={errors}
                   options={[
@@ -324,7 +397,6 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                   placeholder="Select blood component"
                   icon={FaTint}
                 />
-
                 <TextInput
                   label="Phone :"
                   name="phone"
@@ -332,10 +404,26 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                   errors={errors}
                   placeholder="Enter phone number"
                   icon={FaPhone}
+                  validation={{
+                    // required: "Phone number is required",
+                    pattern: {
+                      value: /^[+\d]?(?:[\d\s-]{3,14}\d)$/,
+                      message: "Invalid phone number format",
+                    },
+                    minLength: {
+                      value: 9,
+                      message: "Phone number too short",
+                    },
+                    maxLength: {
+                      value: 15,
+                      message: "Phone number too long",
+                    },
+                  }}
                 />
+
                 <DateInput
                   label="Date of Birth :"
-                  name="date_of_birth"
+                  name="dateOfBirth"
                   register={register}
                   errors={errors}
                   max={format(new Date(), "yyyy-MM-dd")}
@@ -355,7 +443,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                   register={register}
                   errors={errors}
                   validation={{
-                    required: "Email is required",
+                    // required: "Email is required",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                       message: "Invalid email address",
@@ -366,7 +454,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                 />
                 <TextInput
                   label="Height (cm) :"
-                  name="height_cm"
+                  name="height"
                   register={register}
                   errors={errors}
                   placeholder="Enter height"
@@ -375,7 +463,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
 
                 <TextInput
                   label="Weight (kg) :"
-                  name="weight_kg"
+                  name="weight"
                   register={register}
                   errors={errors}
                   placeholder="Enter weight"
@@ -392,7 +480,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                 />
                 <TextAreaInput
                   label="Medical History :"
-                  name="medical_history"
+                  name="medicalHistory"
                   register={register}
                   errors={errors}
                   rows={3}
@@ -400,7 +488,7 @@ const UserCreationModal = ({ isOpen, onClose }) => {
                   icon={FaNotesMedical}
                 />
               </div>
-               <hr className="border-gray-100" />
+              <hr className="border-gray-100" />
             </div>
           )}
 
@@ -417,7 +505,13 @@ const UserCreationModal = ({ isOpen, onClose }) => {
               disabled={isSubmitting}
               className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
             >
-              {isSubmitting ? "Creating..." : "Create User"}
+              {isSubmitting
+                ? selectedUser
+                  ? "Updating..."
+                  : "Creating..."
+                : selectedUser
+                ? "Update User"
+                : "Create User"}
             </button>
           </div>
         </form>

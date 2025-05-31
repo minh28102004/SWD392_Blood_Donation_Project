@@ -5,6 +5,7 @@
       "@components/*": ["components/*"],
       "@utils/*": ["utils/*"],
       "@pages/*": ["pages/*"],
+      "@layout/*": ["layout/*"],
       "@styles/*": ["styles/*"],
       "@assets/*": ["assets/*"],
       "@redux/*": ["redux/*"],
