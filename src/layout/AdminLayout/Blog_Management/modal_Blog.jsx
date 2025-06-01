@@ -1,110 +1,72 @@
-import React, { useState, useEffect, useCallback, Fragment } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useState, useEffect, Fragment, useRef } from "react";
+import { useForm } from "react-hook-form";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { FiUpload, FiX } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Dialog, Transition } from "@headlessui/react";
+import { FaTimes } from "react-icons/fa";
+import { TextInput } from "@components/Form_Input";
+import ImageUploadInput from "@components/Image_Input";
 
-const BlogPostModal = ({ isOpen, onClose }) => {
+const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
   const [formData, setFormData] = useState({
-    userId: "",
-    title: "",
-    content: "",
-    category: "",
-    featuredImage: null,
+    content: selectedPost?.content || "",
+    featuredImage: selectedPost?.featuredImage || null,
   });
-  const [errors, setErrors] = useState({});
-  const [preview, setPreview] = useState(null);
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const categories = [
-    "Technology",
-    "Travel",
-    "Food",
-    "Lifestyle",
-    "Business",
-    "Health",
-  ];
-
-  const onDrop = useCallback((acceptedFiles) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size should be less than 5MB");
-        return;
-      }
-      if (
-        ![".jpg", ".jpeg", ".png"].includes(
-          file.name.toLowerCase().substr(file.name.lastIndexOf("."))
-        )
-      ) {
-        toast.error("Only JPEG and PNG files are allowed");
-        return;
-      }
-      setFormData((prev) => ({ ...prev, featuredImage: file }));
-      setPreview(URL.createObjectURL(file));
-    }
-  }, []);
-
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    accept: {
-      "image/jpeg": [],
-      "image/png": [],
+  const scrollRef = useRef(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    defaultValues: {
+      userId: selectedPost?.userId || "",
+      title: selectedPost?.title || "",
+      category: selectedPost?.category || "",
     },
-    maxFiles: 1,
   });
 
   useEffect(() => {
-    const words = formData.content.replace(/<[^>]*>/g, "").split(/\s+/).filter(Boolean).length;
+    const words = formData.content
+      .replace(/<[^>]*>/g, "")
+      .split(/\s+/)
+      .filter(Boolean).length;
     setWordCount(words);
     setReadingTime(Math.ceil(words / 200));
   }, [formData.content]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.userId || !/^\d+$/.test(formData.userId)) {
-      newErrors.userId = "Please enter a valid user ID";
+  const validateForm = (data) => {
+    const contentLength = formData.content.replace(/<[^>]*>/g, "").length;
+    if (contentLength < 100) {
+      toast.error("Content must be at least 100 characters long");
+      return false;
     }
-    if (formData.title.length < 10 || formData.title.length > 100) {
-      newErrors.title = "Title must be between 10 and 100 characters";
-    }
-    if (formData.title.match(/[^a-zA-Z0-9\s]/)) {
-      newErrors.title = "Title cannot contain special characters";
-    }
-    if (formData.content.replace(/<[^>]*>/g, "").length < 100) {
-      newErrors.content = "Content must be at least 100 characters long";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setLoading(true);
-      try {
-        // TODO: Call API here
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        toast.success("Blog post created successfully!");
-        setFormData({
-          userId: "",
-          title: "",
-          content: "",
-          category: "",
-          featuredImage: null,
-        });
-        setPreview(null);
-        onClose();
-      } catch (error) {
-        toast.error("Failed to create blog post");
-      } finally {
-        setLoading(false);
-      }
+  const onSubmit = async (data) => {
+    if (!validateForm(data)) return;
+    setLoading(true);
+    try {
+      await new Promise((res) => setTimeout(res, 2000));
+      toast.success(
+        selectedPost
+          ? "Blog post updated successfully!"
+          : "Blog post created successfully!"
+      );
+      reset();
+      setFormData({ content: "", featuredImage: null });
+      onClose();
+    } catch {
+      toast.error("Failed to submit blog post");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,10 +79,11 @@ const BlogPostModal = ({ isOpen, onClose }) => {
     ],
   };
 
+  const importantFields = ["userId", "title", "category"];
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* Background overlay */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -133,7 +96,6 @@ const BlogPostModal = ({ isOpen, onClose }) => {
           <div className="fixed inset-0 bg-black bg-opacity-70" />
         </Transition.Child>
 
-        {/* Modal panel */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition.Child
@@ -145,169 +107,164 @@ const BlogPostModal = ({ isOpen, onClose }) => {
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-2xl font-bold leading-6 text-gray-900 mb-6"
+              <Dialog.Panel
+                className={`relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white text-left align-middle shadow-xl transition-all 
+               py-6 pl-6 pr-2 }`}
+              >
+                <button
+                  onClick={onClose}
+                  className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition-colors p-2 rounded-full"
+                  aria-label="Close modal"
                 >
-                  Create New Blog Post
+                  <FaTimes className="w-5 h-5" />
+                </button>
+                <Dialog.Title
+                  as="h2"
+                  className="text-2xl font-bold leading-6 text-gray-900 mb-4 text-center"
+                >
+                  {selectedPost ? "Edit Blog Post" : "Create New Blog Post"}
                 </Dialog.Title>
+                <hr className="border-gray-100 mb-6" />
+                <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("userId") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            User ID :
+                          </>
+                        }
+                        name="userId"
+                        placeholder="Enter numeric user ID"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "User ID is required",
+                          pattern: {
+                            value: /^\d+$/,
+                            message: "Only numeric user IDs allowed",
+                          },
+                        }}
+                      />
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* User ID */}
-                  <div>
-                    <label
-                      className="block mb-2 font-semibold"
-                      htmlFor="userId"
-                    >
-                      User ID *
-                    </label>
-                    <input
-                      type="number"
-                      id="userId"
-                      value={formData.userId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, userId: e.target.value })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-white"
-                      required
-                    />
-                    {errors.userId && (
-                      <p className="mt-1 text-red-500 text-sm">{errors.userId}</p>
-                    )}
-                  </div>
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("title") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Title :
+                          </>
+                        }
+                        name="title"
+                        placeholder="Enter blog title"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Title is required",
+                          minLength: {
+                            value: 10,
+                            message: "Min 10 characters",
+                          },
+                          maxLength: {
+                            value: 100,
+                            message: "Max 100 characters",
+                          },
+                          pattern: {
+                            value: /^[a-zA-Z0-9\s]*$/,
+                            message: "No special characters allowed",
+                          },
+                        }}
+                      />
 
-                  {/* Title */}
-                  <div>
-                    <label className="block mb-2 font-semibold" htmlFor="title">
-                      Title *
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-white"
-                      required
-                    />
-                    {errors.title && (
-                      <p className="mt-1 text-red-500 text-sm">{errors.title}</p>
-                    )}
-                  </div>
-
-                  {/* Category */}
-                  <div>
-                    <label
-                      className="block mb-2 font-semibold"
-                      htmlFor="category"
-                    >
-                      Category
-                    </label>
-                    <select
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-white"
-                    >
-                      <option value="">Select a category</option>
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Featured Image */}
-                  <div>
-                    <label className="block mb-2 font-semibold">
-                      Featured Image
-                    </label>
-                    <div
-                      {...getRootProps()}
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400"
-                    >
-                      <input {...getInputProps()} />
-                      {preview ? (
-                        <div className="relative">
-                          <img
-                            src={preview}
-                            alt="Preview"
-                            className="max-h-48 mx-auto rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPreview(null);
-                              setFormData({ ...formData, featuredImage: null });
-                            }}
-                            className="absolute top-0 right-0 p-1 bg-red-500 text-white rounded-full"
-                          >
-                            <FiX />
-                          </button>
-                        </div>
-                      ) : (
-                        <div>
-                          <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2">Drag & drop or click to upload</p>
-                          <p className="text-sm text-gray-500">
-                            Maximum file size: 5MB
-                          </p>
-                        </div>
-                      )}
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("category") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Category :
+                          </>
+                        }
+                        name="category"
+                        placeholder="Enter category"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Category is required",
+                        }}
+                      />
                     </div>
-                  </div>
 
-                  {/* Content */}
-                  <div>
-                    <label className="block mb-2 font-semibold">Content *</label>
-                    <ReactQuill
-                      value={formData.content}
-                      onChange={(content) =>
-                        setFormData({ ...formData, content: content })
-                      }
-                      modules={modules}
-                      className="bg-white rounded-lg"
-                    />
-                    {errors.content && (
-                      <p className="mt-1 text-red-500 text-sm">{errors.content}</p>
-                    )}
-                    <div className="mt-2 text-sm text-gray-500">
+                    <div className="max-w-full">
+                      <ImageUploadInput
+                        value={formData.featuredImage}
+                        onChange={(file) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            featuredImage: file,
+                          }))
+                        }
+                        error={errors.featuredImage?.message}
+                        label={
+                          <>
+                            <span className="text-red-600 mr-1">*</span>
+                            Featured Image :
+                          </>
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <span className="text-red-600 mr-1">*</span>
+                        Content :
+                      </label>
+                      <div className="h-[100px] relative">
+                        <ReactQuill
+                          value={formData.content}
+                          onChange={(val) =>
+                            setFormData((prev) => ({ ...prev, content: val }))
+                          }
+                          modules={modules}
+                          className="bg-white rounded-lg h-full"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-gray-500 pt-6">
                       <span>Words: {wordCount}</span>
                       <span className="mx-2">|</span>
                       <span>Estimated reading time: {readingTime} min</span>
                     </div>
-                  </div>
 
-                  {/* Buttons */}
-                  <div className="flex gap-4 justify-end">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className={`px-6 py-3 rounded-lg font-semibold text-white ${
-                        loading
-                          ? "bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      }`}
-                    >
-                      {loading ? "Creating..." : "Create Post"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="px-6 py-3 rounded-lg font-semibold bg-gray-200 hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-
-                <ToastContainer position="bottom-right" theme="light" />
+                    <div className="flex justify-end space-x-4 pt-2">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                      >
+                        {isSubmitting
+                          ? selectedPost
+                            ? "Updating..."
+                            : "Creating..."
+                          : selectedPost
+                          ? "Update Post"
+                          : "Create Post"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                
               </Dialog.Panel>
             </Transition.Child>
           </div>
