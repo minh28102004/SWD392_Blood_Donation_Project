@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaSyncAlt, FaPlus } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTrash,
+  FaSyncAlt,
+  FaPlus,
+  FaExclamationCircle,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
@@ -137,7 +143,7 @@ const UserManagement = () => {
   const handleDelete = async (user) => {
     Modal.confirm({
       title: "Are you sure you want to delete this user?",
-      content: "(Note: The user will be removed from the list)",
+      content: "( Note: The user will be removed from the list )",
       okText: "OK",
       cancelText: "Cancel",
       onOk: async () => {
@@ -197,7 +203,10 @@ const UserManagement = () => {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : userList.length === 0 ? (
-            <p>No users found.</p>
+            <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
+              <FaExclamationCircle className="text-xl" />
+              <p>No users found.</p>
+            </div>
           ) : (
             <TableComponent columns={columns} data={usersWithNames} />
           )}

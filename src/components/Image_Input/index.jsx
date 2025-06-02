@@ -70,9 +70,9 @@ const ImageUploadInput = ({
           </div>
         ) : (
           <div>
-            <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2">Drag & drop or click to upload</p>
-            <p className="text-sm text-gray-500">Max file size: 5MB</p>
+            <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-200" />
+            <p className="mt-2 dark:text-gray-300">Drag & drop or click to upload</p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">Max file size: 5MB</p>
           </div>
         )}
       </div>

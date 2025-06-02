@@ -1,20 +1,27 @@
 import { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaSyncAlt, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
-import { fetchBlogPosts, deleteBlogPost } from "@redux/features/blogPostsSlice";
+import {
+  fetchBlogPosts,
+  createBlogPost,
+  updateBlogPost,
+  deleteBlogPost,
+} from "@redux/features/blogPostsSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
 import ActionButtons from "@components/Action_Button";
 import Tooltip from "@mui/material/Tooltip";
 import BlogPostModal from "./modal_Blog";
+import { Modal } from "antd";
+import { toast } from "react-toastify";
 
 const BlogPostManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
   const { blogList, loading, error } = useSelector((state) => state.blogPosts);
-  console.log("blog: ", blogList);
   const [selectedPost, setSelectedPost] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [loadingDelay, setLoadingDelay] = useState(true);
@@ -127,10 +134,25 @@ const BlogPostManagement = () => {
   };
 
   // [DELETE]
-  const handleDelete = (post) => {
-    if (window.confirm(`Delete post "${post.title}"?`)) {
-      dispatch(deleteBlogPost(post.postId));
-    }
+  const handleDelete = async (blog) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this blog post?",
+      content: "( Note: The blog post will be removed from the list )",
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBlogPost(blog.postId)).unwrap();
+          toast.success("Blog post has been deleted!");
+          dispatch(fetchBlogPosts());
+        } catch (error) {
+          toast.error(
+            error?.message || "An error occurred while deleting the blog post!"
+          );
+        }
+      },
+      style: { top: "30%" },
+    });
   };
 
   const handleRefresh = () => {
@@ -156,7 +178,10 @@ const BlogPostManagement = () => {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : blogList.length === 0 ? (
-            <p>No blog posts found.</p>
+            <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
+              <MdArticle className="text-xl" />
+              <p>No blog posts found.</p>
+            </div>
           ) : (
             <TableComponent columns={columns} data={blogList} />
           )}

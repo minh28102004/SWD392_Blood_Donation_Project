@@ -108,19 +108,18 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
               <Dialog.Panel
-                className={`relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white text-left align-middle shadow-xl transition-all 
+                className={`relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all 
                py-6 pl-6 pr-2 }`}
               >
                 <button
                   onClick={onClose}
-                  className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition-colors p-2 rounded-full"
-                  aria-label="Close modal"
+                  className="absolute right-4 top-4 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
                 >
                   <FaTimes className="w-5 h-5" />
                 </button>
                 <Dialog.Title
                   as="h2"
-                  className="text-2xl font-bold leading-6 text-gray-900 mb-4 text-center"
+                  className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 text-center"
                 >
                   {selectedPost ? "Edit Blog Post" : "Create New Blog Post"}
                 </Dialog.Title>
@@ -222,19 +221,19 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                         <span className="text-red-600 mr-1">*</span>
                         Content :
                       </label>
-                      <div className="h-[100px] relative">
+                      <div className="h-[100px] dark:bg-white relative">
                         <ReactQuill
                           value={formData.content}
                           onChange={(val) =>
                             setFormData((prev) => ({ ...prev, content: val }))
                           }
                           modules={modules}
-                          className="bg-white rounded-lg h-full"
+                          className="rounded-lg h-full bg-transparent"
                         />
                       </div>
                     </div>
 
-                    <div className="text-sm text-gray-500 pt-6">
+                    <div className="text-sm text-gray-500 dark:text-gray-300 pt-6">
                       <span>Words: {wordCount}</span>
                       <span className="mx-2">|</span>
                       <span>Estimated reading time: {readingTime} min</span>
@@ -244,14 +243,14 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                       <button
                         type="button"
                         onClick={onClose}
-                        className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-sm"
+                        className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-sm"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
                           ? selectedPost
@@ -264,7 +263,6 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                     </div>
                   </form>
                 </div>
-                
               </Dialog.Panel>
             </Transition.Child>
           </div>
