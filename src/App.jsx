@@ -17,7 +17,7 @@ import Statistic from "@layout/AdminLayout/Statistics";
 import UserManagement from "@layout/AdminLayout/User_Management";
 import BlogManagement from "@layout/AdminLayout/Blog_Management";
 import StaffLayout from "@layout/StaffLayout/Dashboard";
-import StaffStatistic from "@layout/StaffLayout/Statistics";
+import StaffStatistic from "@layout/StaffLayout/Donation";
 import StaffManagement from "@layout/StaffLayout/User_Management";
 import UserProfile from "@pages/User_Profile";
 import UserHistory from "@pages/User_Request_History";

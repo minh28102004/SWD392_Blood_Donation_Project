@@ -34,7 +34,7 @@ const DashboardLayout = () => {
   ];
 
   const menuItems = [
-    { name: "Statistic", icon: <BarChartOutlined />, path: "/staffLayout" },
+    { name: "Donation", icon: <BarChartOutlined />, path: "/staffLayout" },
     {
       name: "Staff Management",
       icon: <UserOutlined />,
