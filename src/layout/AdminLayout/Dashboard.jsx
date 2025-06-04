@@ -87,32 +87,48 @@ const DashboardLayout = () => {
           )}
         </div>
         <nav>
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => navigate(item.path)}
-              className={`flex items-center w-full p-2 mb-2 rounded-lg transition-colors ${
-                location.pathname === item.path
-                  ? "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
-              } justify-start`}
-              style={
-                sidebarOpen
-                  ? {}
-                  : { paddingLeft: "0.85rem", paddingRight: "0.75rem" }
-              }
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span
-                className={`ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
-                  sidebarOpen ? "opacity-100 max-w-xs" : "opacity-0 max-w-0"
-                }`}
-                style={{ whiteSpace: "nowrap" }}
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            const button = (
+              <button
+                key={item.name}
+                onClick={() => navigate(item.path)}
+                className={`flex items-center w-full p-2 mb-2 rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-blue-100 text-blue-600 dark:bg-blue-600 dark:text-white"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                } justify-start`}
+                style={
+                  sidebarOpen
+                    ? {}
+                    : { paddingLeft: "0.88rem", paddingRight: "0.75rem" }
+                }
               >
-                {item.name}
-              </span>
-            </button>
-          ))}
+                <span className="text-xl">{item.icon}</span>
+                <span
+                  className={`ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
+                    sidebarOpen ? "opacity-100 max-w-xs" : "opacity-0 max-w-0"
+                  }`}
+                  style={{ whiteSpace: "nowrap" }}
+                >
+                  {item.name}
+                </span>
+              </button>
+            );
+
+            return sidebarOpen ? (
+              button
+            ) : (
+              <Tooltip
+                title={item.name}
+                placement="right"
+                arrow
+                key={item.name}
+              >
+                {button}
+              </Tooltip>
+            );
+          })}
         </nav>
       </aside>
 
@@ -120,7 +136,7 @@ const DashboardLayout = () => {
       <main className="flex-1 p-3 overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Tooltip title={sidebarOpen ? "Close" : "Open"}>
+          <Tooltip title={sidebarOpen ? "Close" : "Open"} arrow>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -130,17 +146,23 @@ const DashboardLayout = () => {
           </Tooltip>
 
           <div className="flex items-center space-x-4 relative">
-            <button
-              onClick={toggleTheme}
-              title={darkMode ? "Light Mode" : "Dark Mode"}
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            <Tooltip
+              title={
+                darkMode ? "Light Mode" : "Dark Mode"
+              }
+              arrow
             >
-              {darkMode ? (
-                <FiSun className="text-yellow-400 text-xl" />
-              ) : (
-                <FiMoon className="text-gray-800 dark:text-white text-xl" />
-              )}
-            </button>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              >
+                {darkMode ? (
+                  <FiSun className="text-yellow-400 text-xl" />
+                ) : (
+                  <FiMoon className="text-gray-800 dark:text-white text-xl" />
+                )}
+              </button>
+            </Tooltip>
 
             <div className="relative">
               <button

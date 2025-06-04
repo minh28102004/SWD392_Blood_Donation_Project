@@ -32,6 +32,7 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
 /* 
 button {
   border-radius: 8px;
@@ -66,6 +67,28 @@ button {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(128, 128, 128, 0.6);
+}
+
+/* Buộc container của Quill chiếm 100% */
+.my-quill .ql-container {
+  height: calc(100% - 42px) !important;
+  /* 42px = toolbar height */
+}
+
+/* Toàn bộ wrapper nền trắng */
+.my-quill .ql-toolbar,
+.my-quill .ql-container,
+.my-quill .ql-editor {
+  background-color: white !important;
+}
+
+/* Dark mode */
+.dark .my-quill .ql-toolbar,
+.dark .my-quill .ql-container,
+.dark .my-quill .ql-editor {
+  background-color: #1f2937 !important;
+  /* Tailwind gray-800 */
+  color: white !important;
 }
 
 @media (prefers-color-scheme: light) {

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   FaUser,
   FaEnvelope,
@@ -239,325 +240,368 @@ const UserCreationModal = ({
     label: bc.name,
   }));
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6"
-        ref={modalRef}
-      >
-        <div className="relative mb-4 pb-4">
-          <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-gray-800 dark:text-white">
-            {selectedUser
-              ? `Edit User - [ ${selectedUser.name} ]`
-              : "Create New User"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-label="Close modal"
-          >
-            <FaTimes className="w-5 h-5" />
-          </button>
-        </div>
-        <hr className="border-gray-100 mb-6" />
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <TextInput
-              label={
-                <>
-                  {importantFields.includes("name") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Full Name :
-                </>
-              }
-              name="name"
-              register={register}
-              errors={errors}
-              validation={{
-                required: "Name is required",
-                minLength: { value: 2, message: "At least 2 characters" },
-                pattern: {
-                  value: /^[A-Za-z\s]+$/,
-                  message: "Only letters and spaces allowed",
-                },
-              }}
-              placeholder="Enter full name"
-              icon={FaUser}
-            />
-            <SelectInput
-              label={
-                <>
-                  {importantFields.includes("roleBit") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Role :
-                </>
-              }
-              name="roleBit"
-              register={register}
-              errors={errors}
-              options={roleOptions}
-              placeholder="Select role"
-              icon={FaUserTag}
-            />
-            <TextInput
-              label={
-                <>
-                  {importantFields.includes("userName") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Username :
-                </>
-              }
-              name="userName"
-              register={register}
-              errors={errors}
-              validation={{
-                required: "Username is required",
-                minLength: { value: 3, message: "At least 3 characters" },
-                maxLength: { value: 50, message: "Max 50 characters" },
-              }}
-              placeholder="Enter username"
-              icon={FaUser}
-            />
-            <SelectInput
-              label={
-                <>
-                  {importantFields.includes("status") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Status :
-                </>
-              }
-              name="status"
-              register={register}
-              errors={errors}
-              options={statusOptions}
-              placeholder="Select status"
-              icon={FaToggleOn}
-            />
-            <PasswordInput
-              label={
-                <>
-                  {importantFields.includes("password") && (
-                    <span className="text-red-600 mr-1">*</span>
-                  )}
-                  Password :
-                </>
-              }
-              name="password"
-              register={register}
-              errors={errors}
-              validation={{
-                required: selectedUser ? false : "Password is required",
-                minLength: { value: 4, message: "At least 4 characters" },
-                // pattern: {
-                //   value:
-                //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                //   message:
-                //     "Must contain uppercase, lowercase, number, special char",
-                // },
-              }}
-              placeholder={
-                selectedUser ? "Leave blank to keep current" : "Enter password"
-              }
-              icon={FaLock}
-            />
-            {!selectedUser && (
-              <div className="mt-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Strength: {getPasswordStrengthLabel()}
-                </span>
-                <div className="h-2 rounded-full bg-gray-200 mt-1">
-                  <div
-                    className={`${getPasswordStrengthColor()} h-2 rounded-full transition-all duration-300`}
-                  />
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-70"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-70"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-70" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 ">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95 translate-y-4"
+              enterTo="opacity-100 scale-100 translate-y-0"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100 translate-y-0"
+              leaveTo="opacity-0 scale-95 translate-y-4"
+            >
+              <Dialog.Panel className="relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all py-6 pl-6 pr-1">
+                <Dialog.Title
+                  as="h2"
+                  className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-4"
+                >
+                  {selectedUser
+                    ? `Edit User - [ ${selectedUser.name} ]`
+                    : "Create New User"}
+                </Dialog.Title>
+                <button
+                  onClick={onClose}
+                  className="absolute right-4 top-4 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </button>{" "}
+                <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-5">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("name") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Full Name :
+                          </>
+                        }
+                        name="name"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Name is required",
+                          minLength: {
+                            value: 2,
+                            message: "At least 2 characters",
+                          },
+                          pattern: {
+                            value: /^[A-Za-z\s]+$/,
+                            message: "Only letters and spaces allowed",
+                          },
+                        }}
+                        placeholder="Enter full name"
+                        icon={FaUser}
+                      />
+                      <SelectInput
+                        label={
+                          <>
+                            {importantFields.includes("roleBit") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Role :
+                          </>
+                        }
+                        name="roleBit"
+                        register={register}
+                        errors={errors}
+                        options={roleOptions}
+                        placeholder="Select role"
+                        icon={FaUserTag}
+                      />
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("userName") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Username :
+                          </>
+                        }
+                        name="userName"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Username is required",
+                          minLength: {
+                            value: 3,
+                            message: "At least 3 characters",
+                          },
+                          maxLength: {
+                            value: 50,
+                            message: "Max 50 characters",
+                          },
+                        }}
+                        placeholder="Enter username"
+                        icon={FaUser}
+                      />
+                      <SelectInput
+                        label={
+                          <>
+                            {importantFields.includes("status") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Status :
+                          </>
+                        }
+                        name="status"
+                        register={register}
+                        errors={errors}
+                        options={statusOptions}
+                        placeholder="Select status"
+                        icon={FaToggleOn}
+                      />
+                      <PasswordInput
+                        label={
+                          <>
+                            {importantFields.includes("password") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Password :
+                          </>
+                        }
+                        name="password"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: selectedUser
+                            ? false
+                            : "Password is required",
+                          minLength: {
+                            value: 4,
+                            message: "At least 4 characters",
+                          },
+                          // pattern: {
+                          //   value:
+                          //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                          //   message:
+                          //     "Must contain uppercase, lowercase, number, special char",
+                          // },
+                        }}
+                        placeholder={
+                          selectedUser
+                            ? "Leave blank to keep current"
+                            : "Enter password"
+                        }
+                        icon={FaLock}
+                      />
+                      {!selectedUser && (
+                        <div className="mt-2">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                            Strength: {getPasswordStrengthLabel()}
+                          </span>
+                          <div className="h-2 rounded-full bg-gray-200 mt-1">
+                            <div
+                              className={`${getPasswordStrengthColor()} h-2 rounded-full transition-all duration-300`}
+                            />
+                          </div>
+                          {passwordStrength === 0 ? (
+                            <p className="mt-1 text-xs text-red-600 italic">
+                              * Please enter a password
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-300 italic">
+                              {passwordStrength <= 1 &&
+                                "Password is very weak, try adding uppercase letters, numbers, or special characters."}
+                              {passwordStrength === 2 &&
+                                "Weak password, consider adding more character types."}
+                              {passwordStrength === 3 &&
+                                "Moderate strength, can be improved with more variety."}
+                              {passwordStrength === 4 &&
+                                "Strong password, good job!"}
+                              {passwordStrength === 5 &&
+                                "Very strong password!"}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
+                      <input
+                        type="checkbox"
+                        id="showAdditional"
+                        checked={showAdditional}
+                        onChange={(e) => setShowAdditional(e.target.checked)}
+                        className="w-4 h-4 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <label
+                        htmlFor="showAdditional"
+                        className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:hover:text-yellow-500 flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors"
+                      >
+                        <span>Show Additional Information</span>
+                        <FaInfoCircle
+                          className="text-blue-500"
+                          title="Toggle additional fields"
+                        />
+                      </label>
+                    </div>
+
+                    {showAdditional && (
+                      <div className="space-y-6 transition-all duration-300 ease-in-out transform">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <SelectInput
+                            label="Blood Type :"
+                            name="bloodType"
+                            register={register}
+                            errors={errors}
+                            options={bloodTypeOptions}
+                            placeholder="Select blood type"
+                            icon={FaTint}
+                          />
+
+                          <SelectInput
+                            label="Blood Component :"
+                            name="bloodComponent"
+                            register={register}
+                            errors={errors}
+                            options={bloodComponentOptions}
+                            placeholder="Select blood component"
+                            icon={FaTint}
+                          />
+                          <TextInput
+                            label="Phone :"
+                            name="phone"
+                            register={register}
+                            errors={errors}
+                            placeholder="Enter phone number"
+                            icon={FaPhone}
+                            validation={{
+                              // required: "Phone number is required",
+                              pattern: {
+                                value: /^[+\d]?(?:[\d\s-]{3,14}\d)$/,
+                                message: "Invalid phone number format",
+                              },
+                              minLength: {
+                                value: 9,
+                                message: "Phone number too short",
+                              },
+                              maxLength: {
+                                value: 15,
+                                message: "Phone number too long",
+                              },
+                            }}
+                          />
+
+                          <DateInput
+                            label="Date of Birth :"
+                            name="dateOfBirth"
+                            register={register}
+                            errors={errors}
+                            max={format(new Date(), "yyyy-MM-dd")}
+                            icon={FaCalendarAlt}
+                          />
+                          <TextInput
+                            label="Identification :"
+                            name="identification"
+                            register={register}
+                            errors={errors}
+                            placeholder="Enter identification"
+                            icon={FaIdBadge}
+                          />
+                          <TextInput
+                            label="Email :"
+                            name="email"
+                            register={register}
+                            errors={errors}
+                            validation={{
+                              // required: "Email is required",
+                              pattern: {
+                                value:
+                                  /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: "Invalid email address",
+                              },
+                            }}
+                            placeholder="Enter email"
+                            icon={FaEnvelope}
+                          />
+                          <TextInput
+                            label="Height (cm) :"
+                            name="height"
+                            register={register}
+                            errors={errors}
+                            placeholder="Enter height"
+                            icon={FaRulerVertical}
+                          />
+
+                          <TextInput
+                            label="Weight (kg) :"
+                            name="weight"
+                            register={register}
+                            errors={errors}
+                            placeholder="Enter weight"
+                            icon={FaWeight}
+                          />
+                          <TextAreaInput
+                            label="Address :"
+                            name="address"
+                            register={register}
+                            errors={errors}
+                            rows={3}
+                            placeholder="Enter address"
+                            icon={FaAddressCard}
+                          />
+                          <TextAreaInput
+                            label="Medical History :"
+                            name="medicalHistory"
+                            register={register}
+                            errors={errors}
+                            rows={3}
+                            placeholder="Enter medical history"
+                            icon={FaNotesMedical}
+                          />
+                        </div>
+                        <hr className="border-gray-100" />
+                      </div>
+                    )}
+
+                    <div className="flex justify-end space-x-4 pt-2">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-200 shadow-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
+                      >
+                        {isSubmitting
+                          ? selectedUser
+                            ? "Updating..."
+                            : "Creating..."
+                          : selectedUser
+                          ? "Update User"
+                          : "Create User"}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                {passwordStrength === 0 ? (
-                  <p className="mt-1 text-xs text-red-600 italic">
-                    * Please enter a password
-                  </p>
-                ) : (
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-300 italic">
-                    {passwordStrength <= 1 &&
-                      "Password is very weak, try adding uppercase letters, numbers, or special characters."}
-                    {passwordStrength === 2 &&
-                      "Weak password, consider adding more character types."}
-                    {passwordStrength === 3 &&
-                      "Moderate strength, can be improved with more variety."}
-                    {passwordStrength === 4 && "Strong password, good job!"}
-                    {passwordStrength === 5 && "Very strong password!"}
-                  </p>
-                )}
-              </div>
-            )}
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-
-          <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
-            <input
-              type="checkbox"
-              id="showAdditional"
-              checked={showAdditional}
-              onChange={(e) => setShowAdditional(e.target.checked)}
-              className="w-4 h-4 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-            />
-            <label
-              htmlFor="showAdditional"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:hover:text-yellow-500 flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors"
-            >
-              <span>Show Additional Information</span>
-              <FaInfoCircle
-                className="text-blue-500"
-                title="Toggle additional fields"
-              />
-            </label>
-          </div>
-
-          {showAdditional && (
-            <div className="space-y-6 transition-all duration-300 ease-in-out transform">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <SelectInput
-                  label="Blood Type :"
-                  name="bloodType"
-                  register={register}
-                  errors={errors}
-                  options={bloodTypeOptions}
-                  placeholder="Select blood type"
-                  icon={FaTint}
-                />
-
-                <SelectInput
-                  label="Blood Component :"
-                  name="bloodComponent"
-                  register={register}
-                  errors={errors}
-                  options={bloodComponentOptions}
-                  placeholder="Select blood component"
-                  icon={FaTint}
-                />
-                <TextInput
-                  label="Phone :"
-                  name="phone"
-                  register={register}
-                  errors={errors}
-                  placeholder="Enter phone number"
-                  icon={FaPhone}
-                  validation={{
-                    // required: "Phone number is required",
-                    pattern: {
-                      value: /^[+\d]?(?:[\d\s-]{3,14}\d)$/,
-                      message: "Invalid phone number format",
-                    },
-                    minLength: {
-                      value: 9,
-                      message: "Phone number too short",
-                    },
-                    maxLength: {
-                      value: 15,
-                      message: "Phone number too long",
-                    },
-                  }}
-                />
-
-                <DateInput
-                  label="Date of Birth :"
-                  name="dateOfBirth"
-                  register={register}
-                  errors={errors}
-                  max={format(new Date(), "yyyy-MM-dd")}
-                  icon={FaCalendarAlt}
-                />
-                <TextInput
-                  label="Identification :"
-                  name="identification"
-                  register={register}
-                  errors={errors}
-                  placeholder="Enter identification"
-                  icon={FaIdBadge}
-                />
-                <TextInput
-                  label="Email :"
-                  name="email"
-                  register={register}
-                  errors={errors}
-                  validation={{
-                    // required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  }}
-                  placeholder="Enter email"
-                  icon={FaEnvelope}
-                />
-                <TextInput
-                  label="Height (cm) :"
-                  name="height"
-                  register={register}
-                  errors={errors}
-                  placeholder="Enter height"
-                  icon={FaRulerVertical}
-                />
-
-                <TextInput
-                  label="Weight (kg) :"
-                  name="weight"
-                  register={register}
-                  errors={errors}
-                  placeholder="Enter weight"
-                  icon={FaWeight}
-                />
-                <TextAreaInput
-                  label="Address :"
-                  name="address"
-                  register={register}
-                  errors={errors}
-                  rows={3}
-                  placeholder="Enter address"
-                  icon={FaAddressCard}
-                />
-                <TextAreaInput
-                  label="Medical History :"
-                  name="medicalHistory"
-                  register={register}
-                  errors={errors}
-                  rows={3}
-                  placeholder="Enter medical history"
-                  icon={FaNotesMedical}
-                />
-              </div>
-              <hr className="border-gray-100" />
-            </div>
-          )}
-
-          <div className="flex justify-end space-x-4 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-sm"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-            >
-              {isSubmitting
-                ? selectedUser
-                  ? "Updating..."
-                  : "Creating..."
-                : selectedUser
-                ? "Update User"
-                : "Create User"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </Dialog>
+    </Transition>
   );
 };
 
