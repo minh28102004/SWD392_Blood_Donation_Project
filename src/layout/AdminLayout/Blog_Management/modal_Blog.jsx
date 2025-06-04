@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment, useRef } from "react";
 import { useForm } from "react-hook-form";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes } from "react-icons/fa";
@@ -18,7 +18,6 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const scrollRef = useRef(null);
   const {
     register,
     handleSubmit,

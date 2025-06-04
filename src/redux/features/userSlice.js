@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getRequest,
-  postRequest,
-  putRequest,
+  postRequestMultipartFormData,
+  putRequestMultipartFormData,
   deleteRequest,
 } from "@services/api";
 
@@ -35,9 +35,12 @@ export const fetchUserById = createAsyncThunk(
 // [POST] create new user
 export const createUser = createAsyncThunk(
   "user/create",
-  async (data, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const res = await postRequest({ url: "/api/Users", data });
+      const res = await postRequestMultipartFormData({
+        url: "/api/Users",
+        formData,
+      });
       return res;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -45,18 +48,23 @@ export const createUser = createAsyncThunk(
   }
 );
 
+
 // [PUT] update user
 export const updateUser = createAsyncThunk(
   "user/update",
-  async ({ id, data }, { rejectWithValue }) => {
+  async ({ id, formData }, { rejectWithValue }) => {
     try {
-      const res = await putRequest({ url: `/api/Users/${id}`, data });
+      const res = await putRequestMultipartFormData({
+        url: `/api/Users/${id}`,
+        formData,
+      });
       return res;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
 
 // [DELETE] delete user
 export const deleteUser = createAsyncThunk(

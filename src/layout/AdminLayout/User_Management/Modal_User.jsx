@@ -127,37 +127,57 @@ const UserCreationModal = ({
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
-    // Hàm helper chuyển chuỗi trống thành null
+
+    // helper chuyển chuỗi trống thành null
     const normalizeNull = (value) =>
       value === "" || value === undefined || value === null ? null : value;
-    const payload = {
-      userName: normalizeNull(data.userName),
-      name: normalizeNull(data.name),
-      email: normalizeNull(data.email),
-      phone: normalizeNull(data.phone),
-      dateOfBirth: normalizeNull(data.dateOfBirth),
-      address: normalizeNull(data.address),
-      identification: normalizeNull(data.identification),
-      medicalHistory: normalizeNull(data.medicalHistory),
-      statusBit: data.status === "1" ? 1 : 0,
 
-      roleBit: Number(data.roleBit),
-      heightCm: data.height ? Number(data.height) : null,
-      weightKg: data.weight ? Number(data.weight) : null,
-      bloodTypeId: data.bloodType ? Number(data.bloodType) : null,
-      bloodComponentId: data.bloodComponent
-        ? Number(data.bloodComponent)
-        : null,
-    };
-    // Nếu password tồn tại thì thêm vào payload, ngược lại xóa khi edit
-    if (selectedUser && !data.password) {
+    // Tạo FormData để gửi multipart/form-data
+    const formData = new FormData();
+
+    formData.append("UserName", normalizeNull(data.userName));
+    formData.append("Name", normalizeNull(data.name));
+    formData.append("Email", normalizeNull(data.email));
+    formData.append("Phone", normalizeNull(data.phone));
+    formData.append("DateOfBirth", normalizeNull(data.dateOfBirth));
+    formData.append("Address", normalizeNull(data.address));
+    formData.append("Identification", normalizeNull(data.identification));
+    formData.append("MedicalHistory", normalizeNull(data.medicalHistory));
+    if (selectedUser) {
+      // PUT cập nhật: gửi "true"/"false"
+      formData.append("StatusBit", data.status === "1" ? "true" : "false");
     } else {
-      payload.password = data.password;
+      // POST tạo mới: gửi 1 hoặc 0
+      formData.append("StatusBit", data.status === "1" ? 1 : 0);
     }
+    formData.append("RoleBit", Number(data.roleBit));
+    formData.append("HeightCm", data.height ? Number(data.height) : 0);
+    formData.append("WeightKg", data.weight ? Number(data.weight) : 0);
+    formData.append("BloodTypeId", data.bloodType ? Number(data.bloodType) : 0);
+    formData.append(
+      "BloodComponentId",
+      data.bloodComponent ? Number(data.bloodComponent) : 0
+    );
+
+    // Xử lý password:
+    // Nếu là tạo mới (không có selectedUser) -> luôn gửi password (bắt buộc)
+    // Nếu là cập nhật (có selectedUser) và user có nhập password thì gửi
+    // Ngược lại không gửi password
+    if (!selectedUser) {
+      // POST tạo mới: password bắt buộc
+      formData.append("Password", data.password);
+    } else {
+      // PUT cập nhật: chỉ gửi nếu có nhập password
+      if (data.password && data.password.trim() !== "") {
+        formData.append("Password", data.password);
+      }
+    }
+
     try {
       if (selectedUser) {
+        // Update user
         const resultAction = await dispatch(
-          updateUser({ id: selectedUser.id, data: payload })
+          updateUser({ id: selectedUser.userId, formData })
         );
         if (updateUser.fulfilled.match(resultAction)) {
           toast.success("User updated successfully!");
@@ -167,7 +187,8 @@ const UserCreationModal = ({
           toast.error("Update failed: " + resultAction.payload);
         }
       } else {
-        const resultAction = await dispatch(createUser(payload));
+        // Create user
+        const resultAction = await dispatch(createUser(formData));
         if (createUser.fulfilled.match(resultAction)) {
           toast.success("User created successfully!");
           onSuccess && onSuccess();
@@ -297,15 +318,14 @@ const UserCreationModal = ({
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Name is required",
                           minLength: {
                             value: 2,
                             message: "At least 2 characters",
                           },
-                          pattern: {
-                            value: /^[A-Za-z\s]+$/,
-                            message: "Only letters and spaces allowed",
-                          },
+                          // pattern: {
+                          //   value: /^[A-Za-z\s]+$/,
+                          //   message: "Only letters and spaces allowed",
+                          // },
                         }}
                         placeholder="Enter full name"
                         icon={FaUser}
@@ -368,6 +388,7 @@ const UserCreationModal = ({
                         placeholder="Select status"
                         icon={FaToggleOn}
                       />
+
                       <PasswordInput
                         label={
                           <>
@@ -402,6 +423,7 @@ const UserCreationModal = ({
                         }
                         icon={FaLock}
                       />
+
                       {!selectedUser && (
                         <div className="mt-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
