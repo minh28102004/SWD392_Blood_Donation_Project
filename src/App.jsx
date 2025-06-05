@@ -17,8 +17,8 @@ import Statistic from "@layout/AdminLayout/Statistics";
 import UserManagement from "@layout/AdminLayout/User_Management";
 import BlogManagement from "@layout/AdminLayout/Blog_Management";
 import StaffLayout from "@layout/StaffLayout/Dashboard";
-import StaffStatistic from "@layout/StaffLayout/Donation";
-import StaffManagement from "@layout/StaffLayout/User_Management";
+import BloodRequests from "@layout/StaffLayout/BloodRequests";
+import BloodInventory from "@layout/StaffLayout/BloodInventory";
 import UserProfile from "@pages/User_Profile";
 import UserHistory from "@pages/User_Request_History";
 
@@ -41,8 +41,8 @@ function AppRoutes() {
           <Route path="blogManagement" element={<BlogManagement />} />
         </Route>
         <Route path={endPoint.STAFFLAYOUT} element={<StaffLayout />}>
-          <Route index element={<StaffStatistic />} />
-          <Route path="staffManagement" element={<StaffManagement />} />
+          <Route index element={<BloodRequests />} />
+          <Route path="BloodInventory" element={<BloodInventory />} />
         </Route>
         <Route path={endPoint.AUTHPAGE} element={<AuthPage />}>
           <Route path={endPoint.LOGIN} element={<Login />} />

@@ -11,6 +11,8 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
 import logo from "@assets/logo.png";
 import { useTheme } from "@components/Theme_Context"; 
+import { MdInventory, MdRequestPage } from "react-icons/md";
+import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -34,11 +36,11 @@ const DashboardLayout = () => {
   ];
 
   const menuItems = [
-    { name: "Donation", icon: <BarChartOutlined />, path: "/staffLayout" },
+    { name: "Blood Requests", icon: <VscGitPullRequestGoToChanges  />, path: "/staffLayout" },
     {
-      name: "Staff Management",
-      icon: <UserOutlined />,
-      path: "/staffLayout/staffManagement",
+      name: "Blood Inventory",
+      icon: <MdInventory />,
+      path: "/staffLayout/BloodInventory",
     },
   ];
 
