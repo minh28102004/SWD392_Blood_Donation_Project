@@ -7,28 +7,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import DonateForm from "./Donate_Form";
 import RequestForm from "./Request_Form";
 import SuccessModal from "./Success_Modal";
-import { useNavigate } from "react-router-dom";  // <-- import useNavigate
+import { useNavigate } from "react-router-dom";
+import useOutsideClick from "@hooks/useOutsideClick";
 
 const BloodDonationModal = ({ isOpen, setIsOpen }) => {
   const [modalSuccess, setModalSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("donate");
   const [formData, setFormData] = useState({});
   const modalRef = useRef();
-  const navigate = useNavigate(); // <-- khởi tạo useNavigate
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, setIsOpen]);
+  const navigate = useNavigate();
+  useOutsideClick(modalRef, setIsOpen, isOpen);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -144,7 +132,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
         onViewHistory={() => {
           setModalSuccess(false);
           setIsOpen(false);
-          navigate("/userHistory"); 
+          navigate("/userHistory");
         }}
       />
     </div>

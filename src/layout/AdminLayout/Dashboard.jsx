@@ -139,19 +139,14 @@ const DashboardLayout = () => {
           <Tooltip title={sidebarOpen ? "Close" : "Open"} arrow>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+              className="p-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 hover:border-blue-100 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-gray-600 transition-all duration-200"
             >
               <FiMenu />
             </button>
           </Tooltip>
 
           <div className="flex items-center space-x-4 relative">
-            <Tooltip
-              title={
-                darkMode ? "Light Mode" : "Dark Mode"
-              }
-              arrow
-            >
+            <Tooltip title={darkMode ? "Light Mode" : "Dark Mode"} arrow>
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"

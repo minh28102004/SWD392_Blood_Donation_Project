@@ -30,17 +30,7 @@ import {
 import { createUser, updateUser } from "@redux/features/userSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const roleOptions = [
-  { value: "0", label: "User" },
-  { value: "1", label: "Staff" },
-  { value: "2", label: "Admin" },
-];
-
-const statusOptions = [
-  { value: "1", label: "Active" }, // 1 = true
-  { value: "0", label: "Inactive" }, // 0 = false
-];
+import useOutsideClick from "@hooks/useOutsideClick";
 
 const UserCreationModal = ({
   isOpen,
@@ -49,12 +39,15 @@ const UserCreationModal = ({
   onSuccess,
   bloodTypes = [],
   bloodComponents = [],
+  userRole = [],
+  userStatus = [],
 }) => {
   const dispatch = useDispatch();
   const [showAdditional, setShowAdditional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const modalRef = useRef(null);
+  useOutsideClick(modalRef, onClose);
 
   const {
     register,
@@ -62,7 +55,11 @@ const UserCreationModal = ({
     watch,
     formState: { errors },
     reset,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      status: "1", // Mặc định là Active
+    },
+  });
 
   const password = watch("password");
 
@@ -92,7 +89,9 @@ const UserCreationModal = ({
 
       setShowAdditional(true);
     } else {
-      reset();
+      reset({
+        status: "1", // Set lại giá trị mặc định nếu không có selectedUser
+      });
       setShowAdditional(false);
     }
   }, [selectedUser, reset]);
@@ -108,22 +107,6 @@ const UserCreationModal = ({
     }
     setPasswordStrength(strength);
   }, [password]);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose();
-      }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
@@ -251,6 +234,7 @@ const UserCreationModal = ({
     "status",
   ];
 
+  // Dynamically generate options for bloodType and bloodComponents
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
     label: `${bt.name}${bt.rhFactor}`,
@@ -259,6 +243,17 @@ const UserCreationModal = ({
   const bloodComponentOptions = bloodComponents.map((bc) => ({
     value: bc.bloodComponentId.toString(),
     label: bc.name,
+  }));
+
+  // Dynamically generate options for role and status from userList
+  const roleOptions = userRole.map((role) => ({
+    value: role.id,
+    label: role.name,
+  }));
+
+  const statusOptions = userStatus.map((status) => ({
+    value: status.id,
+    label: status.name,
   }));
 
   return (
@@ -322,10 +317,6 @@ const UserCreationModal = ({
                             value: 2,
                             message: "At least 2 characters",
                           },
-                          // pattern: {
-                          //   value: /^[A-Za-z\s]+$/,
-                          //   message: "Only letters and spaces allowed",
-                          // },
                         }}
                         placeholder="Enter full name"
                         icon={FaUser}
@@ -385,8 +376,9 @@ const UserCreationModal = ({
                         register={register}
                         errors={errors}
                         options={statusOptions}
-                        placeholder="Select status"
                         icon={FaToggleOn}
+                        disabled={!selectedUser} // Disabled nếu không có selectedUser (tạo mới)
+                        // Nếu không phải tạo mới (chỉnh sửa), người dùng có thể thay đổi status
                       />
 
                       <PasswordInput

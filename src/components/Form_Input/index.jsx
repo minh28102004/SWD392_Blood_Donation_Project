@@ -5,7 +5,15 @@ const baseClass = `border border-gray-300 dark:border-gray-600 bg-white dark:bg-
   text-black dark:text-white rounded-lg hover:border-blue-500 focus:border-blue-600 
   dark:hover:border-white focus:outline-none focus:ring-1 transition-all duration-200`;
 
-export function TextInput({ label, register, name, errors, validation, placeholder, icon: Icon }) {
+export function TextInput({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+  placeholder,
+  icon: Icon,
+}) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
       {label}
@@ -25,13 +33,23 @@ export function TextInput({ label, register, name, errors, validation, placehold
         />
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[name].message}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
       )}
     </label>
   );
 }
 
-export function PasswordInput({ label, register, name, errors, validation, placeholder, icon: Icon }) {
+export function PasswordInput({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+  placeholder,
+  icon: Icon,
+}) {
   const [show, setShow] = useState(false);
 
   return (
@@ -62,13 +80,25 @@ export function PasswordInput({ label, register, name, errors, validation, place
         </button>
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[name].message}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
       )}
     </label>
   );
 }
 
-export function SelectInput({ label, register, name, errors, options, validation, placeholder, icon: Icon }) {
+export function SelectInput({
+  label,
+  register,
+  name,
+  errors,
+  options,
+  validation,
+  placeholder,
+  icon: Icon,
+  disabled,
+}) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
       {label}
@@ -84,10 +114,13 @@ export function SelectInput({ label, register, name, errors, options, validation
             Icon ? "pl-8" : ""
           } ${errors[name] ? "border-red-500 dark:border-red-400" : ""}`}
           defaultValue=""
+          disabled={disabled}
         >
-          <option value="" disabled>
-            {placeholder || `Select ${label}`}
-          </option>
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -96,13 +129,23 @@ export function SelectInput({ label, register, name, errors, options, validation
         </select>
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[name].message}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
       )}
     </label>
   );
 }
 
-export function DateInput({ label, register, name, errors, validation, max, icon: Icon }) {
+export function DateInput({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+  max,
+  icon: Icon,
+}) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
       {label}
@@ -122,13 +165,24 @@ export function DateInput({ label, register, name, errors, validation, max, icon
         />
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[name].message}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
       )}
     </label>
   );
 }
 
-export function TextAreaInput({ label, register, name, errors, validation, rows = 3, placeholder, icon: Icon }) {
+export function TextAreaInput({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+  rows = 3,
+  placeholder,
+  icon: Icon,
+}) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
       {label}
@@ -148,7 +202,9 @@ export function TextAreaInput({ label, register, name, errors, validation, rows 
         />
       </div>
       {errors[name] && (
-        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors[name].message}</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
       )}
     </label>
   );

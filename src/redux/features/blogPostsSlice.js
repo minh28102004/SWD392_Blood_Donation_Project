@@ -13,7 +13,6 @@ export const fetchBlogPosts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await getRequest("/api/BlogPosts");
-      console.log("BlogPostLoad: ",res.data.data)
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);

@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  FaEdit,
-  FaTrash,
-  FaSyncAlt,
-  FaPlus,
-  FaExclamationCircle,
-} from "react-icons/fa";
+import { FaEdit, FaTrash, FaExclamationCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
@@ -26,57 +20,69 @@ import Tooltip from "@mui/material/Tooltip";
 import UserCreationModal from "./Modal_User";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
+import Pagination from "@components/Pagination";
+import { useLoadingDelay } from "@hooks/useLoadingDelay";
 
 const UserManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const { userList, userRole, userStatus, loading, error } = useSelector(
-    (state) => state.user
-  );
+  const {
+    userList,
+    userRole,
+    userStatus,
+    loading,
+    error,
+    totalCount,
+    totalPages,
+    currentPage,
+    pageSize,
+  } = useSelector((state) => state.user);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [formKey, setFormKey] = useState(0);
-  const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+
+  console.log({
+    totalCount,
+    pageSize,
+    currentPage,
+  });
 
   useEffect(() => {
-    // Users
-    dispatch(fetchUsers());
-    dispatch(fetchUserRoles());
-    dispatch(fetchUserStatuses());
-    // BloodTypes, BloodComponents
-    dispatch(fetchBloodComponents());
-    dispatch(fetchBloodTypes());
-  }, [dispatch]);
+    const fetchData = async () => {
+      startLoading();
+      try {
+        await dispatch(fetchUsers({ page: currentPage, size: pageSize }));
+        if (
+          !bloodComponents.length &&
+          !bloodTypes.length &&
+          !userRole.length &&
+          !userStatus.length
+        ) {
+          await dispatch(fetchBloodComponents());
+          await dispatch(fetchBloodTypes());
+          await dispatch(fetchUserRoles());
+          await dispatch(fetchUserStatuses());
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        stopLoading();
+      }
+    };
+    fetchData();
+  }, [dispatch, currentPage, pageSize]);
 
-  useEffect(() => {
-    setLoadingDelay(true);
-    dispatch(fetchUsers());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [dispatch]);
+  const usersWithNames = Array.isArray(userList)
+    ? userList.map((user) => ({
+        ...user,
+        roleName: user.role?.name || "N/A",
+        statusName: user.status?.name || "N/A",
+      }))
+    : [];
 
-  // Map role và status sang object để lookup nhanh
-  const roleMap = userRole.reduce((acc, item) => {
-    acc[item.id] = item.name;
-    return acc;
-  }, {});
-
-  const statusMap = userStatus.reduce((acc, item) => {
-    acc[item.id] = item.name;
-    return acc;
-  }, {});
-
-  // Map userList với roleName và statusName
-  const usersWithNames = userList.map((user) => ({
-    ...user,
-    roleName: roleMap[user.roleBit] || "N/A",
-    statusName: statusMap[user.statusBit ? 1 : 0] || "N/A", // convert true/false => 1/0
-  }));
-
-  // Columns
   const columns = [
     { key: "identification", title: "Identification", width: "12%" },
     { key: "name", title: "Name", width: "15%" },
@@ -125,32 +131,29 @@ const UserManagement = () => {
     },
   ];
 
-  // [CREATE]
   const handleCreateUser = () => {
     setSelectedUser(null);
-    setFormKey((prev) => prev + 1); // đổi key để reset form
+    setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
   };
 
-  // [EDIT]
   const handleEdit = (user) => {
     setSelectedUser(user);
-    setFormKey((prev) => prev + 1); // đổi key để reset form
+    setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
   };
 
-  // [DELETE]
   const handleDelete = async (user) => {
     Modal.confirm({
       title: "Are you sure you want to delete this user?",
-      content: "( Note: The user will be removed from the list )",
+      content: "(Note: The user will be removed from the list)",
       okText: "OK",
       cancelText: "Cancel",
       onOk: async () => {
         try {
           await dispatch(deleteUser(user.userId)).unwrap();
           toast.success("User has been deleted!");
-          dispatch(fetchUsers());
+          dispatch(fetchUsers({ page: currentPage, size: pageSize }));
         } catch (error) {
           toast.error(
             error?.message || "An error occurred while deleting the user!"
@@ -162,16 +165,16 @@ const UserManagement = () => {
   };
 
   const handleRefresh = () => {
-    setLoadingDelay(true);
-    dispatch(fetchUsers());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
+    startLoading();
+    setTimeout(() => {
+      dispatch(fetchUsers({ page: currentPage, size: pageSize }))
+        .unwrap()
+        .finally(() => {
+          stopLoading();
+        });
     }, 1000);
-
-    return () => clearTimeout(timer);
   };
 
-  // Hiển thị badge màu cho status
   const getStatusBadge = (status) => {
     if (!status) return <span>N/A</span>;
 
@@ -196,9 +199,9 @@ const UserManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
-        {/*Table*/}
+        {/* Table */}
         <div className="p-2">
-          {loading || loadingDelay ? (
+          {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
           ) : error ? (
             <ErrorMessage message={error} />
@@ -211,23 +214,39 @@ const UserManagement = () => {
             <TableComponent columns={columns} data={usersWithNames} />
           )}
         </div>
-        {/*Button*/}
+        {/* Pagination */}
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => {
+            dispatch(fetchUsers({ page, size: pageSize }));
+          }}
+          onPageSizeChange={(size) => {
+            dispatch(fetchUsers({ page: 1, size }));
+          }}
+        />
+        {/* Button */}
         <ActionButtons
           loading={loading}
-          loadingDelay={loadingDelay}
+          loadingDelay={isLoadingDelay}
           onReload={handleRefresh}
           onCreate={handleCreateUser}
           createLabel="User"
         />
-        {/*Modal*/}
+        {/* Modal */}
         <UserCreationModal
           key={formKey}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedUser={selectedUser}
-          onSuccess={() => dispatch(fetchUsers())}
-          bloodTypes={bloodTypes} // thêm prop bloodTypes
-          bloodComponents={bloodComponents} // thêm prop bloodComponents
+          onSuccess={() =>
+            dispatch(fetchUsers({ page: currentPage, size: pageSize }))
+          }
+          bloodTypes={bloodTypes}
+          bloodComponents={bloodComponents}
+          userRole={userRole}
+          userStatus={userStatus}
         />
       </div>
     </div>
