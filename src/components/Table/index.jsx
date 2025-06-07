@@ -1,6 +1,6 @@
 const TableComponent = ({ columns, data }) => {
   return (
-    <div className="overflow-x-auto p-2">
+    <div className="overflow-x-hidden p-2">
       <table
         className="w-full text-sm border"
         style={{ tableLayout: "fixed" }}

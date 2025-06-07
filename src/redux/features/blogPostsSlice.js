@@ -1,18 +1,35 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   getRequest,
-  getRequestParams,
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
 } from "@services/api";
 
 // [GET] all blog posts
-export const fetchBlogPosts = createAsyncThunk(
+export const fetchAllBlogPosts = createAsyncThunk(
   "blogPosts/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const res = await getRequest("/api/BlogPosts");
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// [GET] blog posts with search parameters
+export const fetchBlogPosts = createAsyncThunk(
+  "user/fetchAll",
+  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
+    try {
+      const queryString = new URLSearchParams({
+        page: page.toString(),
+        pageSize: size.toString(),
+        ...searchParams,
+      }).toString();
+      const res = await getRequest(`/api/BlogPosts/search?${queryString}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -85,6 +102,10 @@ const blogPostsSlice = createSlice({
     selectedPost: null,
     loading: false,
     error: null,
+    totalCount: 0,
+    totalPages: 0,
+    currentPage: 1,
+    pageSize: 7,
   },
   reducers: {
     clearSelectedPost: (state) => {
@@ -93,6 +114,19 @@ const blogPostsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+      setPagination: (state, action) => {
+          const { totalCount, totalPages, currentPage, pageSize } = action.payload;
+          state.totalCount = totalCount;
+          state.totalPages = totalPages;
+          state.currentPage = currentPage;
+          state.pageSize = pageSize;
+        },
+        setCurrentPage: (state, action) => {
+          state.currentPage = action.payload;
+        },
+        setPageSize: (state, action) => {
+          state.pageSize = action.payload;
+        },
   },
   extraReducers: (builder) => {
     builder
@@ -103,7 +137,11 @@ const blogPostsSlice = createSlice({
       })
       .addCase(fetchBlogPosts.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogList = action.payload;
+        state.blogList = action.payload.posts || [];
+         state.totalCount = action.payload.totalCount;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
+        state.pageSize = action.payload.pageSize;
       })
       .addCase(fetchBlogPosts.rejected, (state, action) => {
         state.loading = false;
@@ -177,5 +215,5 @@ const blogPostsSlice = createSlice({
   },
 });
 
-export const { clearSelectedPost, clearError } = blogPostsSlice.actions;
+export const { clearSelectedPost, clearError, setPagination, setCurrentPage, setPageSize  } = blogPostsSlice.actions;
 export default blogPostsSlice.reducer;

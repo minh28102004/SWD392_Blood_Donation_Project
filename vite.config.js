@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
+  
   resolve: {
     alias: {
       "@components": path.resolve(__dirname, "./src/components"),
@@ -19,6 +20,8 @@ export default defineConfig({
       "@redux": path.resolve(__dirname, "./src/redux"),
       "@services": path.resolve(__dirname, "./src/services"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
+      
     },
+    
   },
 })

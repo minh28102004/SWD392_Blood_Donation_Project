@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,8 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
+  setCurrentPage,
+  setPageSize,
 } from "@redux/features/blogPostsSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
@@ -17,17 +19,42 @@ import Tooltip from "@mui/material/Tooltip";
 import BlogPostModal from "./modal_Blog";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
+import Pagination from "@components/Pagination";
+import { useLoadingDelay } from "@hooks/useLoadingDelay";
+import CollapsibleSearch from "@components/Collapsible_Search";
 
 const BlogPostManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const { blogList, loading, error } = useSelector((state) => state.blogPosts);
+  const { blogList, loading, error, totalCount, currentPage, pageSize } =
+    useSelector((state) => state.blogPosts);
+  const [searchParams, setSearchParams] = useState({
+    id: "",
+    title: "",
+  });
+
   const [selectedPost, setSelectedPost] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
-  const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
-  // Columns tương ứng các field
+  useEffect(() => {
+    const fetchData = async () => {
+      startLoading();
+      try {
+        await dispatch(
+          fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        stopLoading();
+      }
+    };
+
+    fetchData();
+  }, [dispatch, currentPage, pageSize, searchParams]);
+
   const columns = [
     { key: "postId", title: "ID", width: "6%" },
     {
@@ -105,20 +132,6 @@ const BlogPostManagement = () => {
     },
   ];
 
-  useEffect(() => {
-    dispatch(fetchBlogPosts());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setLoadingDelay(true);
-    dispatch(fetchBlogPosts());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [dispatch]);
-
   // [CREATE]
   const handleCreatePost = () => {
     setSelectedPost(null);
@@ -144,7 +157,9 @@ const BlogPostManagement = () => {
         try {
           await dispatch(deleteBlogPost(blog.postId)).unwrap();
           toast.success("Blog post has been deleted!");
-          dispatch(fetchBlogPosts());
+          dispatch(
+            fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
+          );
         } catch (error) {
           toast.error(
             error?.message || "An error occurred while deleting the blog post!"
@@ -155,15 +170,28 @@ const BlogPostManagement = () => {
     });
   };
 
+  // [REFRESH]
   const handleRefresh = () => {
-    setLoadingDelay(true);
-    dispatch(fetchBlogPosts());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
+    startLoading();
+    setTimeout(() => {
+      dispatch(
+        fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
+      )
+        .unwrap()
+        .finally(() => {
+          stopLoading();
+        });
     }, 1000);
-
-    return () => clearTimeout(timer);
   };
+
+  // [SEARCH]
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params);
+    },
+    [dispatch]
+  );
 
   return (
     <div>
@@ -172,8 +200,22 @@ const BlogPostManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
+        {/* Collapsible Search Component */}
+        <CollapsibleSearch
+          searchFields={[
+            { key: "id", type: "text", placeholder: "Search By Id" },
+            { key: "title", type: "text", placeholder: "Search By Title" },
+          ]}
+          onSearch={handleSearch}
+          onClear={() =>
+            setSearchParams({
+              id: "",
+              title: "",
+            })
+          }
+        />
         <div className="p-2">
-          {loading || loadingDelay ? (
+          {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
           ) : error ? (
             <ErrorMessage message={error} />
@@ -186,10 +228,23 @@ const BlogPostManagement = () => {
             <TableComponent columns={columns} data={blogList} />
           )}
         </div>
+        {/* Pagination */}
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => {
+            dispatch(setCurrentPage(page));
+          }}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
         {/*Button*/}
         <ActionButtons
           loading={loading}
-          loadingDelay={loadingDelay}
+          loadingDelay={isLoadingDelay}
           onReload={handleRefresh}
           onCreate={handleCreatePost}
           createLabel="Post"
@@ -200,7 +255,15 @@ const BlogPostManagement = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedPost={selectedPost}
-          onSuccess={() => dispatch(fetchBlogPosts())}
+          onSuccess={() =>
+            dispatch(
+              fetchBlogPosts({
+                page: currentPage,
+                size: pageSize,
+                searchParams,
+              })
+            )
+          }
         />
       </div>
     </div>

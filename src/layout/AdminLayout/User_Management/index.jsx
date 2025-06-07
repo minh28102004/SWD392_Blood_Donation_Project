@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { FaEdit, FaTrash, FaExclamationCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
@@ -7,6 +7,8 @@ import {
   fetchUserRoles,
   fetchUserStatuses,
   deleteUser,
+  setCurrentPage,
+  setPageSize,
 } from "@redux/features/userSlice";
 import {
   fetchBloodComponents,
@@ -22,6 +24,7 @@ import { Modal } from "antd";
 import { toast } from "react-toastify";
 import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
+import CollapsibleSearch from "@components/Collapsible_Search";
 
 const UserManagement = () => {
   const { darkMode } = useOutletContext();
@@ -33,28 +36,27 @@ const UserManagement = () => {
     loading,
     error,
     totalCount,
-    totalPages,
     currentPage,
     pageSize,
   } = useSelector((state) => state.user);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
-
+  const [searchParams, setSearchParams] = useState({
+    name: "",
+    role: "",
+    statusBit: "",
+  });
   const [selectedUser, setSelectedUser] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
-  console.log({
-    totalCount,
-    pageSize,
-    currentPage,
-  });
-
   useEffect(() => {
     const fetchData = async () => {
       startLoading();
       try {
-        await dispatch(fetchUsers({ page: currentPage, size: pageSize }));
+        await dispatch(
+          fetchUsers({ page: currentPage, size: pageSize, searchParams })
+        );
         if (
           !bloodComponents.length &&
           !bloodTypes.length &&
@@ -72,8 +74,9 @@ const UserManagement = () => {
         stopLoading();
       }
     };
+
     fetchData();
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage, pageSize, searchParams]);
 
   const usersWithNames = Array.isArray(userList)
     ? userList.map((user) => ({
@@ -131,18 +134,21 @@ const UserManagement = () => {
     },
   ];
 
+  // [CREATE]
   const handleCreateUser = () => {
     setSelectedUser(null);
     setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
   };
 
+  // [EDIT]
   const handleEdit = (user) => {
     setSelectedUser(user);
     setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
   };
 
+  // [DELETE]
   const handleDelete = async (user) => {
     Modal.confirm({
       title: "Are you sure you want to delete this user?",
@@ -153,7 +159,9 @@ const UserManagement = () => {
         try {
           await dispatch(deleteUser(user.userId)).unwrap();
           toast.success("User has been deleted!");
-          dispatch(fetchUsers({ page: currentPage, size: pageSize }));
+          dispatch(
+            fetchUsers({ page: currentPage, size: pageSize, searchParams })
+          );
         } catch (error) {
           toast.error(
             error?.message || "An error occurred while deleting the user!"
@@ -164,16 +172,26 @@ const UserManagement = () => {
     });
   };
 
+  // [REFRESH]
   const handleRefresh = () => {
     startLoading();
     setTimeout(() => {
-      dispatch(fetchUsers({ page: currentPage, size: pageSize }))
+      dispatch(fetchUsers({ page: currentPage, size: pageSize, searchParams }))
         .unwrap()
         .finally(() => {
           stopLoading();
         });
     }, 1000);
   };
+
+  // [SEARCH]
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params);
+    },
+    [dispatch]
+  );
 
   const getStatusBadge = (status) => {
     if (!status) return <span>N/A</span>;
@@ -192,6 +210,16 @@ const UserManagement = () => {
     );
   };
 
+  const roleOptions = useMemo(
+    () => userRole.map((role) => ({ value: role.id, label: role.name })),
+    [userRole]
+  );
+  const statusOptions = useMemo(
+    () =>
+      userStatus.map((status) => ({ value: status.id, label: status.name })),
+    [userStatus]
+  );
+
   return (
     <div>
       <div
@@ -199,6 +227,32 @@ const UserManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
+        {/* Collapsible Search Component */}
+        <CollapsibleSearch
+          searchFields={[
+            { key: "name", type: "text", placeholder: "Search By full name" },
+            {
+              key: "statusBit",
+              type: "select",
+              placeholder: "Search by status",
+              options: statusOptions,
+            },
+            {
+              key: "role",
+              type: "select",
+              placeholder: "Search by role",
+              options: roleOptions,
+            },
+          ]}
+          onSearch={handleSearch}
+          onClear={() =>
+            setSearchParams({
+              name: "",
+              statusBit: "",
+              role: "",
+            })
+          }
+        />
         {/* Table */}
         <div className="p-2">
           {loading || isLoadingDelay ? (
@@ -220,10 +274,11 @@ const UserManagement = () => {
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={(page) => {
-            dispatch(fetchUsers({ page, size: pageSize }));
+            dispatch(setCurrentPage(page));
           }}
           onPageSizeChange={(size) => {
-            dispatch(fetchUsers({ page: 1, size }));
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
           }}
         />
         {/* Button */}
@@ -236,12 +291,14 @@ const UserManagement = () => {
         />
         {/* Modal */}
         <UserCreationModal
-          key={formKey}
+          key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedUser={selectedUser}
           onSuccess={() =>
-            dispatch(fetchUsers({ page: currentPage, size: pageSize }))
+            dispatch(
+              fetchUsers({ page: currentPage, size: pageSize, searchParams })
+            )
           }
           bloodTypes={bloodTypes}
           bloodComponents={bloodComponents}

@@ -14,6 +14,7 @@ import {
   FileTextOutlined,
 } from "@ant-design/icons";
 import logo from "@assets/logo.png";
+import logo2 from "@assets/logo2.png";
 import { useTheme } from "@components/Theme_Context";
 import Tooltip from "@mui/material/Tooltip";
 
@@ -81,11 +82,14 @@ const DashboardLayout = () => {
         } transition-all duration-500 ease-in-out 
         bg-white dark:bg-gray-800 p-2 shadow-xl overflow-hidden`}
       >
-        <div className="flex items-center justify-between mb-5">
-          {sidebarOpen && (
-            <img src={logo} alt="Logo" className="object-contain" />
+        <div className="flex items-center justify-between mb-2">
+          {sidebarOpen ? (
+            <img src={logo} alt="Logo" className="object-contain " />
+          ) : (
+            <img src={logo2} alt="Logo" className="ml-1 mt-1 object-contain w-10 h-10" />
           )}
         </div>
+        <hr className="border-gray-200 mb-2" />
         <nav>
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
