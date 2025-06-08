@@ -8,12 +8,10 @@ import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
+import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
 
-const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
-  const [formData, setFormData] = useState({
-    content: selectedPost?.content || "",
-    featuredImage: selectedPost?.featuredImage || null,
-  });
+const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
+
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -25,27 +23,15 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
     reset,
   } = useForm({
     defaultValues: {
-      userId: selectedPost?.userId || "",
-      title: selectedPost?.title || "",
-      category: selectedPost?.category || "",
+      inventoryID: selectedInventory?.inventoryID || "",
+      bloodTypes: selectedInventory?.bloodTypes || "",
+      quantity_unit: selectedInventory?.category || "",
     },
   });
 
-  useEffect(() => {
-    const words = formData.content
-      .replace(/<[^>]*>/g, "")
-      .split(/\s+/)
-      .filter(Boolean).length;
-    setWordCount(words);
-    setReadingTime(Math.ceil(words / 200));
-  }, [formData.content]);
+ 
 
   const validateForm = (data) => {
-    const contentLength = formData.content.replace(/<[^>]*>/g, "").length;
-    if (contentLength < 100) {
-      toast.error("Content must be at least 100 characters long");
-      return false;
-    }
     return true;
   };
 
@@ -55,15 +41,15 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
     try {
       await new Promise((res) => setTimeout(res, 2000));
       toast.success(
-        selectedPost
-          ? "Blog post updated successfully!"
-          : "Blog post created successfully!"
+        selectedInventory
+          ? "Inventory updated successfully!"
+          : "Inventory created successfully!"
       );
       reset();
-      setFormData({ content: "", featuredImage: null });
+
       onClose();
     } catch {
-      toast.error("Failed to submit blog post");
+      toast.error("Failed to submit Inventory");
     } finally {
       setLoading(false);
     }
@@ -78,7 +64,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
     ],
   };
 
-  const importantFields = ["userId", "title", "category"];
+  const importantFields = ["IntId", "blood_type_id", "quantity_unit"];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -120,7 +106,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                   as="h2"
                   className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 text-center"
                 >
-                  {selectedPost ? "Edit Blog Post" : "Create New Blog Post"}
+                  {selectedInventory ? "Edit Inventory" : "Create New Inventory"}
                 </Dialog.Title>
                 <hr className="border-gray-100 mb-6" />
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
@@ -129,48 +115,36 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("userId") && (
+                            {importantFields.includes("IntId") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            User ID :
+                            Inventory ID :
                           </>
                         }
-                        name="userId"
-                        placeholder="Enter numeric user ID"
+                        name="IntId"
+                        placeholder="Enter Inventory ID"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "User ID is required",
-                          pattern: {
-                            value: /^\d+$/,
-                            message: "Only numeric user IDs allowed",
-                          },
+                          required: "Inventory ID is required",
                         }}
                       />
 
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("title") && (
+                            {importantFields.includes("blood_type_id") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Title :
+                            Blood Type :
                           </>
                         }
-                        name="title"
-                        placeholder="Enter blog title"
+                        name="blood_type_id"
+                        placeholder="Enter Blood Type"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Title is required",
-                          minLength: {
-                            value: 10,
-                            message: "Min 10 characters",
-                          },
-                          maxLength: {
-                            value: 100,
-                            message: "Max 100 characters",
-                          },
+                          required: "Blood Type is required",
                           pattern: {
                             value: /^[a-zA-Z0-9\s]*$/,
                             message: "No special characters allowed",
@@ -181,62 +155,23 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("category") && (
+                            {importantFields.includes("quantity_unit") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Category :
+                            Quantity :
                           </>
                         }
-                        name="category"
-                        placeholder="Enter category"
+                        name="quantity_unit"
+                        placeholder="Enter Quantity"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Category is required",
+                          required: "Quantity is required",
                         }}
                       />
                     </div>
 
-                    <div className="max-w-full">
-                      <ImageUploadInput
-                        value={formData.featuredImage}
-                        onChange={(file) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            featuredImage: file,
-                          }))
-                        }
-                        error={errors.featuredImage?.message}
-                        label={
-                          <>
-                            <span className="text-red-600 mr-1">*</span>
-                            Featured Image :
-                          </>
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        <span className="text-red-600 mr-1">*</span>
-                        Content :
-                      </label>
-                      <div className="h-[100px] dark:bg-white relative">
-                        <ReactQuill
-                          value={formData.content}
-                          onChange={(val) =>
-                            setFormData((prev) => ({ ...prev, content: val }))
-                          }
-                          modules={modules}
-                          className="rounded-lg h-full bg-transparent"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-gray-500 dark:text-gray-300 pt-6">
-                      <span>Words: {wordCount}</span>
-                      <span className="mx-2">|</span>
-                      <span>Estimated reading time: {readingTime} min</span>
-                    </div>
+                   
 
                     <div className="flex justify-end space-x-4 pt-2">
                       <button
@@ -252,12 +187,12 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                         className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
-                          ? selectedPost
+                          ? selectedInventory
                             ? "Updating..."
                             : "Creating..."
-                          : selectedPost
-                          ? "Update Post"
-                          : "Create Post"}
+                          : selectedInventory
+                          ? "Update Inventory"
+                          : "Create Inventory"}
                       </button>
                     </div>
                   </form>
@@ -271,4 +206,4 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
   );
 };
 
-export default BlogPostModal;
+export default InventoryModal;

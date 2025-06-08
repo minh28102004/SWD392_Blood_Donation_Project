@@ -18,7 +18,7 @@ import RequestModal from "./modal_Request";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { Checkbox } from "@mui/material";
-const inventory = [
+const request = [
   {
     id: 1,
     blood_request_id: "1",
@@ -125,18 +125,18 @@ const BloodRequests = () => {
   // [DELETE]
   const handleDelete = async (blog) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this blog post?",
-      content: "( Note: The blog post will be removed from the list )",
+      title: "Are you sure you want to delete this blood request?",
+      content: "( Note: The Blood request will be removed from the list )",
       okText: "OK",
       cancelText: "Cancel",
       onOk: async () => {
         try {
           await dispatch(deleteBlogPost(blog.postId)).unwrap();
-          toast.success("Blog post has been deleted!");
+          toast.success("Blood request has been deleted!");
           dispatch(fetchBlogPosts());
         } catch (error) {
           toast.error(
-            error?.message || "An error occurred while deleting the blog post!"
+            error?.message || "An error occurred while deleting the blood request!"
           );
         }
       },
@@ -166,13 +166,13 @@ const BloodRequests = () => {
             <LoadingSpinner color="blue" size="8" />
           ) : error ? (
             <ErrorMessage message={error} />
-          ) : inventory.length === 0 ? (
+          ) : request.length === 0 ? (
             <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
               <MdArticle className="text-xl" />
-              <p>No blog posts found.</p>
+              <p>No Blood requests found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={inventory} />
+            <TableComponent columns={columns} data={request} />
           )}
         </div>
         {/*Button*/}

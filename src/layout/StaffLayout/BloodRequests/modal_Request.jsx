@@ -6,14 +6,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes } from "react-icons/fa";
-import { TextInput } from "@components/Form_Input";
+import { TextInput, Checkbox } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
 
 const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
-  const [formData, setFormData] = useState({
-    content: selectedRequest?.content || "",
-    featuredImage: selectedRequest?.featuredImage || null,
-  });
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -31,21 +27,7 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
     },
   });
 
-  useEffect(() => {
-    const words = formData.content
-      .replace(/<[^>]*>/g, "")
-      .split(/\s+/)
-      .filter(Boolean).length;
-    setWordCount(words);
-    setReadingTime(Math.ceil(words / 200));
-  }, [formData.content]);
-
   const validateForm = (data) => {
-    const contentLength = formData.content.replace(/<[^>]*>/g, "").length;
-    if (contentLength < 100) {
-      toast.error("Content must be at least 100 characters long");
-      return false;
-    }
     return true;
   };
 
@@ -60,7 +42,7 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
           : "Request created successfully!"
       );
       reset();
-      setFormData({ content: "", featuredImage: null });
+
       onClose();
     } catch {
       toast.error("Failed to submit request");
@@ -78,7 +60,7 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
     ],
   };
 
-  const importantFields = ["userId", "title", "category"];
+  const importantFields = ["userId", "BloodId", "bloodCompoID","Quantity"];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -153,26 +135,18 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("title") && (
+                            {importantFields.includes("BloodId") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Blood Id :
                           </>
                         }
-                        name="Blood Id"
+                        name="BloodId"
                         placeholder="Enter Blood Id"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Title is required",
-                          minLength: {
-                            value: 10,
-                            message: "Min 10 characters",
-                          },
-                          maxLength: {
-                            value: 100,
-                            message: "Max 100 characters",
-                          },
+                          required: "Blood Id is required",
                           pattern: {
                             value: /^[a-zA-Z0-9\s]*$/,
                             message: "No special characters allowed",
@@ -183,13 +157,13 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("category") && (
+                            {importantFields.includes("bloodCompoID") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Blood Component ID :
                           </>
                         }
-                        name="category"
+                        name="bloodCompoID"
                         placeholder="Enter Blood Component ID"
                         register={register}
                         errors={errors}
@@ -197,8 +171,76 @@ const RequestModal = ({ isOpen, onClose, selectedRequest }) => {
                           required: "Blood Component ID is required",
                         }}
                       />
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("Quantity") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Quantity:
+                          </>
+                        }
+                        name="Quantity"
+                        placeholder="Enter blood quantity"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Quantity is required",
+                        }}
+                      />
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("status") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Status:
+                          </>
+                        }
+                        name="status"
+                        placeholder="Enter status"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Status is required",
+                        }}
+                      />
+
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("location") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Location:
+                          </>
+                        }
+                        name="location"
+                        placeholder="Enter location"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Location is required",
+                        }}
+                      />
+                      <Checkbox
+                        label={
+                          <>
+                            {importantFields.includes("Emergency") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Emergency:
+                          </>
+                        }
+                        name="emergency"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Emergency is required",
+                        }}
+                      />
                     </div>
-                        
+
                     <div className="flex justify-end space-x-4 pt-2">
                       <button
                         type="button"

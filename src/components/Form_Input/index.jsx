@@ -40,6 +40,33 @@ export function TextInput({
     </label>
   );
 }
+export function Checkbox({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+}) {
+  return (
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className="flex items-center gap-2 mt-1">
+        <input
+          type="checkbox"
+          {...register(name, validation)}
+          className={`h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 ${
+            errors[name] ? "border-red-500 ring-red-500" : ""
+          }`}
+        />
+        <span>{label}</span>
+      </div>
+      {errors[name] && (
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
+      )}
+    </label>
+  );
+}
 
 export function PasswordInput({
   label,
