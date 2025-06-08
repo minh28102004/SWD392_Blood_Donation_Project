@@ -6,13 +6,18 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] all users
+// [GET] all users with search parameters
 export const fetchUsers = createAsyncThunk(
   "user/fetchAll",
-  async ({ page = 1, size = 10 }, { rejectWithValue }) => {
+  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
     try {
-      const res = await getRequest(`/api/Users?page=${page}&pageSize=${size}`);
-      return res.data; 
+      const queryString = new URLSearchParams({
+        page: page.toString(),
+        pageSize: size.toString(),
+        ...searchParams,
+      }).toString();
+      const res = await getRequest(`/api/Users/search?${queryString}`);
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -48,7 +53,6 @@ export const createUser = createAsyncThunk(
   }
 );
 
-
 // [PUT] update user
 export const updateUser = createAsyncThunk(
   "user/update",
@@ -64,7 +68,6 @@ export const updateUser = createAsyncThunk(
     }
   }
 );
-
 
 // [DELETE] delete user
 export const deleteUser = createAsyncThunk(
@@ -87,14 +90,12 @@ export const fetchUserRoles = createAsyncThunk(
       const res = await getRequest("/api/ReferenceData/userroles");
       return res.data;
     } catch (err) {
-    
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
 
-
-// [ENUM] status (e.g: active & inactive)
+// [ENUM] Status (e.g: active & inactive)
 export const fetchUserStatuses = createAsyncThunk(
   "referenceData/fetchUserStatuses",
   async (_, { rejectWithValue }) => {
@@ -119,7 +120,7 @@ const userSlice = createSlice({
     totalCount: 0,
     totalPages: 0,
     currentPage: 1,
-    pageSize: 10,
+    pageSize: 8,
   },
   reducers: {
     clearSelectedUser: (state) => {
@@ -128,14 +129,20 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-     setPagination: (state, action) => {
+    setPagination: (state, action) => {
       const { totalCount, totalPages, currentPage, pageSize } = action.payload;
       state.totalCount = totalCount;
       state.totalPages = totalPages;
       state.currentPage = currentPage;
       state.pageSize = pageSize;
     },
-  }, 
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setPageSize: (state, action) => {
+      state.pageSize = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // --- FETCH ALL USERS ---
@@ -143,7 +150,7 @@ const userSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-     .addCase(fetchUsers.fulfilled, (state, action) => {
+      .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.userList = action.payload.users || [];
         state.totalCount = action.payload.totalCount;
@@ -168,35 +175,32 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
       // --- FETCH USER ROLES ---
-    .addCase(fetchUserRoles.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(fetchUserRoles.fulfilled, (state, action) => {
-  state.loading = false;
-  state.userRole = action.payload;
-})
-    .addCase(fetchUserRoles.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    })
-
-    // --- FETCH USER STATUSES ---
-    .addCase(fetchUserStatuses.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    })
-    .addCase(fetchUserStatuses.fulfilled, (state, action) => {
-      state.loading = false;
-      state.userStatus = action.payload;
-    })
-    .addCase(fetchUserStatuses.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    })
-
+      .addCase(fetchUserRoles.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserRoles.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userRole = action.payload;
+      })
+      .addCase(fetchUserRoles.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // --- FETCH USER STATUSES ---
+      .addCase(fetchUserStatuses.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserStatuses.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userStatus = action.payload;
+      })
+      .addCase(fetchUserStatuses.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // --- CREATE USER ---
       .addCase(createUser.pending, (state) => {
         state.loading = true;
@@ -210,7 +214,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
       // --- UPDATE USER ---
       .addCase(updateUser.pending, (state) => {
         state.loading = true;
@@ -225,7 +228,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
       // --- DELETE USER ---
       .addCase(deleteUser.pending, (state) => {
         state.loading = true;
@@ -242,5 +244,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearSelectedUser, clearError, setPagination  } = userSlice.actions;
+export const { clearSelectedUser, clearError, setPagination, setCurrentPage, setPageSize } = userSlice.actions;
 export default userSlice.reducer;

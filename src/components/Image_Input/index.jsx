@@ -1,16 +1,30 @@
 import { useDropzone } from "react-dropzone";
 import { FiUpload, FiX } from "react-icons/fi";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 const ImageUploadInput = ({
-  value,
+  value,   // This will be the image URL or File object
   onChange,
   error,
   label = "Upload Image",
 }) => {
-  const [preview, setPreview] = useState(
-    value ? URL.createObjectURL(value) : null
-  );
+  const [preview, setPreview] = useState(null);
+
+  // Handle preview when the value changes
+  useEffect(() => {
+    if (value) {
+      // If the value is already a URL (string), use it directly for the preview
+      if (typeof value === "string") {
+        setPreview(value); // This is the case when the value is an image URL
+      }
+      // If the value is a File object, create an object URL for preview
+      else if (value instanceof File) {
+        setPreview(URL.createObjectURL(value));
+      }
+    } else {
+      setPreview(null); 
+    }
+  }, [value]);
 
   const onDrop = useCallback(
     (acceptedFiles) => {
@@ -27,8 +41,7 @@ const ImageUploadInput = ({
         return;
       }
 
-      onChange(file);
-      setPreview(URL.createObjectURL(file));
+      onChange(file); 
     },
     [onChange]
   );
@@ -39,9 +52,15 @@ const ImageUploadInput = ({
     maxFiles: 1,
   });
 
+  const handleRemove = (e) => {
+    e.stopPropagation();
+    onChange(null); l
+    setPreview(null); 
+  };
+
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" >
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
         {label}
       </label>
       <div
@@ -58,11 +77,7 @@ const ImageUploadInput = ({
             />
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onChange(null);
-                setPreview(null);
-              }}
+              onClick={handleRemove}
               className="absolute top-0 right-0 p-1 bg-blue-500 text-white hover:bg-blue-700 rounded-full"
             >
               <FiX />

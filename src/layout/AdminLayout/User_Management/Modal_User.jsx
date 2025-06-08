@@ -158,28 +158,27 @@ const UserCreationModal = ({
 
     try {
       if (selectedUser) {
-        // Update user
+        // [PUT]
         const resultAction = await dispatch(
           updateUser({ id: selectedUser.userId, formData })
         );
         if (updateUser.fulfilled.match(resultAction)) {
           toast.success("User updated successfully!");
-          onSuccess && onSuccess();
-          onClose();
+          onSuccess();
         } else {
           toast.error("Update failed: " + resultAction.payload);
         }
       } else {
-        // Create user
+        // [POST]
         const resultAction = await dispatch(createUser(formData));
         if (createUser.fulfilled.match(resultAction)) {
           toast.success("User created successfully!");
-          onSuccess && onSuccess();
-          onClose();
+          onSuccess();
         } else {
           toast.error("Create failed: " + resultAction.payload);
         }
       }
+      onClose();
     } catch (error) {
       toast.error("Unexpected error: " + error.message);
     } finally {

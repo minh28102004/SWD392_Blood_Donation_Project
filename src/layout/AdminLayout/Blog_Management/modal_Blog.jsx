@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useRef } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { useForm } from "react-hook-form";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -8,11 +8,14 @@ import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
+import { useDispatch } from "react-redux";
+import { createBlogPost, updateBlogPost } from "@redux/features/blogPostsSlice"; // Import actions
 
-const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
+const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     content: selectedPost?.content || "",
-    featuredImage: selectedPost?.featuredImage || null,
+    featuredImage: selectedPost?.imgPath || null,
   });
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
@@ -40,29 +43,49 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
     setReadingTime(Math.ceil(words / 200));
   }, [formData.content]);
 
-  const validateForm = (data) => {
-    const contentLength = formData.content.replace(/<[^>]*>/g, "").length;
-    if (contentLength < 100) {
-      toast.error("Content must be at least 100 characters long");
-      return false;
-    }
-    return true;
+  const removeHtmlTags = (str) => {
+    return str.replace(/(<([^>]+)>)/gi, "");
   };
+  const contentWithoutHtml = removeHtmlTags(formData.content);
 
   const onSubmit = async (data) => {
-    if (!validateForm(data)) return;
+    const { title, category, userId } = data;
+    const formDataToSend = new FormData();
+    formDataToSend.append("UserId", userId);
+    formDataToSend.append("Title", title);
+    formDataToSend.append("Content", contentWithoutHtml);
+    formDataToSend.append("Category", category);
+    if (formData.featuredImage) {
+      formDataToSend.append("Img", formData.featuredImage);
+    }
+
     setLoading(true);
     try {
-      await new Promise((res) => setTimeout(res, 2000));
-      toast.success(
-        selectedPost
-          ? "Blog post updated successfully!"
-          : "Blog post created successfully!"
-      );
+      if (selectedPost) {
+        const resultAction = await dispatch(
+          updateBlogPost({ id: selectedPost.post_id, formData: formDataToSend })
+        );
+        if (updateBlogPost.fulfilled.match(resultAction)) {
+          toast.success("Blog post updated successfully!");
+          onSuccess();
+        } else {
+          toast.error("Update failed: " + resultAction.payload);
+        }
+      } else {
+        const resultAction = await dispatch(
+          createBlogPost({ formData: formDataToSend })
+        );
+        if (createBlogPost.fulfilled.match(resultAction)) {
+          toast.success("Blog post created successfully!");
+          onSuccess();
+        } else {
+          toast.error("Create failed: " + resultAction.payload);
+        }
+      }
       reset();
       setFormData({ content: "", featuredImage: null });
       onClose();
-    } catch {
+    } catch (error) {
       toast.error("Failed to submit blog post");
     } finally {
       setLoading(false);
@@ -106,10 +129,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
-              <Dialog.Panel
-                className={`relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all 
-               py-6 pl-6 pr-2 }`}
-              >
+              <Dialog.Panel className="relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all py-6 pl-6 pr-2">
                 <button
                   onClick={onClose}
                   className="absolute right-4 top-4 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
@@ -161,21 +181,6 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
                         placeholder="Enter blog title"
                         register={register}
                         errors={errors}
-                        validation={{
-                          required: "Title is required",
-                          minLength: {
-                            value: 10,
-                            message: "Min 10 characters",
-                          },
-                          maxLength: {
-                            value: 100,
-                            message: "Max 100 characters",
-                          },
-                          pattern: {
-                            value: /^[a-zA-Z0-9\s]*$/,
-                            message: "No special characters allowed",
-                          },
-                        }}
                       />
 
                       <TextInput
@@ -199,7 +204,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost }) => {
 
                     <div className="max-w-full">
                       <ImageUploadInput
-                        value={formData.featuredImage}
+                        value={selectedPost?.imgPath || formData.featuredImage}
                         onChange={(file) =>
                           setFormData((prev) => ({
                             ...prev,
