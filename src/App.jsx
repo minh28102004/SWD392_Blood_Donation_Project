@@ -20,7 +20,7 @@ import StaffLayout from "@layout/StaffLayout/Dashboard";
 import BloodRequests from "@layout/StaffLayout/BloodRequests";
 import BloodInventory from "@layout/StaffLayout/BloodInventory";
 import UserProfile from "@pages/User_Profile";
-import UserHistory from "@pages/User_Request_History";
+import UserHistory from "@pages/User_History/userHistory";
 
 function AppRoutes() {
   return (

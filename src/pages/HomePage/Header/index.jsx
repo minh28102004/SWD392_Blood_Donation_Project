@@ -86,7 +86,7 @@ const Header = () => {
 
   return (
     <header className="fixed w-full bg-white dark:bg-gray-800 shadow-sm z-50 transition-all duration-300 ease-in-out">
-      <nav className="container mx-auto shadow-lg px-6 py-1">
+      <nav className="container max-w-none shadow-lg px-6 py-1">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
@@ -185,7 +185,6 @@ const Header = () => {
                           item.isDanger
                             ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
                             : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
-
                         }`}
                       >
                         {item.icon && item.icon}
