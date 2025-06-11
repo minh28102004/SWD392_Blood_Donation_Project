@@ -8,6 +8,7 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
+  deleteBloodRequest,
 } from "@redux/features/blogPostsSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
@@ -41,7 +42,7 @@ const request = [
 const BloodRequests = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [selectedRquest, setSelectedRequest] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -71,20 +72,20 @@ const BloodRequests = () => {
       width: "12%",
       render: (_, currentRow) => (
         <div className="flex justify-center gap-2">
-          <Tooltip title="Edit post">
+          <Tooltip title="Edit request">
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
-              aria-label="Edit post"
+              aria-label="Edit request"
             >
               <FaEdit size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="Delete post">
+          <Tooltip title="Delete request">
             <button
               className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
               onClick={() => handleDelete(currentRow)}
-              aria-label="Delete post"
+              aria-label="Delete request"
             >
               <FaTrash size={20} />
             </button>
@@ -110,14 +111,14 @@ const BloodRequests = () => {
 
   // [CREATE]
   const handleCreatePost = () => {
-    setSelectedPost(null);
+    setSelectedRequest(null);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [EDIT]
-  const handleEdit = (post) => {
-    setSelectedPost(post);
+  const handleEdit = (request) => {
+    setSelectedRequest(request);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
@@ -131,7 +132,7 @@ const BloodRequests = () => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          await dispatch(deleteBlogPost(blog.postId)).unwrap();
+          await dispatch(deleteBloodRequest(request.id)).unwrap();
           toast.success("Blood request has been deleted!");
           dispatch(fetchBlogPosts());
         } catch (error) {
@@ -188,7 +189,7 @@ const BloodRequests = () => {
           key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          selectedPost={selectedPost}
+          selectedRquest={selectedRquest}
           onSuccess={() => dispatch(fetchBlogPosts())}
         />
       </div>
