@@ -6,13 +6,13 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] All Donation Requests 
+// [GET] All Donation Requests
 export const fetchAllDonationRequests = createAsyncThunk(
   "donationRequests/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const res = await getRequest("/api/DonationRequests");
-      
+
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -30,7 +30,9 @@ export const fetchDonationRequests = createAsyncThunk(
         pageSize: size.toString(),
       }).toString();
 
-      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
+      const res = await getRequest(
+        `/api/DonationRequests/search?${queryString}`
+      );
       return res.data; // { data, totalCount, totalPages, ... }
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -130,7 +132,7 @@ const bloodDonationSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDonationRequests.fulfilled, (state, action) => {
-        const payload = action.payload ;
+        const payload = action.payload;
         state.loading = false;
         state.donationList = payload.requests || [];
         state.totalCount = payload.totalCount || 0;
@@ -185,7 +187,9 @@ const bloodDonationSlice = createSlice({
         if (index !== -1) {
           state.donationList[index] = updated;
         }
-        if (state.selectedRequest?.donateRequestId === updated.donateRequestId) {
+        if (
+          state.selectedRequest?.donateRequestId === updated.donateRequestId
+        ) {
           state.selectedRequest = updated;
         }
       })
@@ -215,11 +219,7 @@ const bloodDonationSlice = createSlice({
   },
 });
 
-export const {
-  clearSelectedRequest,
-  clearError,
-  setCurrentPage,
-  setPageSize,
-} = bloodDonationSlice.actions;
+export const { clearSelectedRequest, clearError, setCurrentPage, setPageSize } =
+  bloodDonationSlice.actions;
 
 export default bloodDonationSlice.reducer;

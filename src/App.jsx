@@ -5,7 +5,6 @@ import endPoint from "./routers/router";
 import ErrorBoundary from "@components/Error_Boundary";
 import { PersistGate } from "redux-persist/integration/react";
 import ProtectedRoute from "@services/ProtectedRoute";
-import { ROLES } from "@redux/features/authSlice";
 // Pages
 import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";

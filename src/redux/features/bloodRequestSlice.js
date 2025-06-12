@@ -16,7 +16,7 @@ export const fetchBloodRequests = createAsyncThunk(
         pageSize: size.toString(),
         ...searchParams,
       }).toString();
-      const res = await getRequest(`/api/BloodRequests/search?${queryString}`);     
+      const res = await getRequest(`/api/BloodRequests/search?${queryString}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -30,7 +30,7 @@ export const fetchBloodRequestById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await getRequest(`/api/BloodRequests/${id}`);
-     return res.data.data;
+      return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -117,7 +117,7 @@ const bloodRequestSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-     // --- FETCH ALL BLOOD REQUESTS ---
+      // --- FETCH ALL BLOOD REQUESTS ---
       .addCase(fetchBloodRequests.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -125,7 +125,7 @@ const bloodRequestSlice = createSlice({
       .addCase(fetchBloodRequests.fulfilled, (state, action) => {
         state.loading = false;
         state.bloodRequestList = action.payload.requests || [];
-        console.log("data: ",state.bloodRequestList)
+        console.log("data: ", state.bloodRequestList);
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
         state.currentPage = action.payload.currentPage;
@@ -135,7 +135,7 @@ const bloodRequestSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-        // --- FETCH BLOOD REQUESTS BY ID---
+      // --- FETCH BLOOD REQUESTS BY ID---
       .addCase(fetchBloodRequestById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -148,7 +148,7 @@ const bloodRequestSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-       // --- CREATE BLOOD REQUESTS ---
+      // --- CREATE BLOOD REQUESTS ---
       .addCase(createBloodRequest.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -168,7 +168,9 @@ const bloodRequestSlice = createSlice({
       })
       .addCase(updateBloodRequest.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.bloodRequestList.findIndex((r) => r.id === action.payload.id);
+        const index = state.bloodRequestList.findIndex(
+          (r) => r.id === action.payload.id
+        );
         if (index !== -1) state.bloodRequestList[index] = action.payload;
       })
       .addCase(updateBloodRequest.rejected, (state, action) => {

@@ -43,7 +43,7 @@ export const fetchBlogPostById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await getRequest(`/api/BlogPosts/${id}`);
-     return res.data.data;
+      return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -94,18 +94,7 @@ export const deleteBlogPost = createAsyncThunk(
     }
   }
 );
-// [DELETE] delete blood request by id
-export const deleteBloodRequest = createAsyncThunk(
-  "bloodRequest/delete",
-  async (id, { rejectWithValue }) => {
-    try {
-      const res = await deleteRequest({ url: `/api/BloodRequest/${id}` });
-      return res;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
+
 const blogPostsSlice = createSlice({
   name: "blogPosts",
   initialState: {
@@ -125,19 +114,19 @@ const blogPostsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-      setPagination: (state, action) => {
-          const { totalCount, totalPages, currentPage, pageSize } = action.payload;
-          state.totalCount = totalCount;
-          state.totalPages = totalPages;
-          state.currentPage = currentPage;
-          state.pageSize = pageSize;
-        },
-        setCurrentPage: (state, action) => {
-          state.currentPage = action.payload;
-        },
-        setPageSize: (state, action) => {
-          state.pageSize = action.payload;
-        },
+    setPagination: (state, action) => {
+      const { totalCount, totalPages, currentPage, pageSize } = action.payload;
+      state.totalCount = totalCount;
+      state.totalPages = totalPages;
+      state.currentPage = currentPage;
+      state.pageSize = pageSize;
+    },
+    setCurrentPage: (state, action) => {
+      state.currentPage = action.payload;
+    },
+    setPageSize: (state, action) => {
+      state.pageSize = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -149,7 +138,7 @@ const blogPostsSlice = createSlice({
       .addCase(fetchBlogPosts.fulfilled, (state, action) => {
         state.loading = false;
         state.blogList = action.payload.posts || [];
-         state.totalCount = action.payload.totalCount;
+        state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
         state.currentPage = action.payload.currentPage;
         state.pageSize = action.payload.pageSize;
@@ -194,7 +183,9 @@ const blogPostsSlice = createSlice({
       })
       .addCase(updateBlogPost.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.blogList.findIndex((post) => post.postId === action.payload.postId);
+        const index = state.blogList.findIndex(
+          (post) => post.postId === action.payload.postId
+        );
         if (index !== -1) {
           state.blogList[index] = action.payload;
         }
@@ -214,7 +205,9 @@ const blogPostsSlice = createSlice({
       })
       .addCase(deleteBlogPost.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogList = state.blogList.filter((post) => post.postId !== action.meta.arg);
+        state.blogList = state.blogList.filter(
+          (post) => post.postId !== action.meta.arg
+        );
         if (state.selectedPost?.postId === action.meta.arg) {
           state.selectedPost = null;
         }
@@ -226,5 +219,11 @@ const blogPostsSlice = createSlice({
   },
 });
 
-export const { clearSelectedPost, clearError, setPagination, setCurrentPage, setPageSize  } = blogPostsSlice.actions;
+export const {
+  clearSelectedPost,
+  clearError,
+  setPagination,
+  setCurrentPage,
+  setPageSize,
+} = blogPostsSlice.actions;
 export default blogPostsSlice.reducer;

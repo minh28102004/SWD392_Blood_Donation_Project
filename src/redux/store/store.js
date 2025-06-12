@@ -14,9 +14,7 @@ import storage from "redux-persist/lib/storage";
 import userReducer from "../features/userSlice";
 import blogPostsReducer from "../features/blogPostsSlice";
 import bloodReducer from "../features/bloodSlice";
-<<<<<<< HEAD
 import bloodInventoryReducer from "../features/bloodInvSlice";
-=======
 import bloodDonation from "../features/bloodDonationSlice";
 import bloodRequestReducer from "../features/bloodRequestSlice";
 import authReducer from "../features/authSlice";
@@ -25,14 +23,12 @@ import authReducer from "../features/authSlice";
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth"], 
+  whitelist: ["auth"],
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 
 // Tạo store với middleware xử lý cảnh báo non-serializable
->>>>>>> 4d236ef065ed7a29b5bae58c8a0e6e69574d211c
-
 export const store = configureStore({
   reducer: {
     user: userReducer,
@@ -40,6 +36,7 @@ export const store = configureStore({
     blood: bloodReducer,
     donationRequests: bloodDonation,
     bloodRequest: bloodRequestReducer,
+    bloodInventory: bloodInventoryReducer,
     auth: persistedAuthReducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -53,10 +50,3 @@ export const store = configureStore({
 
 // Khởi tạo persistor
 export const persistor = persistStore(store);
-<<<<<<< HEAD
-    bloodInventory: bloodInventoryReducer,
-=======
-    donationRequests: bloodDonation
->>>>>>> 4d236ef065ed7a29b5bae58c8a0e6e69574d211c
-  },
-});

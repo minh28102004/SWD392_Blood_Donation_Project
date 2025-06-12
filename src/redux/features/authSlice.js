@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginAPI, registerAPI } from "@services/authAPI";
-import { persistor } from "@redux/store/store"; 
+import { persistor } from "@redux/store/store";
 
 // [ROLES]
 const ROLES = {
@@ -65,7 +65,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.token = action.payload.token;
-        state.role = action.payload.role; 
+        state.role = action.payload.role;
         localStorage.setItem("accessToken", action.payload.token);
         localStorage.setItem("user", JSON.stringify(action.payload));
       })
@@ -77,7 +77,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.token = action.payload.token;
-        state.role = action.payload.role; 
+        state.role = action.payload.role;
         localStorage.setItem("accessToken", action.payload.token);
         localStorage.setItem("user", JSON.stringify(action.payload));
       });

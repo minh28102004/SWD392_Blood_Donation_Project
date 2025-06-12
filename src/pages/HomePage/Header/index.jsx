@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   FiLogOut,
-  FiSettings,
   FiLogIn,
   FiUserPlus,
   FiChevronDown,
@@ -73,12 +72,11 @@ const Header = () => {
     },
   ];
 
-  
   useEffect(() => {
     if (!user) {
-      setLoadingLogout(false); 
+      setLoadingLogout(false);
     }
-  }, [user]); 
+  }, [user]);
 
   return (
     <header className="fixed w-full bg-white dark:bg-gray-800 shadow-sm z-50 transition-all duration-300 ease-in-out">
