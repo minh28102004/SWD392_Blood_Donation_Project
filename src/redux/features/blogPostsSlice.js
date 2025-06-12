@@ -94,7 +94,18 @@ export const deleteBlogPost = createAsyncThunk(
     }
   }
 );
-
+// [DELETE] delete blood request by id
+export const deleteBloodRequest = createAsyncThunk(
+  "bloodRequest/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await deleteRequest({ url: `/api/BloodRequest/${id}` });
+      return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 const blogPostsSlice = createSlice({
   name: "blogPosts",
   initialState: {

@@ -4,11 +4,11 @@ import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
-  fetchBlogPosts,
-  createBlogPost,
-  updateBlogPost,
-  deleteBlogPost,
-} from "@redux/features/blogPostsSlice";
+  fetchBloodInventories,
+  createBloodInventory,
+  updateBloodInventory,
+  deleteBloodInventory,
+} from "@redux/features/bloodInvSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -18,73 +18,74 @@ import InventoryModal from "./modal_Inventory";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { Checkbox } from "@mui/material";
-const inventory = [
-  {
-    IntId: 1,
-    blood_request_id: "1",
-    blood_type_id: "A",
-    last_update: "12/2/2025",
-    quantity_unit: 300,
-    location: "HCM City",
-  },
-  {
-    IntId: 2,
-    blood_request_id: "2",
-    blood_type_id: "B",
-    last_update: "12/3/2025",
-    quantity_unit: 400,
-    location: "HaNoi",
-  },
-];
-const BloodRequests = () => {
+import { useLoadingDelay } from "@hooks/useLoadingDelay";
+const BloodInventoryManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const [selectedRequest, setselectedRequest] = useState(null);
+  const {  bloodList, loading, error, totalCount, currentPage, pageSize } =
+    useSelector((state) => state.bloodInventory);
+  const [searchParams, setSearchParams] = useState({
+    inventoryId: "",
+    bloodComponentId: "",
+    bloodTypeId: "",
+  });
+
+
+
+  const [selectedInventory, setSelectedInventory] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
-  const [loadingDelay, setLoadingDelay] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const error = undefined;
+ const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
   // Columns tương ứng các field
   const columns = [
-    { key: "IntId", title: "Inventory ID", width: "20%" },
-    { key: "blood_type_id", title: "Blood Type", width: "20%" },
-    { key: "quantity_unit", title: "Quantity Unit", width: "20%" },
-    { key: "last_update", title: "Last Updated", width: "20%" },
-    { key: "location", title: "Location", width: "20%" },
+    { key: "inventoryId", title: "Inventory ID", width: "20%" },
+    { key: "bloodTypeId", title: "Blood Type", width: "20%" },
+    { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
+    { key: "bloodComponentId", title: "Blood Component", width: "20%" },
+    { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
+    { key: "quantity", title: "Quantity", width: "20%" },
+    { key: "unit", title: "unit", width: "20%" },
+    { key: "lastUpdated", title: "Last Updated", width: "20%" },
+    { key: "inventoryLocation", title: "Location", width: "20%" },
   ];
 
-  useEffect(() => {
-    dispatch(fetchBlogPosts());
-  }, [dispatch]);
+ useEffect(() => {
+     const fetchData = async () => {
+       startLoading();
+       try {
+         await dispatch(
+           fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
+         );
+       } catch (error) {
+         console.error("Error fetching data:", error);
+       } finally {
+         stopLoading();
+       }
+     };
+ 
+     fetchData();
+   }, [dispatch, currentPage, pageSize, searchParams]);
+ 
 
-  useEffect(() => {
-    setLoadingDelay(true);
-    dispatch(fetchBlogPosts());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
-    }, 1000);
 
-    return () => clearTimeout(timer);
-  }, [dispatch]);
 
   // [CREATE]
   const handleCreatePost = () => {
-    setselectedRequest(null);
+    setSelectedInventory(null);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [EDIT]
   const handleEdit = (post) => {
-    setselectedRequest(post);
+    setSelectedInventory(post);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [DELETE]
-  const handleDelete = async (blog) => {
+  const handleDelete = async (inventory) => {
     Modal.confirm({
       title: "Are you sure you want to delete this blood inventory?",
       content: "( Note: The blood inventory will be removed from the list )",
@@ -92,9 +93,9 @@ const BloodRequests = () => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          await dispatch(deleteBlogPost(blog.postId)).unwrap();
+          await dispatch(deleteBloodInventory(inventory.inventoryId)).unwrap();
           toast.success("Blood inventory has been deleted!");
-          dispatch(fetchBlogPosts());
+          dispatch(fetchBloodInventories());
         } catch (error) {
           toast.error(
             error?.message ||
@@ -106,16 +107,18 @@ const BloodRequests = () => {
     });
   };
 
-  const handleRefresh = () => {
-    setLoadingDelay(true);
-    dispatch(fetchBlogPosts());
-    const timer = setTimeout(() => {
-      setLoadingDelay(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  };
-
+ const handleRefresh = () => {
+     startLoading();
+     setTimeout(() => {
+       dispatch(
+         fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
+       )
+         .unwrap()
+         .finally(() => {
+           stopLoading();
+         });
+     }, 1000);
+   };
   return (
     <div>
       <div
@@ -124,38 +127,38 @@ const BloodRequests = () => {
         }`}
       >
         <div className="p-2">
-          {loading || loadingDelay ? (
+          {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
           ) : error ? (
             <ErrorMessage message={error} />
-          ) : inventory.length === 0 ? (
+          ) : bloodList.length === 0 ? (
             <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
               <MdArticle className="text-xl" />
-              <p>No blood inventorys found.</p>
+              <p>No blood inventories found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={inventory} />
+            <TableComponent columns={columns} data={bloodList} />
           )}
         </div>
         {/*Button*/}
         <ActionButtons
           loading={loading}
-          loadingDelay={loadingDelay}
+          loadingDelay={isLoadingDelay}
           onReload={handleRefresh}
           onCreate={handleCreatePost}
-          createLabel="Post"
+          createLabel="Inventory"
         />
         {/*Modal*/}
         <InventoryModal
           key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          selectedRequest={selectedRequest}
-          onSuccess={() => dispatch(fetchBlogPosts())}
+          selectedInventory={selectedInventory}
+          onSuccess={() => dispatch(fetchBloodInventories())}
         />
       </div>
     </div>
   );
 };
 
-export default BloodRequests;
+export default BloodInventoryManagement;
