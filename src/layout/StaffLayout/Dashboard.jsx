@@ -42,6 +42,11 @@ const DashboardLayout = () => {
       icon: <MdInventory />,
       path: "/staffLayout/BloodInventory",
     },
+       {
+      name: "Blood donation",
+      icon: <MdInventory />,
+      path: "/staffLayout/BloodDonation",
+    },
   ];
 
   const toggleMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
