@@ -23,7 +23,7 @@ const AuthPage = () => {
   };
 
   useEffect(() => {
-    AOS.init({ duration: 1000, once: true }); 
+    AOS.init({ duration: 700, once: true }); 
   }, []);
 
   const handleToHomePage = () => {

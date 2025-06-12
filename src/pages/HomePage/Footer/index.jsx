@@ -128,7 +128,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom line */}
-        <div className="mt-7 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
+        <div className="mt-7 border-t border-gray-700 pt-6 text-center text-sm text-gray-500 hover:text-yellow-500">
           © 2025 BloodLife. All rights reserved.
         </div>
       </div>

@@ -41,7 +41,7 @@ const RequestHistory = () => {
     UrgencyLevel: "",
     Status: "",
   });
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedBR, setSelectedBR] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
@@ -117,7 +117,6 @@ const RequestHistory = () => {
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
-              aria-label="Edit user"
             >
               <FaEdit size={20} />
             </button>
@@ -126,7 +125,6 @@ const RequestHistory = () => {
             <button
               className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500 transform transition-transform hover:scale-110"
               onClick={() => handleView(currentRow)}
-              aria-label="View request"
             >
               <FaEye size={20} />
             </button>
@@ -137,8 +135,8 @@ const RequestHistory = () => {
   ];
 
   // [EDIT]
-  const handleEdit = (user) => {
-    setSelectedUser(user);
+  const handleEdit = (value) => {
+    setSelectedBR(value);
     setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
   };
@@ -147,7 +145,9 @@ const RequestHistory = () => {
   const handleRefresh = () => {
     startLoading();
     setTimeout(() => {
-      dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }))
+      dispatch(
+        fetchBloodRequests({ page: currentPage, size: pageSize, searchParams })
+      )
         .unwrap()
         .finally(() => {
           stopLoading();

@@ -6,7 +6,7 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] All Donation Requests (không phân trang)
+// [GET] All Donation Requests 
 export const fetchAllDonationRequests = createAsyncThunk(
   "donationRequests/fetchAll",
   async (_, { rejectWithValue }) => {
@@ -31,7 +31,6 @@ export const fetchDonationRequests = createAsyncThunk(
       }).toString();
 
       const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
-            console.log("res: ",res.data)
       return res.data; // { data, totalCount, totalPages, ... }
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
