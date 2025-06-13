@@ -125,7 +125,6 @@ const bloodRequestSlice = createSlice({
       .addCase(fetchBloodRequests.fulfilled, (state, action) => {
         state.loading = false;
         state.bloodRequestList = action.payload.requests || [];
-        console.log("data: ", state.bloodRequestList);
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
         state.currentPage = action.payload.currentPage;

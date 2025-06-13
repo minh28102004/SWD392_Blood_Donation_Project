@@ -26,7 +26,7 @@ import CollapsibleSearch from "@components/Collapsible_Search";
 const DonationHistory = () => {
   const dispatch = useDispatch();
   const { donationList, loading, error, totalCount, currentPage, pageSize } =
-    useSelector((state) => state.bloodRequest);
+    useSelector((state) => state.donationRequests);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [searchParams, setSearchParams] = useState({
     BloodTypeId: "",
@@ -38,6 +38,7 @@ const DonationHistory = () => {
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+  console.log("List: ",donationList)
 
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
@@ -71,9 +72,9 @@ const DonationHistory = () => {
   }, [dispatch, currentPage, pageSize, searchParams]);
 
   const columns = [
-    { key: "bloodRequestId", title: "Blood Request ID", width: "15%" },
-    { key: "userName", title: "User Name", width: "20%" },
-    { key: "bloodTypeName", title: "Blood Type", width: "15%" },
+    { key: "donateRequestId", title: "Donation Request ID", width: "15%" },
+    // { key: "userName", title: "User Name", width: "20%" },
+    // { key: "bloodTypeName", title: "Blood Type", width: "15%" },
     { key: "quantity", title: "Quantity", width: "10%" },
     {
       key: "status",
@@ -224,13 +225,13 @@ const DonationHistory = () => {
           <LoadingSpinner color="blue" size="8" />
         ) : error ? (
           <ErrorMessage message={error} />
-        ) : bloodRequestList.length === 0 ? (
+        ) : donationList.length === 0 ? (
           <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
             <FaExclamationCircle className="text-xl" />
             <p>No blood request applications were found.</p>
           </div>
         ) : (
-          <TableComponent columns={columns} data={bloodRequestList} />
+          <TableComponent columns={columns} data={donationList} />
         )}
       </div>
       {/* Pagination */}

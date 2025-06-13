@@ -2,13 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginAPI, registerAPI } from "@services/authAPI";
 import { persistor } from "@redux/store/store";
 
-// [ROLES]
-const ROLES = {
-  USER: 0,
-  STAFF: 1,
-  ADMIN: 2,
-};
-
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload, thunkAPI) => {
@@ -87,4 +80,3 @@ const authSlice = createSlice({
 export const { logout, restoreUser } = authSlice.actions;
 export default authSlice.reducer;
 
-export { ROLES };

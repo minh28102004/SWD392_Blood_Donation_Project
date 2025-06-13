@@ -33,7 +33,6 @@ const RequestHistory = () => {
     currentPage,
     pageSize,
   } = useSelector((state) => state.bloodRequest);
-  console.log("bloodRequestList: ", bloodRequestList);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [searchParams, setSearchParams] = useState({
     BloodTypeId: "",

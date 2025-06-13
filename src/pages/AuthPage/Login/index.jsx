@@ -16,7 +16,7 @@ import { loginUser } from "@redux/features/authSlice";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.auth);
+  const { loading, error, role } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -48,7 +48,13 @@ const Login = () => {
       );
 
       if (loginUser.fulfilled.match(resultAction)) {
-        navigate("/");
+        if (role === "Staff") {
+          navigate("/staffLayout");
+        } else if (role === "Admin") {
+          navigate("/adminLayout");
+        } else {
+          navigate("/");
+        }
         toast.success("Login successful!");
       } else {
         const errorMessage =

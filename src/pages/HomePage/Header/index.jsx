@@ -9,11 +9,14 @@ import {
   FiSun,
 } from "react-icons/fi";
 import logo from "@assets/logo.png";
-import { Link, useLocation } from "react-router-dom";
+import { href, Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@components/Theme_Context";
 import useOutsideClick from "@hooks/useOutsideClick";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/features/authSlice";
+import { jwtDecode } from "jwt-decode";
+import { fetchUserById } from "@redux/features/userSlice";
+import Avatar from "@components/Avatar_User_Image";
 
 const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -22,9 +25,18 @@ const Header = () => {
   const buttonRef = useRef(null);
   const location = useLocation();
   const { darkMode, toggleTheme } = useTheme();
-
   const dispatch = useDispatch();
-  const { user, token, loading, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { user, token } = useSelector((state) => state.auth);
+  const { selectedUser } = useSelector((state) => state.user);
+
+  // Decode token to get userId
+  const decodedToken = user ? jwtDecode(user.token) : null;
+  const userIdFromToken = decodedToken
+    ? decodedToken[
+        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+      ]
+    : null;
 
   const toggleMenu = (event) => {
     event.stopPropagation();
@@ -32,6 +44,21 @@ const Header = () => {
   };
 
   useOutsideClick(dropdownRef, () => setIsUserMenuOpen(false), isUserMenuOpen);
+
+  const handleUserProfileClick = () => {
+    if (selectedUser) {
+      navigate("/userProfile", { state: { user: selectedUser } });
+    } else {
+      console.log("User data is loading...");
+    }
+    setIsUserMenuOpen(false);
+  };
+
+  useEffect(() => {
+    if (!selectedUser) {
+      dispatch(fetchUserById(userIdFromToken));
+    }
+  }, [dispatch, userIdFromToken, selectedUser]);
 
   // Trường hợp chưa đăng nhập:
   const guestMenuItems = [
@@ -51,8 +78,8 @@ const Header = () => {
   const userMenuItems = [
     {
       label: "User Profile",
-      href: "/userProfile",
       icon: <FiUserPlus className="mr-2 text-lg" />,
+      onClick: handleUserProfileClick,
     },
     {
       label: "Request History",
@@ -138,10 +165,10 @@ const Header = () => {
                 onClick={toggleMenu}
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
-                <img
-                  src={user?.avatar || "https://i.pravatar.cc/100?u=guest"}
-                  alt="User Avatar"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-yellow-600"
+                <Avatar
+                  name={user?.name}
+                  avatarUrl={user?.avatar}
+                  size={36}
                 />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
                   {loadingLogout

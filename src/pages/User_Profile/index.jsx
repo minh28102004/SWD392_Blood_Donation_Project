@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaEnvelope,
   FaPhone,
@@ -20,6 +20,12 @@ import {
   FaStickyNote,
 } from "react-icons/fa";
 import { format, differenceInDays } from "date-fns";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
+import Avatar from "@components/Avatar_User_Image";
 
 const InputField = ({
   label,
@@ -62,31 +68,30 @@ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     avatarUrl: "https://i.pravatar.cc/150?img=52",
-    donorId: "DON123456",
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    password: "********",
-    phone: "+1 (555) 123-4567",
-    dob: "1990-05-15",
-    address: "123 Medical Center Dr, Healthcare City, HC 12345",
-    bloodType: "O+",
     donorStatus: "available",
     lastDonation: "2024-01-15",
     components: ["Red Blood Cell", "White Blood Cell", "Platelets", "Plasma"],
     nextEligibleDate: "2024-03-15",
     verificationStatus: "verified",
     healthStatus: "Good",
-    weight: 70,
-    height: 175,
-    medicalProfile: "No allergies, non-smoker",
   });
+  const dispatch = useDispatch();
+  const { selectedUser } = useSelector((state) => state.user);
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
 
   const statusColors = {
-    available:
-      "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    temporary:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-    ineligible: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+    inactive: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
   };
 
   const handleChange = (e) => {
@@ -97,26 +102,32 @@ const UserProfile = () => {
     }));
   };
 
-  const StatusIndicator = () => (
+const StatusIndicator = () => {
+  const statusValue = selectedUser?.statusBit;
+
+  // Chuyển từ số hoặc chuỗi số sang tên trạng thái
+  const normalizedStatus =
+    statusValue === 1 || statusValue === "1"
+      ? "active"
+      : "inactive"; // mặc định nếu không phải 1 là inactive
+
+  return (
     <div className="flex flex-col items-center gap-3">
       <div
         className={`inline-flex items-center px-4 py-2 rounded-full ${
-          statusColors[profile.donorStatus] ||
+          statusColors[normalizedStatus] ||
           "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
         } shadow-sm`}
       >
-        {
-          {
-            available: <FaCheckCircle className="mr-2 animate-pulse" />,
-            temporary: <FaExclamationCircle className="mr-2 animate-pulse" />,
-            ineligible: <FaTimesCircle className="mr-2 animate-pulse" />,
-          }[profile.donorStatus]
-        }
-        {profile.donorStatus.charAt(0).toUpperCase() +
-          profile.donorStatus.slice(1)}
+        {{
+          active: <FaCheckCircle className="mr-2 animate-pulse" />,
+          inactive: <FaExclamationCircle className="mr-2 animate-pulse" />,
+        }[normalizedStatus]}
+        {normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1)}
       </div>
     </div>
   );
+};
 
   // Donation history mở rộng với nhiều lần hiến máu
   const DonationHistory = () => {
@@ -144,6 +155,10 @@ const UserProfile = () => {
         <FaTimesCircle className="text-red-500 dark:text-red-300 mr-1" />
       ),
     };
+
+    if (!profile) {
+      return <div>Loading...</div>;
+    }
 
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow max-w-xl mx-auto">
@@ -219,18 +234,18 @@ const UserProfile = () => {
         <div className="lg:col-span-1 space-y-8">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center">
             <div className="h-32 w-32 bg-red-100 dark:bg-red-900 mx-auto mb-4 overflow-hidden rounded-full transform hover:scale-105 transition-transform duration-300">
-              <img
-                src={profile.avatarUrl}
-                alt="User Avatar"
-                className="h-32 w-32 object-cover"
+              <Avatar
+                name={selectedUser?.name}
+                avatarUrl={selectedUser?.avatar}
+                size={128}
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {profile.fullName}
+              {selectedUser.userName}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 mt-1 flex items-center justify-center">
               <FaIdCard className="mr-2" />
-              {profile.donorId}
+              {selectedUser.identification}
             </p>
             <StatusIndicator />
           </div>
@@ -258,8 +273,9 @@ const UserProfile = () => {
                 icon={FaIdCard}
                 iconColor="text-gray-700 dark:text-gray-300"
                 name="donorId"
-                value={profile.donorId}
-                disabled
+                value={selectedUser.identification}
+                disabled={!isEditing}
+                onChange={handleChange}
               />
               <InputField
                 label="Password"
@@ -267,7 +283,7 @@ const UserProfile = () => {
                 iconColor="text-gray-600 dark:text-gray-300"
                 type="password"
                 name="password"
-                value={profile.password}
+                value={selectedUser.password}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -276,7 +292,7 @@ const UserProfile = () => {
                 icon={FaUser}
                 iconColor="text-gray-600 dark:text-gray-300"
                 name="fullName"
-                value={profile.fullName}
+                value={selectedUser.name}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -286,7 +302,7 @@ const UserProfile = () => {
                 iconColor="text-gray-600 dark:text-gray-300"
                 type="email"
                 name="email"
-                value={profile.email}
+                value={selectedUser.email}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -296,7 +312,7 @@ const UserProfile = () => {
                 iconColor="text-gray-600 dark:text-gray-300"
                 type="tel"
                 name="phone"
-                value={profile.phone}
+                value={selectedUser.phone}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -306,7 +322,7 @@ const UserProfile = () => {
                 iconColor="text-gray-600 dark:text-gray-300"
                 type="date"
                 name="dob"
-                value={profile.dob}
+                value={selectedUser.dateOfBirth}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -317,7 +333,7 @@ const UserProfile = () => {
               icon={FaMapMarkerAlt}
               iconColor="text-gray-600 dark:text-gray-300"
               name="address"
-              value={profile.address}
+              value={selectedUser.address}
               disabled={!isEditing}
               onChange={handleChange}
               className="mt-6"
@@ -342,7 +358,7 @@ const UserProfile = () => {
               >
                 <select
                   name="bloodType"
-                  value={profile.bloodType}
+                  value={selectedUser.bloodTypeId}
                   disabled={!isEditing}
                   className="w-full h-10 p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white"
                   onChange={handleChange}
@@ -363,7 +379,7 @@ const UserProfile = () => {
                 name="height"
                 type="number"
                 min={0}
-                value={profile.height || ""}
+                value={selectedUser.heightCm || ""}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
@@ -374,14 +390,14 @@ const UserProfile = () => {
                 name="weight"
                 type="number"
                 min={0}
-                value={profile.weight}
+                value={selectedUser.weightKg}
                 disabled={!isEditing}
                 onChange={handleChange}
               />
             </div>
 
             <InputField
-              label="Medical Profile"
+              label="Medical History"
               iconColor="text-gray-600 dark:text-gray-300"
               name="medicalProfile"
               disabled={!isEditing}
@@ -390,7 +406,7 @@ const UserProfile = () => {
             >
               <textarea
                 name="medicalProfile"
-                value={profile.medicalProfile}
+                value={selectedUser.medicalHistory}
                 disabled={!isEditing}
                 onChange={handleChange}
                 rows={3}
