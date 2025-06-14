@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { FaEdit, FaExclamationCircle, FaEye } from "react-icons/fa";
+import { useEffect, useState, useCallback } from "react";
+import { FaEdit, FaExclamationCircle, FaEye, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { useOutletContext } from "react-router-dom";
 import {
   fetchDonationRequests,
   updateDonationRequest,
+  deleteDonationRequest,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodDonationSlice";
@@ -38,7 +38,7 @@ const DonationHistory = () => {
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
-  console.log("List: ",donationList)
+  console.log("List: ", donationList);
 
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
@@ -106,7 +106,15 @@ const DonationHistory = () => {
       title: "Actions",
       width: "10%",
       render: (_, currentRow) => (
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-1">
+          <Tooltip title="View detail request">
+            <button
+              className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500 transform transition-transform hover:scale-110"
+              onClick={() => handleView(currentRow)}
+            >
+              <FaEye size={20} />
+            </button>
+          </Tooltip>
           <Tooltip title="Edit request field">
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
@@ -115,12 +123,13 @@ const DonationHistory = () => {
               <FaEdit size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="View detail data">
+          <Tooltip title="Cancel request send">
             <button
-              className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500 transform transition-transform hover:scale-110"
-              onClick={() => handleView(currentRow)}
+              className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
+              onClick={() => handleDelete(currentRow)}
+              aria-label="Delete user"
             >
-              <FaEye size={20} />
+              <FaTrash size={20} />
             </button>
           </Tooltip>
         </div>
@@ -133,6 +142,34 @@ const DonationHistory = () => {
     setSelectedBD(value);
     setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
+  };
+
+  // [DELETE]
+  const handleDelete = async (request) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this request?",
+      content: "(Note: The donation request will be removed from the list)",
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteDonationRequest(request.donateRequestId)).unwrap();
+          toast.success("Request has been deleted!");
+          dispatch(
+            fetchBloodRequests({
+              page: currentPage,
+              size: pageSize,
+              searchParams,
+            })
+          );
+        } catch (error) {
+          toast.error(
+            error?.message || "An error occurred while deleting the request!"
+          );
+        }
+      },
+      style: { top: "30%" },
+    });
   };
 
   // [REFRESH]
@@ -228,7 +265,7 @@ const DonationHistory = () => {
         ) : donationList.length === 0 ? (
           <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
             <FaExclamationCircle className="text-xl" />
-            <p>No blood request applications were found.</p>
+            <p>No blood donation requests have been submitted yet.</p>
           </div>
         ) : (
           <TableComponent columns={columns} data={donationList} />

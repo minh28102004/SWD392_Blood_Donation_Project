@@ -42,7 +42,7 @@ const BloodHistoryPage = () => {
                   }`
                 }
               >
-                Reception History
+                Reciption History
               </Tab>
             </Tab.List>
 

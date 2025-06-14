@@ -168,7 +168,6 @@ const userSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchUserById.fulfilled, (state, action) => {
-        console.log("fetchUserById fulfilled:", action.payload);
         state.loading = false;
         state.selectedUser = action.payload;
       })

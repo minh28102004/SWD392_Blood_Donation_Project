@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { FaEdit, FaExclamationCircle, FaEye } from "react-icons/fa";
+import { useEffect, useState, useCallback } from "react";
+import { FaEdit, FaExclamationCircle, FaEye, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { useOutletContext } from "react-router-dom";
 import {
   fetchBloodRequests,
   updateBloodRequest,
+  deleteBloodRequest,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodRequestSlice";
@@ -82,6 +82,12 @@ const RequestHistory = () => {
     { key: "bloodTypeName", title: "Blood Type", width: "15%" },
     { key: "quantity", title: "Quantity", width: "10%" },
     {
+      key: "createdAt",
+      title: "Created At",
+      width: "20%",
+      render: (value) => new Date(value).toLocaleDateString(),
+    },
+    {
       key: "status",
       title: "Status",
       width: "10%",
@@ -99,19 +105,21 @@ const RequestHistory = () => {
         );
       },
     },
-    {
-      key: "createdAt",
-      title: "Created At",
-      width: "20%",
-      render: (value) => new Date(value).toLocaleDateString(),
-    },
     { key: "location", title: "Location", width: "20%" },
     {
       key: "actions",
       title: "Actions",
       width: "10%",
       render: (_, currentRow) => (
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-1">
+          <Tooltip title="View detail request">
+            <button
+              className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500 transform transition-transform hover:scale-110"
+              onClick={() => handleView(currentRow)}
+            >
+              <FaEye size={20} />
+            </button>
+          </Tooltip>
           <Tooltip title="Edit request field">
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
@@ -120,12 +128,13 @@ const RequestHistory = () => {
               <FaEdit size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="View detail data">
+          <Tooltip title="Cancel request send">
             <button
-              className="p-1 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500 transform transition-transform hover:scale-110"
-              onClick={() => handleView(currentRow)}
+              className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
+              onClick={() => handleDelete(currentRow)}
+              aria-label="Delete user"
             >
-              <FaEye size={20} />
+              <FaTrash size={20} />
             </button>
           </Tooltip>
         </div>
@@ -138,6 +147,34 @@ const RequestHistory = () => {
     setSelectedBR(value);
     setFormKey((prev) => prev + 1); // Reset form
     setModalOpen(true);
+  };
+
+  // [DELETE]
+  const handleDelete = async (request) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this request?",
+      content: "(Note: The blood request will be removed from the list)",
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBloodRequest(request.bloodRequestId)).unwrap();
+          toast.success("Request has been deleted!");
+          dispatch(
+            fetchBloodRequests({
+              page: currentPage,
+              size: pageSize,
+              searchParams,
+            })
+          );
+        } catch (error) {
+          toast.error(
+            error?.message || "An error occurred while deleting the request!"
+          );
+        }
+      },
+      style: { top: "30%" },
+    });
   };
 
   // [REFRESH]
@@ -229,7 +266,7 @@ const RequestHistory = () => {
         ) : bloodRequestList.length === 0 ? (
           <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
             <FaExclamationCircle className="text-xl" />
-            <p>No blood request applications were found.</p>
+            <p>No blood request applications have been submitted yet.</p>
           </div>
         ) : (
           <TableComponent columns={columns} data={bloodRequestList} />
