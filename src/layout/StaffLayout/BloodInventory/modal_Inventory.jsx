@@ -11,7 +11,6 @@ import ImageUploadInput from "@components/Image_Input";
 import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
 
 const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
-
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,8 +27,6 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
       quantity_unit: selectedInventory?.category || "",
     },
   });
-
- 
 
   const validateForm = (data) => {
     return true;
@@ -64,7 +61,12 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
     ],
   };
 
-  const importantFields = ["IntId", "blood_type_id", "quantity_unit"];
+  const importantFields = [
+    "blood_component_id",
+    "blood_type_id",
+    "quantity",
+    "unit",
+  ];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -106,7 +108,9 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                   as="h2"
                   className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 text-center"
                 >
-                  {selectedInventory ? "Edit Inventory" : "Create New Inventory"}
+                  {selectedInventory
+                    ? "Edit Inventory"
+                    : "Create New Inventory"}
                 </Dialog.Title>
                 <hr className="border-gray-100 mb-6" />
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
@@ -115,36 +119,18 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("IntId") && (
+                            {importantFields.includes("BloodTypeId") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Inventory ID :
+                            Blood Type ID :
                           </>
                         }
-                        name="IntId"
-                        placeholder="Enter Inventory ID"
+                        name="BloodTypeId"
+                        placeholder="Enter Blood Type ID"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Inventory ID is required",
-                        }}
-                      />
-
-                      <TextInput
-                        label={
-                          <>
-                            {importantFields.includes("blood_type_id") && (
-                              <span className="text-red-600 mr-1">*</span>
-                            )}
-                            Blood Type :
-                          </>
-                        }
-                        name="blood_type_id"
-                        placeholder="Enter Blood Type"
-                        register={register}
-                        errors={errors}
-                        validation={{
-                          required: "Blood Type is required",
+                          required: "Blood Type ID is required",
                           pattern: {
                             value: /^[a-zA-Z0-9\s]*$/,
                             message: "No special characters allowed",
@@ -155,13 +141,35 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("quantity_unit") && (
+                            {importantFields.includes("blood_component_id") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Blood Component :
+                          </>
+                        }
+                        name="blood_component_id"
+                        placeholder="Enter Blood Component ID"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Blood Component ID is required",
+                          pattern: {
+                            value: /^[a-zA-Z0-9\s]*$/,
+                            message: "No special characters allowed",
+                          },
+                        }}
+                      />
+
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("quantity") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Quantity :
                           </>
                         }
-                        name="quantity_unit"
+                        name="quantity"
                         placeholder="Enter Quantity"
                         register={register}
                         errors={errors}
@@ -169,9 +177,34 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                           required: "Quantity is required",
                         }}
                       />
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("unit") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Unit :
+                          </>
+                        }
+                        name="unit"
+                        placeholder="Enter Unit"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Unit is required",
+                        }}
+                      />
+                      <TextInput
+                        label={<>Location :</>}
+                        name="location"
+                        placeholder="Enter Location"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Location is required",
+                        }}
+                      />
                     </div>
-
-                   
 
                     <div className="flex justify-end space-x-4 pt-2">
                       <button
