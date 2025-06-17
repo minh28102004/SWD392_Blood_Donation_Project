@@ -198,22 +198,22 @@ const bloodInventorySlice = createSlice({
 
       // DELETE BLOOD INVENTORY
       .addCase(deleteBloodInventory.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(deleteBloodInventory.fulfilled, (state, action) => {
-        state.loading = false;
-        state.bloodList = state.bloodList.filter(
-          (blood) => blood.id !== action.meta.arg
-        );
-        if (state.selectedBlood?.id === action.meta.arg) {
-          state.selectedBlood = null;
-        }
-      })
-      .addCase(deleteBloodInventory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
+              state.loading = true;
+              state.error = null;
+            })
+            .addCase(deleteBloodInventory.fulfilled, (state, action) => {
+              state.loading = false;
+              state.bloodList = state.bloodList.filter(
+                (blood) => blood.id !== action.meta.arg
+              );
+              if (state.selectedBlood?.id === action.meta.arg) {
+                state.selectedBlood = null;
+              }
+            })
+            .addCase(deleteBloodInventory.rejected, (state, action) => {
+              state.loading = false;
+              state.error = action.payload;
+            });
   },
 });
 export const {

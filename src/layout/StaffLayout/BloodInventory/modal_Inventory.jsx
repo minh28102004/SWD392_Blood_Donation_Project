@@ -216,7 +216,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
                       />
                       <TextInput
                         label={<>Location :</>}
-                        name="location"
+                        name="InventoryLocation"
                         placeholder="Enter Location"
                         register={register}
                         errors={errors}

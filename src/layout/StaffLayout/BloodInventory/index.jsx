@@ -113,27 +113,28 @@ const BloodInventoryManagement = () => {
   };
 
   // [DELETE]
-  const handleDelete = async (inventory) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this blood inventory?",
-      content: "( Note: The blood inventory will be removed from the list )",
-      okText: "OK",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await dispatch(deleteBloodInventory(inventory.inventoryId)).unwrap();
-          toast.success("Blood inventory has been deleted!");
-          dispatch(fetchBloodInventories());
-        } catch (error) {
-          toast.error(
-            error?.message ||
-              "An error occurred while deleting the blood inventory!"
-          );
-        }
-      },
-      style: { top: "30%" },
-    });
-  };
+  const handleDelete = async (bloodInv) => {
+      Modal.confirm({
+        title: "Are you sure you want to delete this blog post?",
+        content: "( Note: The blog post will be removed from the list )",
+        okText: "OK",
+        cancelText: "Cancel",
+        onOk: async () => {
+          try {
+            await dispatch(deleteBloodInventory(bloodInv.inventoryId)).unwrap();
+            toast.success("Blood inventory has been deleted!");
+            dispatch(
+              fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
+            );
+          } catch (error) {
+            toast.error(
+              error?.message || "An error occurred while deleting the blood inventory!"
+            );
+          }
+        },
+        style: { top: "30%" },
+      });
+    };
   //[SEARCH]
   const handleSearch = useCallback(
     (params) => {
