@@ -221,7 +221,9 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.userList.findIndex((u) => u.id === action.payload.id);
+        const index = state.userList.findIndex(
+          (u) => u.id === action.payload.id
+        );
         if (index !== -1) state.userList[index] = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
@@ -244,5 +246,11 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearSelectedUser, clearError, setPagination, setCurrentPage, setPageSize } = userSlice.actions;
+export const {
+  clearSelectedUser,
+  clearError,
+  setPagination,
+  setCurrentPage,
+  setPageSize,
+} = userSlice.actions;
 export default userSlice.reducer;

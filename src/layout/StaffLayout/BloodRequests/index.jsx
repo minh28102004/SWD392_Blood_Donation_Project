@@ -8,8 +8,8 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
-  deleteBloodRequest,
 } from "@redux/features/blogPostsSlice";
+import { deleteBloodRequest } from "@redux/features/bloodRequestSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -137,7 +137,8 @@ const BloodRequests = () => {
           dispatch(fetchBlogPosts());
         } catch (error) {
           toast.error(
-            error?.message || "An error occurred while deleting the blood request!"
+            error?.message ||
+              "An error occurred while deleting the blood request!"
           );
         }
       },

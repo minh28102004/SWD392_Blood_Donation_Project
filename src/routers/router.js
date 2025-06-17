@@ -8,6 +8,7 @@ const endPoint = {
   USERHISTORY: "/userHistory",
   ADMINLAYOUT:"/adminLayout",
   STAFFLAYOUT:"/staffLayout",
+  UNAUTHORIZEDPAGE:"/unauthorizedPage",
 };
 
 export default endPoint;

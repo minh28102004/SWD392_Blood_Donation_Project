@@ -6,22 +6,9 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] all blog posts
-export const fetchAllBlogPosts = createAsyncThunk(
-  "blogPosts/fetchAll",
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await getRequest("/api/BlogPosts");
-      return res.data.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
-// [GET] blog posts with search parameters
-export const fetchBlogPosts = createAsyncThunk(
-  "user/fetchAll",
+// [GET] all blood requests with search parameters
+export const fetchBloodRequests = createAsyncThunk(
+  "bloodRequest/fetchAll",
   async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
     try {
       const queryString = new URLSearchParams({
@@ -29,7 +16,7 @@ export const fetchBlogPosts = createAsyncThunk(
         pageSize: size.toString(),
         ...searchParams,
       }).toString();
-      const res = await getRequest(`/api/BlogPosts/search?${queryString}`);
+      const res = await getRequest(`/api/BloodRequests/search?${queryString}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -37,12 +24,12 @@ export const fetchBlogPosts = createAsyncThunk(
   }
 );
 
-// [GET] blog post by ID
-export const fetchBlogPostById = createAsyncThunk(
-  "blogPosts/fetchById",
+// [GET] blood request by ID
+export const fetchBloodRequestById = createAsyncThunk(
+  "bloodRequest/fetchById",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await getRequest(`/api/BlogPosts/${id}`);
+      const res = await getRequest(`/api/BloodRequests/${id}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -50,13 +37,13 @@ export const fetchBlogPostById = createAsyncThunk(
   }
 );
 
-// [POST] create new blog post (multipart/form-data)
-export const createBlogPost = createAsyncThunk(
-  "blogPosts/create",
-  async ({ formData }, { rejectWithValue }) => {
+// [POST] create blood request
+export const createBloodRequest = createAsyncThunk(
+  "bloodRequest/create",
+  async (formData, { rejectWithValue }) => {
     try {
       const res = await postRequestMultipartFormData({
-        url: "/api/BlogPosts",
+        url: "/api/BloodRequests",
         formData,
       });
       return res;
@@ -66,13 +53,13 @@ export const createBlogPost = createAsyncThunk(
   }
 );
 
-// [PUT] update blog post (multipart/form-data)
-export const updateBlogPost = createAsyncThunk(
-  "blogPosts/update",
+// [PUT] update blood request
+export const updateBloodRequest = createAsyncThunk(
+  "bloodRequest/update",
   async ({ id, formData }, { rejectWithValue }) => {
     try {
       const res = await putRequestMultipartFormData({
-        url: `/api/BlogPosts/${id}`,
+        url: `/api/BloodRequests/${id}`,
         formData,
       });
       return res;
@@ -82,12 +69,12 @@ export const updateBlogPost = createAsyncThunk(
   }
 );
 
-// [DELETE] delete blog post by id
-export const deleteBlogPost = createAsyncThunk(
-  "blogPosts/delete",
+// [DELETE] delete blood request
+export const deleteBloodRequest = createAsyncThunk(
+  "bloodRequest/delete",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await deleteRequest({ url: `/api/BlogPosts/${id}` });
+      const res = await deleteRequest({ url: `/api/BloodRequests/${id}` });
       return res;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -95,11 +82,11 @@ export const deleteBlogPost = createAsyncThunk(
   }
 );
 
-const blogPostsSlice = createSlice({
-  name: "blogPosts",
+const bloodRequestSlice = createSlice({
+  name: "bloodRequest",
   initialState: {
-    blogList: [],
-    selectedPost: null,
+    bloodRequestList: [],
+    selectedRequest: null,
     loading: false,
     error: null,
     totalCount: 0,
@@ -108,8 +95,8 @@ const blogPostsSlice = createSlice({
     pageSize: 7,
   },
   reducers: {
-    clearSelectedPost: (state) => {
-      state.selectedPost = null;
+    clearSelectedRequest: (state) => {
+      state.selectedRequest = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -130,89 +117,77 @@ const blogPostsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // FETCH ALL BLOG POSTS
-      .addCase(fetchBlogPosts.pending, (state) => {
+      // --- FETCH ALL BLOOD REQUESTS ---
+      .addCase(fetchBloodRequests.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBlogPosts.fulfilled, (state, action) => {
+      .addCase(fetchBloodRequests.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogList = action.payload.posts || [];
+        state.bloodRequestList = action.payload.requests || [];
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
         state.currentPage = action.payload.currentPage;
         state.pageSize = action.payload.pageSize;
       })
-      .addCase(fetchBlogPosts.rejected, (state, action) => {
+      .addCase(fetchBloodRequests.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // FETCH BLOG POST BY ID
-      .addCase(fetchBlogPostById.pending, (state) => {
+      // --- FETCH BLOOD REQUESTS BY ID---
+      .addCase(fetchBloodRequestById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchBlogPostById.fulfilled, (state, action) => {
+      .addCase(fetchBloodRequestById.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedPost = action.payload;
+        state.selectedRequest = action.payload;
       })
-      .addCase(fetchBlogPostById.rejected, (state, action) => {
+      .addCase(fetchBloodRequestById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // CREATE BLOG POST
-      .addCase(createBlogPost.pending, (state) => {
+      // --- CREATE BLOOD REQUESTS ---
+      .addCase(createBloodRequest.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createBlogPost.fulfilled, (state, action) => {
+      .addCase(createBloodRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogList.push(action.payload);
+        state.bloodRequestList.push(action.payload);
       })
-      .addCase(createBlogPost.rejected, (state, action) => {
+      .addCase(createBloodRequest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // UPDATE BLOG POST
-      .addCase(updateBlogPost.pending, (state) => {
+      // --- UPDATE BLOOD REQUESTS ---
+      .addCase(updateBloodRequest.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateBlogPost.fulfilled, (state, action) => {
+      .addCase(updateBloodRequest.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.blogList.findIndex(
-          (post) => post.postId === action.payload.postId
+        const index = state.bloodRequestList.findIndex(
+          (r) => r.id === action.payload.id
         );
-        if (index !== -1) {
-          state.blogList[index] = action.payload;
-        }
-        if (state.selectedPost?.postId === action.payload.postId) {
-          state.selectedPost = action.payload;
-        }
+        if (index !== -1) state.bloodRequestList[index] = action.payload;
       })
-      .addCase(updateBlogPost.rejected, (state, action) => {
+      .addCase(updateBloodRequest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // DELETE BLOG POST
-      .addCase(deleteBlogPost.pending, (state) => {
+      // --- DELETE BLOOD REQUESTS ---
+      .addCase(deleteBloodRequest.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteBlogPost.fulfilled, (state, action) => {
+      .addCase(deleteBloodRequest.fulfilled, (state, action) => {
         state.loading = false;
-        state.blogList = state.blogList.filter(
-          (post) => post.postId !== action.meta.arg
+        state.bloodRequestList = state.bloodRequestList.filter(
+          (r) => r.id !== action.meta.arg
         );
-        if (state.selectedPost?.postId === action.meta.arg) {
-          state.selectedPost = null;
-        }
       })
-      .addCase(deleteBlogPost.rejected, (state, action) => {
+      .addCase(deleteBloodRequest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
@@ -220,10 +195,11 @@ const blogPostsSlice = createSlice({
 });
 
 export const {
-  clearSelectedPost,
+  clearSelectedRequest,
   clearError,
   setPagination,
   setCurrentPage,
   setPageSize,
-} = blogPostsSlice.actions;
-export default blogPostsSlice.reducer;
+} = bloodRequestSlice.actions;
+
+export default bloodRequestSlice.reducer;

@@ -6,13 +6,12 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] All Donation Requests (không phân trang)
+// [GET] All Donation Requests
 export const fetchAllDonationRequests = createAsyncThunk(
   "donationRequests/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const res = await getRequest("/api/DonationRequests");
-      
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -30,8 +29,10 @@ export const fetchDonationRequests = createAsyncThunk(
         pageSize: size.toString(),
       }).toString();
 
-      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
-            console.log("res: ",res.data)
+      const res = await getRequest(
+        `/api/DonationRequests/search?${queryString}`
+      );
+      console.log("ResData: ",res.data)
       return res.data; // { data, totalCount, totalPages, ... }
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -45,7 +46,7 @@ export const fetchDonationRequestById = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await getRequest(`/api/DonationRequests/${id}`);
-      return res.data.data;
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -116,6 +117,13 @@ const bloodDonationSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+     setPagination: (state, action) => {
+      const { totalCount, totalPages, currentPage, pageSize } = action.payload;
+      state.totalCount = totalCount;
+      state.totalPages = totalPages;
+      state.currentPage = currentPage;
+      state.pageSize = pageSize;
+    },
     setCurrentPage: (state, action) => {
       state.currentPage = action.payload;
     },
@@ -131,9 +139,10 @@ const bloodDonationSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchDonationRequests.fulfilled, (state, action) => {
-        const payload = action.payload ;
+        const payload = action.payload;
         state.loading = false;
         state.donationList = payload.requests || [];
+        console.log("donationList: ",state.donationList)
         state.totalCount = payload.totalCount || 0;
         state.totalPages = payload.totalPages || 0;
         state.currentPage = payload.currentPage || 1;
@@ -186,7 +195,9 @@ const bloodDonationSlice = createSlice({
         if (index !== -1) {
           state.donationList[index] = updated;
         }
-        if (state.selectedRequest?.donateRequestId === updated.donateRequestId) {
+        if (
+          state.selectedRequest?.donateRequestId === updated.donateRequestId
+        ) {
           state.selectedRequest = updated;
         }
       })
@@ -216,11 +227,7 @@ const bloodDonationSlice = createSlice({
   },
 });
 
-export const {
-  clearSelectedRequest,
-  clearError,
-  setCurrentPage,
-  setPageSize,
-} = bloodDonationSlice.actions;
+export const { clearSelectedRequest, clearError, setCurrentPage, setPageSize } =
+  bloodDonationSlice.actions;
 
 export default bloodDonationSlice.reducer;

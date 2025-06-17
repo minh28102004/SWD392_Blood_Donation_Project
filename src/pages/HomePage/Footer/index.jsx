@@ -5,7 +5,7 @@ import { SiZalo } from "react-icons/si";
 const Footer = () => {
   return (
     <footer className="bg-gray-900 dark:bg-gray-800 text-white py-6">
-      <div className="container mx-auto px-6 md:px-12">
+      <div className="container max-w-none px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Column 1 */}
           <div>
@@ -128,7 +128,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom line */}
-        <div className="mt-7 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
+        <div className="mt-7 border-t border-gray-700 pt-6 text-center text-sm text-gray-500 hover:text-yellow-500">
           © 2025 BloodLife. All rights reserved.
         </div>
       </div>
