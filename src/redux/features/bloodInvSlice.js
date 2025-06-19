@@ -81,6 +81,7 @@ export const updateBloodInventory = createAsyncThunk(
     }
   }
 );
+
 // [DELETE] delete blood inventory by id
 export const deleteBloodInventory = createAsyncThunk(
   "bloodInventory/delete",
@@ -176,44 +177,45 @@ const bloodInventorySlice = createSlice({
 
       // UPDATE BLOOD INVENTORY
       .addCase(updateBloodInventory.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateBloodInventory.fulfilled, (state, action) => {
-        state.loading = false;
-        const index = state.bloodList.findIndex(
-          (blood) => blood.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.bloodList[index] = action.payload;
-        }
-        if (state.selectedBlood?.id === action.payload.id) {
-          state.selectedBlood = action.payload;
-        }
-      })
-      .addCase(updateBloodInventory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // DELETE BLOOD INVENTORY
-      .addCase(deleteBloodInventory.pending, (state) => {
               state.loading = true;
               state.error = null;
             })
-            .addCase(deleteBloodInventory.fulfilled, (state, action) => {
+            .addCase(updateBloodInventory.fulfilled, (state, action) => {
               state.loading = false;
-              state.bloodList = state.bloodList.filter(
-                (blood) => blood.id !== action.meta.arg
+              const index = state.bloodList.findIndex(
+                (blood) => blood.id === action.payload.id
               );
-              if (state.selectedBlood?.id === action.meta.arg) {
-                state.selectedBlood = null;
+              if (index !== -1) {
+                state.bloodList[index] = action.payload;
+              }
+              if (state.selectedBlood?.id === action.payload.id) {
+                state.selectedBlood = action.payload;
               }
             })
-            .addCase(deleteBloodInventory.rejected, (state, action) => {
+            .addCase(updateBloodInventory.rejected, (state, action) => {
               state.loading = false;
               state.error = action.payload;
-            });
+            })
+      
+
+      // DELETE BLOOD INVENTORY
+      .addCase(deleteBloodInventory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteBloodInventory.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bloodList = state.bloodList.filter(
+          (blood) => blood.id !== action.meta.arg
+        );
+        if (state.selectedBlood?.id === action.meta.arg) {
+          state.selectedBlood = null;
+        }
+      })
+      .addCase(deleteBloodInventory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 export const {
