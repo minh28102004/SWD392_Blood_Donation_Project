@@ -9,8 +9,10 @@ import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
 import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
-
-const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
+import { createBloodInventory, updateBloodInventory } from "@redux/features/bloodInvSlice";
+import { useDispatch } from "react-redux";
+const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
+  const dispatch = useDispatch();
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -22,33 +24,56 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
     reset,
   } = useForm({
     defaultValues: {
-      inventoryID: selectedInventory?.inventoryID || "",
-      bloodTypes: selectedInventory?.bloodTypes || "",
-      quantity_unit: selectedInventory?.category || "",
+      BloodComponentId: selectedInventory?.BloodComponentId || "",
+      BloodTypeId: selectedInventory?.BloodTypeId || "",
+      Quantity: selectedInventory?.Quantity || "",
+      Unit: selectedInventory?.Unit || "",
+      InventoryLocation: selectedInventory?.InventoryLocation || "",
     },
   });
 
   const validateForm = (data) => {
     return true;
   };
-
   const onSubmit = async (data) => {
-    if (!validateForm(data)) return;
-    setLoading(true);
-    try {
-      await new Promise((res) => setTimeout(res, 2000));
-      toast.success(
-        selectedInventory
-          ? "Inventory updated successfully!"
-          : "Inventory created successfully!"
-      );
-      reset();
+    const { BloodTypeId , BloodComponentId , Quantity , Unit ,InventoryLocation} = data;
+    const formDataToSend = new FormData();
+    formDataToSend.append("BloodComponentId", BloodComponentId);
+    formDataToSend.append("BloodTypeId", BloodTypeId);
+    formDataToSend.append("Unit", Unit);
+    formDataToSend.append("Quantity", Quantity);
+    formDataToSend.append("InventoryLocation", InventoryLocation);
 
-      onClose();
-    } catch {
-      toast.error("Failed to submit Inventory");
-    } finally {
-      setLoading(false);
+    setLoading(true);
+        try {
+          if (selectedInventory) {
+            const resultAction = await dispatch(
+              updateBloodInventory({ id: selectedInventory.id, formData: formDataToSend })
+            );
+            if (updateBloodInventory.fulfilled.match(resultAction)) {
+              toast.success("Blood inventory updated successfully!");
+              onSuccess();
+            } else {
+              toast.error("Update failed: " + resultAction.payload);
+            }
+          } else {
+            const resultAction = await dispatch(
+              createBloodInventory({ formData: formDataToSend })
+            );
+            if (createBloodInventory.fulfilled.match(resultAction)) {
+              toast.success("Blood inventory created successfully!");
+              onSuccess();
+            } else {
+              toast.error("Create failed: " + resultAction.payload);
+            }
+          }
+          reset();
+          onClose();
+        } catch (error) {
+          toast.error("Failed to submit blood inventory");
+          console.error("Error submitting blood inventory:", error);
+        } finally {
+          setLoading(false);
     }
   };
 
@@ -61,12 +86,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
     ],
   };
 
-  const importantFields = [
-    "blood_component_id",
-    "blood_type_id",
-    "quantity",
-    "unit",
-  ];
+  const importantFields = ["BloodTypeId", "BloodComponentId", "Quantity", "Unit"];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -141,13 +161,13 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("blood_component_id") && (
+                            {importantFields.includes("BloodComponentId") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Blood Component :
                           </>
                         }
-                        name="blood_component_id"
+                        name="BloodComponentId"
                         placeholder="Enter Blood Component ID"
                         register={register}
                         errors={errors}
@@ -163,13 +183,13 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("quantity") && (
+                            {importantFields.includes("Quantity") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Quantity :
                           </>
                         }
-                        name="quantity"
+                        name="Quantity"
                         placeholder="Enter Quantity"
                         register={register}
                         errors={errors}
@@ -180,13 +200,13 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("unit") && (
+                            {importantFields.includes("Unit") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Unit :
                           </>
                         }
-                        name="unit"
+                        name="Unit"
                         placeholder="Enter Unit"
                         register={register}
                         errors={errors}
@@ -196,13 +216,10 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       />
                       <TextInput
                         label={<>Location :</>}
-                        name="location"
+                        name="InventoryLocation"
                         placeholder="Enter Location"
                         register={register}
                         errors={errors}
-                        validation={{
-                          required: "Location is required",
-                        }}
                       />
                     </div>
 

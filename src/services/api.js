@@ -3,11 +3,19 @@ import axios from "axios";
 // Create url base
 const api = axios.create({
   baseURL: "https://localhost:7210",
-  // baseURL: "https://d8bc-42-115-42-190.ngrok-free.app/",
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+});
+
+// Set token (if have)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // [GET]
@@ -27,7 +35,7 @@ const getRequestParams = async ({ url, params }) => {
   }
 };
 
-// [POST] 
+// [POST]
 const postRequest = async ({ url, data }) => {
   try {
     const res = await api.post(url, data);
@@ -49,7 +57,7 @@ const postRequestParams = async ({ url, params }) => {
   }
 };
 
-// [DELETE] 
+// [DELETE]
 const deleteRequest = async ({ url }) => {
   try {
     const res = await api.delete(url);
@@ -88,7 +96,7 @@ const deleteMany = async ({ url, data }) => {
   }
 };
 
-// [PUT] 
+// [PUT]
 const putRequest = async ({ url, data }) => {
   try {
     const res = await api.put(url, data);

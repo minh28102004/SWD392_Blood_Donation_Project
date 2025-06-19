@@ -7,7 +7,7 @@ export const fetchBloodComponents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await getRequest("/api/BloodComponents");
-   
+
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
