@@ -37,6 +37,25 @@ export const fetchBloodRequestById = createAsyncThunk(
   }
 );
 
+// [GET] blood requests by user ID
+export const fetchBloodRequestsByUserId = createAsyncThunk(
+  "bloodRequest/fetchByUserId",
+  async ({ userId, page = 1, pageSize = 10 }, { rejectWithValue }) => {
+    try {
+      const queryString = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+      }).toString();
+      const res = await getRequest(
+        `/api/BloodRequests/ByUser/${userId}?${queryString}`
+      );
+      return res.data.data; 
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 // [POST] create blood request
 export const createBloodRequest = createAsyncThunk(
   "bloodRequest/create",
@@ -144,6 +163,23 @@ const bloodRequestSlice = createSlice({
         state.selectedRequest = action.payload;
       })
       .addCase(fetchBloodRequestById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // --- FETCH BLOOD REQUESTS BY USER ID ---
+      .addCase(fetchBloodRequestsByUserId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBloodRequestsByUserId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bloodRequestList = action.payload.requests || [];
+        state.totalCount = action.payload.totalCount;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
+        state.pageSize = action.payload.pageSize;
+      })
+      .addCase(fetchBloodRequestsByUserId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

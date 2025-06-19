@@ -6,12 +6,18 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import BloodDonationModal from "@pages/Modal_Form_Registration/ModalForm";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const previewPosts = blogPosts.slice(0, 3);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
@@ -20,6 +26,15 @@ const Content = () => {
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleDonateClick = () => {
+    if (!user) {
+      toast.info("You need to log in before donating blood.");
+      navigate("/authPage/login");
+    } else {
+      setShowModal(true);
+    }
+  };
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -74,7 +89,7 @@ const Content = () => {
                   </motion.p>
 
                   <button
-                    onClick={() => setShowModal(true)}
+                    onClick={handleDonateClick}
                     className="font-semibold bg-red-700 hover:bg-red-900 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300"
                   >
                     Donate Blood Now

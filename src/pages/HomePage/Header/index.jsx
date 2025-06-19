@@ -14,8 +14,7 @@ import { useTheme } from "@components/Theme_Context";
 import useOutsideClick from "@hooks/useOutsideClick";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/features/authSlice";
-import { jwtDecode } from "jwt-decode";
-import { fetchUserById } from "@redux/features/userSlice";
+import { persistor } from "@redux/store/store";
 import Avatar from "@components/Avatar_User_Image";
 
 const Header = () => {
@@ -27,16 +26,8 @@ const Header = () => {
   const { darkMode, toggleTheme } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, token } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const { selectedUser } = useSelector((state) => state.user);
-
-  // Decode token to get userId
-  const decodedToken = user ? jwtDecode(user.token) : null;
-  const userIdFromToken = decodedToken
-    ? decodedToken[
-        "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-      ]
-    : null;
 
   const toggleMenu = (event) => {
     event.stopPropagation();
@@ -53,12 +44,6 @@ const Header = () => {
     }
     setIsUserMenuOpen(false);
   };
-
-  useEffect(() => {
-    if (!selectedUser) {
-      dispatch(fetchUserById(userIdFromToken));
-    }
-  }, [dispatch, userIdFromToken, selectedUser]);
 
   // Trường hợp chưa đăng nhập:
   const guestMenuItems = [
@@ -91,19 +76,21 @@ const Header = () => {
       href: "/",
       icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
       isDanger: true,
-      onClick: () => {
+      onClick: async () => {
         setLoadingLogout(true);
-        dispatch(logout());
         setIsUserMenuOpen(false);
+        dispatch(logout());
+        await persistor.purge();
       },
     },
   ];
 
   useEffect(() => {
-    if (!user) {
-      setLoadingLogout(false);
+    if (loadingLogout) {
+      const timeoutId = setTimeout(() => {}, 2000);
+      return () => clearTimeout(timeoutId);
     }
-  }, [user]);
+  }, [loadingLogout]);
 
   return (
     <header className="fixed w-full bg-white dark:bg-gray-800 shadow-sm z-50 transition-all duration-300 ease-in-out">
@@ -165,15 +152,35 @@ const Header = () => {
                 onClick={toggleMenu}
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
-                <Avatar
-                  name={user?.name}
-                  avatarUrl={user?.avatar}
-                  size={36}
-                />
+                <Avatar name={selectedUser?.name} avatarUrl={selectedUser?.avatar} size={36} />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
-                  {loadingLogout
-                    ? "Logging out..."
-                    : user?.userName || "Unknown"}{" "}
+                  {loadingLogout ? (
+                    <div className="flex items-center">
+                      <svg
+                        className="animate-spin h-6 w-6 mr-2 text-blue-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        ></path>
+                      </svg>
+                      Logging out...
+                    </div>
+                  ) : (
+                    selectedUser?.userName || "Unknown"
+                  )}
                 </span>
                 <FiChevronDown className="text-gray-500 dark:text-gray-300" />
               </button>
@@ -192,10 +199,10 @@ const Header = () => {
                 {user && (
                   <div className="px-4 py-3 border-b dark:border-gray-700">
                     <p className="text-sm text-gray-800 dark:text-white font-semibold">
-                      {user.name}
+                      {selectedUser.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-300">
-                      {user.email}
+                      {selectedUser.email}
                     </p>
                   </div>
                 )}

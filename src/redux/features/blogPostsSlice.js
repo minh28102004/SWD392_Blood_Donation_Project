@@ -105,7 +105,7 @@ const blogPostsSlice = createSlice({
     totalCount: 0,
     totalPages: 0,
     currentPage: 1,
-    pageSize: 7,
+    pageSize: 6,
   },
   reducers: {
     clearSelectedPost: (state) => {

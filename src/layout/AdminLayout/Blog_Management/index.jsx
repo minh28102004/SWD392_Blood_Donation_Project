@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import { baseURL } from "@services/api";
 
 const BlogPostManagement = () => {
   const { darkMode } = useOutletContext();
@@ -37,6 +38,8 @@ const BlogPostManagement = () => {
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [zoomedImage, setZoomedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,19 +63,30 @@ const BlogPostManagement = () => {
     {
       key: "imgPath",
       title: "Image",
-      width: "10%",
+      width: "15%",
       render: (value) =>
         value ? (
-          <img
-            src={value}
-            alt="Post"
-            className="max-h-12 max-w-16 object-cover rounded"
-            loading="lazy"
-          />
+          <div className="relative group cursor-pointer">
+            <img
+              src={`${baseURL}${value}`}
+              alt="Post"
+              className="h-20 w-20 object-cover rounded shadow-md cursor-pointer"
+              onClick={() => handleImageZoom(`${baseURL}${value}`)}
+              loading="lazy"
+            />
+            {/* Icon mắt */}
+            <div
+              className="w-20 absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex justify-center items-center text-white text-lg font-normal transition duration-200"
+              style={{ pointerEvents: "none" }}
+            >
+              <FaEye size={18} />
+            </div>
+          </div>
         ) : (
           <span className="text-gray-400 italic">No Image</span>
         ),
     },
+
     { key: "title", title: "Title", width: "20%" },
     {
       key: "content",
@@ -193,6 +207,15 @@ const BlogPostManagement = () => {
     [dispatch]
   );
 
+  const handleImageZoom = (image) => {
+    setZoomedImage(image);
+    setIsImageZoomed(true);
+  };
+
+  const handleCloseZoom = () => {
+    setIsImageZoomed(false);
+  };
+
   return (
     <div>
       <div
@@ -265,6 +288,20 @@ const BlogPostManagement = () => {
             )
           }
         />
+        {/*Image zoom*/}
+        {isImageZoomed && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
+            onClick={handleCloseZoom}
+          >
+            <img
+              src={zoomedImage}
+              alt="Zoomed Preview"
+              className="max-h-[90vh] max-w-[90vw] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

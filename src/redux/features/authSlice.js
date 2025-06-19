@@ -1,13 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginAPI, registerAPI } from "@services/authAPI";
-import { persistor } from "@redux/store/store";
+import { jwtDecode } from "jwt-decode";
+import { fetchUserById } from "@redux/features/userSlice";
 
+// LOGIN
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload, thunkAPI) => {
     try {
-      const response = await loginAPI(payload);
-      return response;
+      const response = await loginAPI(payload); 
+      return response; 
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Login failed"
@@ -16,6 +18,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// REGISTER
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (payload, thunkAPI) => {
@@ -31,7 +34,7 @@ export const registerUser = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: JSON.parse(localStorage.getItem("user")) || null,
+    user: null,
     token: null,
     loading: false,
     error: null,
@@ -44,8 +47,6 @@ const authSlice = createSlice({
       state.role = null;
       localStorage.removeItem("accessToken");
       localStorage.removeItem("user");
-      // Clear persisted state from redux-persist
-      persistor.purge();
     },
   },
   extraReducers: (builder) => {
@@ -61,11 +62,22 @@ const authSlice = createSlice({
         state.role = action.payload.role;
         localStorage.setItem("accessToken", action.payload.token);
         localStorage.setItem("user", JSON.stringify(action.payload));
+
+        // Decode token và fetch user detail ngay lập tức
+        const decoded = jwtDecode(action.payload.token);
+        const userId =
+          decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+
+        if (userId) {
+          // Gọi fetchUserById ngay lập tức
+          action.asyncDispatch(fetchUserById(userId));
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed";
       })
+
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
@@ -77,6 +89,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, restoreUser } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;
-

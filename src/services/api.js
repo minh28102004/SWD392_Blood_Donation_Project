@@ -9,6 +9,8 @@ const api = axios.create({
   },
 });
 
+const baseURL = "https://localhost:7210";
+
 // Set token (if have)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -164,6 +166,7 @@ const putRequestMultipartFormData = async ({ url, formData }) => {
 
 // -------------------------------------------------------
 export {
+  baseURL,
   getRequest,
   getRequestParams,
   postRequest,
