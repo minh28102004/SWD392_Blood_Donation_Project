@@ -9,9 +9,13 @@ import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
 import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
-
-const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
-
+import {
+  createBloodInventory,
+  updateBloodInventory,
+} from "@redux/features/bloodInvSlice";
+import { useDispatch } from "react-redux";
+const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
+  const dispatch = useDispatch();
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -23,33 +27,60 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
     reset,
   } = useForm({
     defaultValues: {
-      inventoryID: selectedInventory?.inventoryID || "",
-      bloodTypes: selectedInventory?.bloodTypes || "",
-      quantity_unit: selectedInventory?.category || "",
+      BloodComponentId: selectedInventory?.BloodComponentId || "",
+      BloodTypeId: selectedInventory?.BloodTypeId || "",
+      Quantity: selectedInventory?.Quantity || "",
+      Unit: selectedInventory?.Unit || "",
+      InventoryLocation: selectedInventory?.InventoryLocation || "",
     },
   });
-
- 
 
   const validateForm = (data) => {
     return true;
   };
-
   const onSubmit = async (data) => {
-    if (!validateForm(data)) return;
+    const { BloodTypeId, BloodComponentId, Quantity, Unit, InventoryLocation } =
+      data;
+    const formDataToSend = new FormData();
+    formDataToSend.append("BloodComponentId", BloodComponentId);
+    formDataToSend.append("BloodTypeId", BloodTypeId);
+    formDataToSend.append("Unit", Unit);
+    formDataToSend.append("Quantity", Quantity);
+    formDataToSend.append("InventoryLocation", InventoryLocation);
+
     setLoading(true);
     try {
-      await new Promise((res) => setTimeout(res, 2000));
-      toast.success(
-        selectedInventory
-          ? "Inventory updated successfully!"
-          : "Inventory created successfully!"
-      );
+      if (selectedInventory) {
+        const resultAction = await dispatch(
+          updateBloodInventory({
+            id: selectedInventory.id,
+            formData: formDataToSend,
+          })
+        );
+        if (updateBloodInventory.fulfilled.match(resultAction)) {
+          toast.success("Blood inventory updated successfully!");
+
+          onSuccess();
+        } else {
+          toast.error("Update failed: " + resultAction.payload);
+        }
+      } else {
+        const resultAction = await dispatch(
+          createBloodInventory({ formData: formDataToSend })
+        );
+        if (createBloodInventory.fulfilled.match(resultAction)) {
+          toast.success("Blood inventory created successfully!");
+          onSuccess();
+        } else {
+          toast.error("Create failed: " + resultAction.payload);
+        }
+      }
       reset();
 
       onClose();
-    } catch {
-      toast.error("Failed to submit Inventory");
+    } catch (error) {
+      toast.error("Failed to submit blood inventory");
+      console.error("Error submitting blood inventory:", error);
     } finally {
       setLoading(false);
     }
@@ -64,7 +95,12 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
     ],
   };
 
-  const importantFields = ["IntId", "blood_type_id", "quantity_unit"];
+  const importantFields = [
+    "BloodTypeId",
+    "BloodComponentId",
+    "Quantity",
+    "Unit",
+  ];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -106,7 +142,9 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                   as="h2"
                   className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 text-center"
                 >
-                  {selectedInventory ? "Edit Inventory" : "Create New Inventory"}
+                  {selectedInventory
+                    ? "Edit Inventory"
+                    : "Create New Inventory"}
                 </Dialog.Title>
                 <hr className="border-gray-100 mb-6" />
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
@@ -115,36 +153,18 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("IntId") && (
+                            {importantFields.includes("BloodTypeId") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Inventory ID :
+                            Blood Type ID :
                           </>
                         }
-                        name="IntId"
-                        placeholder="Enter Inventory ID"
+                        name="BloodTypeId"
+                        placeholder="Enter Blood Type ID"
                         register={register}
                         errors={errors}
                         validation={{
-                          required: "Inventory ID is required",
-                        }}
-                      />
-
-                      <TextInput
-                        label={
-                          <>
-                            {importantFields.includes("blood_type_id") && (
-                              <span className="text-red-600 mr-1">*</span>
-                            )}
-                            Blood Type :
-                          </>
-                        }
-                        name="blood_type_id"
-                        placeholder="Enter Blood Type"
-                        register={register}
-                        errors={errors}
-                        validation={{
-                          required: "Blood Type is required",
+                          required: "Blood Type ID is required",
                           pattern: {
                             value: /^[a-zA-Z0-9\s]*$/,
                             message: "No special characters allowed",
@@ -155,13 +175,35 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("quantity_unit") && (
+                            {importantFields.includes("BloodComponentId") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Blood Component :
+                          </>
+                        }
+                        name="BloodComponentId"
+                        placeholder="Enter Blood Component ID"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Blood Component ID is required",
+                          pattern: {
+                            value: /^[a-zA-Z0-9\s]*$/,
+                            message: "No special characters allowed",
+                          },
+                        }}
+                      />
+
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("Quantity") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
                             Quantity :
                           </>
                         }
-                        name="quantity_unit"
+                        name="Quantity"
                         placeholder="Enter Quantity"
                         register={register}
                         errors={errors}
@@ -169,9 +211,31 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory }) => {
                           required: "Quantity is required",
                         }}
                       />
+                      <TextInput
+                        label={
+                          <>
+                            {importantFields.includes("Unit") && (
+                              <span className="text-red-600 mr-1">*</span>
+                            )}
+                            Unit :
+                          </>
+                        }
+                        name="Unit"
+                        placeholder="Enter Unit"
+                        register={register}
+                        errors={errors}
+                        validation={{
+                          required: "Unit is required",
+                        }}
+                      />
+                      <TextInput
+                        label={<>Location :</>}
+                        name="InventoryLocation"
+                        placeholder="Enter Location"
+                        register={register}
+                        errors={errors}
+                      />
                     </div>
-
-                   
 
                     <div className="flex justify-end space-x-4 pt-2">
                       <button

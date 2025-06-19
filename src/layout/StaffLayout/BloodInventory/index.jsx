@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useCallback } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,8 @@ import {
   createBloodInventory,
   updateBloodInventory,
   deleteBloodInventory,
+  setCurrentPage,
+  setPageSize,
 } from "@redux/features/bloodInvSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
@@ -17,12 +19,12 @@ import Tooltip from "@mui/material/Tooltip";
 import InventoryModal from "./modal_Inventory";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
-import { Checkbox } from "@mui/material";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
+import CollapsibleSearch from "@components/Collapsible_Search";
 const BloodInventoryManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const {  bloodList, loading, error, totalCount, currentPage, pageSize } =
+  const { bloodList, loading, error, totalCount, currentPage, pageSize } =
     useSelector((state) => state.bloodInventory);
   const [searchParams, setSearchParams] = useState({
     inventoryId: "",
@@ -30,12 +32,10 @@ const BloodInventoryManagement = () => {
     bloodTypeId: "",
   });
 
-
-
   const [selectedInventory, setSelectedInventory] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
- const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
   // Columns tương ứng các field
   const columns = [
@@ -45,30 +45,58 @@ const BloodInventoryManagement = () => {
     { key: "bloodComponentId", title: "Blood Component", width: "20%" },
     { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
     { key: "quantity", title: "Quantity", width: "20%" },
-    { key: "unit", title: "unit", width: "20%" },
+    { key: "unit", title: "Unit", width: "20%" },
     { key: "lastUpdated", title: "Last Updated", width: "20%" },
     { key: "inventoryLocation", title: "Location", width: "20%" },
+    {
+      key: "actions",
+      title: "Actions",
+      width: "12%",
+      render: (_, currentRow) => (
+        <div className="flex justify-center gap-2">
+          <Tooltip title="Edit post">
+            <button
+              className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
+              onClick={() => handleEdit(currentRow)}
+              aria-label="Edit post"
+            >
+              <FaEdit size={20} />
+            </button>
+          </Tooltip>
+          <Tooltip title="Delete post">
+            <button
+              className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
+              onClick={() => handleDelete(currentRow)}
+              aria-label="Delete post"
+            >
+              <FaTrash size={20} />
+            </button>
+          </Tooltip>
+        </div>
+      ),
+    },
   ];
 
- useEffect(() => {
-     const fetchData = async () => {
-       startLoading();
-       try {
-         await dispatch(
-           fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
-         );
-       } catch (error) {
-         console.error("Error fetching data:", error);
-       } finally {
-         stopLoading();
-       }
-     };
- 
-     fetchData();
-   }, [dispatch, currentPage, pageSize, searchParams]);
- 
+  useEffect(() => {
+    const fetchData = async () => {
+      startLoading();
+      try {
+        await dispatch(
+          fetchBloodInventories({
+            page: currentPage,
+            size: pageSize,
+            searchParams,
+          })
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        stopLoading();
+      }
+    };
 
-
+    fetchData();
+  }, [dispatch, currentPage, pageSize, searchParams]);
 
   // [CREATE]
   const handleCreatePost = () => {
@@ -78,54 +106,82 @@ const BloodInventoryManagement = () => {
   };
 
   // [EDIT]
-  const handleEdit = (post) => {
-    setSelectedInventory(post);
+  const handleEdit = (inventory) => {
+    setSelectedInventory(inventory);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [DELETE]
-  const handleDelete = async (inventory) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this blood inventory?",
-      content: "( Note: The blood inventory will be removed from the list )",
-      okText: "OK",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await dispatch(deleteBloodInventory(inventory.inventoryId)).unwrap();
-          toast.success("Blood inventory has been deleted!");
-          dispatch(fetchBloodInventories());
-        } catch (error) {
-          toast.error(
-            error?.message ||
-              "An error occurred while deleting the blood inventory!"
-          );
-        }
-      },
-      style: { top: "30%" },
-    });
-  };
-
- const handleRefresh = () => {
-     startLoading();
-     setTimeout(() => {
-       dispatch(
-         fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
-       )
-         .unwrap()
-         .finally(() => {
-           stopLoading();
-         });
-     }, 1000);
-   };
-  return (
+  const handleDelete = async (bloodInv) => {
+      Modal.confirm({
+        title: "Are you sure you want to delete this blog post?",
+        content: "( Note: The blog post will be removed from the list )",
+        okText: "OK",
+        cancelText: "Cancel",
+        onOk: async () => {
+          try {
+            await dispatch(deleteBloodInventory(bloodInv.inventoryId)).unwrap();
+            toast.success("Blood inventory has been deleted!");
+            dispatch(
+              fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
+            );
+          } catch (error) {
+            toast.error(
+              error?.message || "An error occurred while deleting the blood inventory!"
+            );
+          }
+        },
+        style: { top: "30%" },
+      });
+    };
+  //[SEARCH]
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params);
+    },
+    [dispatch]
+  );
+// [REFRESH]
+const handleRefresh = () => {
+  startLoading();
+  setTimeout(() => {
+    dispatch(
+      fetchBloodInventories({
+        page: currentPage,
+        size: pageSize,
+        searchParams,
+      })
+    )
+      .unwrap()
+      .finally(() => {
+        stopLoading();
+      });
+  }, 1000);
+};
+return (
     <div>
       <div
         className={`rounded-lg shadow-md transition-all duration-300 ${
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
+        <CollapsibleSearch
+          searchFields={[
+            { key: "id", type: "text", placeholder: "Search By Id" },
+            { key: "bloodType", type: "text", placeholder: "Search By BloodType" },
+            { key: "bloodComponent", type: "text", placeholder: "Search By Blood Component" },
+          ]}
+          onSearch={handleSearch}
+          onClear={() =>
+            setSearchParams({
+              id: "",
+              bloodType: "",
+              bloodComponent: "",
+            })
+          }
+        />
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
@@ -154,7 +210,7 @@ const BloodInventoryManagement = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedInventory={selectedInventory}
-          onSuccess={() => dispatch(fetchBloodInventories())}
+          onSuccess={() => dispatch(fetchBloodInventories({ page: currentPage, size: pageSize, searchParams }))}
         />
       </div>
     </div>

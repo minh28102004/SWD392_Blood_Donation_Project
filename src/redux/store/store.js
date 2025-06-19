@@ -62,6 +62,7 @@ export const store = configureStore({
     auth: persistedAuthReducer,
     blogPosts: blogPostsReducer,
     blood: bloodReducer,
+    bloodInventory: bloodInventoryReducer,
     donationRequests: bloodDonation,
     bloodRequest: bloodRequestReducer,
     bloodInventory: bloodInventoryReducer,
