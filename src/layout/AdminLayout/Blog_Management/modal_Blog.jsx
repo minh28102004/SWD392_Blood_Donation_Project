@@ -51,7 +51,9 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
   const onSubmit = async (data) => {
     const { title, category, userId } = data;
     const formDataToSend = new FormData();
-    formDataToSend.append("UserId", userId);
+     if (!selectedPost) {
+      formDataToSend.append("UserId", userId); // Add userId for POST requests
+    }
     formDataToSend.append("Title", title);
     formDataToSend.append("Content", contentWithoutHtml);
     formDataToSend.append("Category", category);
@@ -63,7 +65,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
     try {
       if (selectedPost) {
         const resultAction = await dispatch(
-          updateBlogPost({ id: selectedPost.post_id, formData: formDataToSend })
+          updateBlogPost({ id: selectedPost.postId, formData: formDataToSend })
         );
         if (updateBlogPost.fulfilled.match(resultAction)) {
           toast.success("Blog post updated successfully!");
@@ -204,7 +206,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
 
                     <div className="max-w-full">
                       <ImageUploadInput
-                        value={selectedPost?.imgPath || formData.featuredImage}
+                        value={formData.featuredImage}
                         onChange={(file) =>
                           setFormData((prev) => ({
                             ...prev,

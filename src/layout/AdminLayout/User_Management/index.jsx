@@ -87,22 +87,13 @@ const UserManagement = () => {
     : [];
 
   const columns = [
-    { key: "identification", title: "Identification", width: "12%" },
+    { key: "userId", title: "ID", width: "12%" },
     { key: "name", title: "Name", width: "15%" },
-    { key: "email", title: "Email", width: "18%" },
-    { key: "phone", title: "Phone", width: "10%" },
-    {
-      key: "dateOfBirth",
-      title: "Date of Birth",
-      width: "10%",
-      render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
-    },
-    { key: "address", title: "Address", width: "15%" },
-    { key: "roleName", title: "Role", width: "8%" },
+    { key: "roleName", title: "Role", width: "15%" },
     {
       key: "statusName",
       title: "Status",
-      width: "7%",
+      width: "15%",
       render: (value) => getStatusBadge(value),
     },
     {

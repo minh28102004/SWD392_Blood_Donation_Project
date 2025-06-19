@@ -1,28 +1,29 @@
 import { useDropzone } from "react-dropzone";
 import { FiUpload, FiX } from "react-icons/fi";
 import { useCallback, useState, useEffect } from "react";
+import { baseURL } from "@services/api";
 
 const ImageUploadInput = ({
-  value,   // This will be the image URL or File object
+  value, // This will be the image URL or File object
   onChange,
   error,
   label = "Upload Image",
 }) => {
   const [preview, setPreview] = useState(null);
 
-  // Handle preview when the value changes
   useEffect(() => {
     if (value) {
       // If the value is already a URL (string), use it directly for the preview
       if (typeof value === "string") {
-        setPreview(value); // This is the case when the value is an image URL
+        const fullUrl = value.startsWith("http") ? value : `${baseURL}${value}`;
+        setPreview(fullUrl);
       }
       // If the value is a File object, create an object URL for preview
       else if (value instanceof File) {
         setPreview(URL.createObjectURL(value));
       }
     } else {
-      setPreview(null); 
+      setPreview(null);
     }
   }, [value]);
 
@@ -41,7 +42,7 @@ const ImageUploadInput = ({
         return;
       }
 
-      onChange(file); 
+      onChange(file);
     },
     [onChange]
   );
@@ -54,8 +55,8 @@ const ImageUploadInput = ({
 
   const handleRemove = (e) => {
     e.stopPropagation();
-    onChange(null); l
-    setPreview(null); 
+    onChange(null);
+    setPreview(null);
   };
 
   return (
@@ -86,8 +87,12 @@ const ImageUploadInput = ({
         ) : (
           <div>
             <FiUpload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-200" />
-            <p className="mt-2 dark:text-gray-300">Drag & drop or click to upload</p>
-            <p className="text-sm text-gray-500 dark:text-gray-300">Max file size: 5MB</p>
+            <p className="mt-2 dark:text-gray-300">
+              Drag & drop or click to upload
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              Max file size: 5MB
+            </p>
           </div>
         )}
       </div>

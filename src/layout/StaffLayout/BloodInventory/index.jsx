@@ -210,7 +210,7 @@ return (
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedInventory={selectedInventory}
-          onSuccess={() => dispatch(fetchBloodInventories())}
+          onSuccess={() => dispatch(fetchBloodInventories({ page: currentPage, size: pageSize, searchParams }))}
         />
       </div>
     </div>

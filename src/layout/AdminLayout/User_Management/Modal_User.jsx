@@ -68,23 +68,23 @@ const UserCreationModal = ({
       reset({
         userName: selectedUser.userName || "",
         name: selectedUser.name || "",
-        email: selectedUser.email || "",
+        // email: selectedUser.email || "",
         roleBit:
           selectedUser.roleBit != null ? selectedUser.roleBit.toString() : "0",
         status: selectedUser.statusBit ? "1" : "0",
-        phone: selectedUser.phone || "",
-        dateOfBirth: selectedUser.dateOfBirth
-          ? format(new Date(selectedUser.dateOfBirth), "yyyy-MM-dd")
-          : "",
-        identification: selectedUser.identification || "",
-        bloodType: selectedUser.bloodTypeId?.toString() || "",
-        bloodComponent: selectedUser.bloodComponentId?.toString() || "",
-        height:
-          selectedUser.heightCm != null ? selectedUser.heightCm.toString() : "",
-        weight:
-          selectedUser.weightKg != null ? selectedUser.weightKg.toString() : "",
-        address: selectedUser.address || "",
-        medicalHistory: selectedUser.medicalHistory || "",
+        // phone: selectedUser.phone || "",
+        // dateOfBirth: selectedUser.dateOfBirth
+        //   ? format(new Date(selectedUser.dateOfBirth), "yyyy-MM-dd")
+        //   : "",
+        // identification: selectedUser.identification || "",
+        // bloodType: selectedUser.bloodTypeId?.toString() || "",
+        // bloodComponent: selectedUser.bloodComponentId?.toString() || "",
+        // height:
+        //   selectedUser.heightCm != null ? selectedUser.heightCm.toString() : "",
+        // weight:
+        //   selectedUser.weightKg != null ? selectedUser.weightKg.toString() : "",
+        // address: selectedUser.address || "",
+        // medicalHistory: selectedUser.medicalHistory || "",
       });
 
       setShowAdditional(true);
@@ -121,11 +121,11 @@ const UserCreationModal = ({
     formData.append("UserName", normalizeNull(data.userName));
     formData.append("Name", normalizeNull(data.name));
     formData.append("Email", normalizeNull(data.email));
-    formData.append("Phone", normalizeNull(data.phone));
-    formData.append("DateOfBirth", normalizeNull(data.dateOfBirth));
-    formData.append("Address", normalizeNull(data.address));
-    formData.append("Identification", normalizeNull(data.identification));
-    formData.append("MedicalHistory", normalizeNull(data.medicalHistory));
+    // formData.append("Phone", normalizeNull(data.phone));
+    // formData.append("DateOfBirth", normalizeNull(data.dateOfBirth));
+    // formData.append("Address", normalizeNull(data.address));
+    // formData.append("Identification", normalizeNull(data.identification));
+    // formData.append("MedicalHistory", normalizeNull(data.medicalHistory));
     if (selectedUser) {
       // PUT cập nhật: gửi "true"/"false"
       formData.append("StatusBit", data.status === "1" ? "true" : "false");
@@ -134,13 +134,13 @@ const UserCreationModal = ({
       formData.append("StatusBit", data.status === "1" ? 1 : 0);
     }
     formData.append("RoleBit", Number(data.roleBit));
-    formData.append("HeightCm", data.height ? Number(data.height) : 0);
-    formData.append("WeightKg", data.weight ? Number(data.weight) : 0);
-    formData.append("BloodTypeId", data.bloodType ? Number(data.bloodType) : 0);
-    formData.append(
-      "BloodComponentId",
-      data.bloodComponent ? Number(data.bloodComponent) : 0
-    );
+    // formData.append("HeightCm", data.height ? Number(data.height) : 0);
+    // formData.append("WeightKg", data.weight ? Number(data.weight) : 0);
+    // formData.append("BloodTypeId", data.bloodType ? Number(data.bloodType) : 0);
+    // formData.append(
+    //   "BloodComponentId",
+    //   data.bloodComponent ? Number(data.bloodComponent) : 0
+    // );
 
     // Xử lý password:
     // Nếu là tạo mới (không có selectedUser) -> luôn gửi password (bắt buộc)
@@ -447,7 +447,7 @@ const UserCreationModal = ({
                       )}
                     </div>
 
-                    <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
+                    {/* <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
                       <input
                         type="checkbox"
                         id="showAdditional"
@@ -583,7 +583,7 @@ const UserCreationModal = ({
                         </div>
                         <hr className="border-gray-100" />
                       </div>
-                    )}
+                    )} */}
 
                     <div className="flex justify-end space-x-4 pt-2">
                       <button

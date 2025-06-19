@@ -3,7 +3,6 @@ import {
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
-  FaLock,
   FaHistory,
   FaCalendarAlt,
   FaCheckCircle,
@@ -12,59 +11,23 @@ import {
   FaIdCard,
   FaKey,
   FaTint,
-  FaHeartbeat,
   FaWeight,
   FaRulerVertical,
   FaEdit,
   FaUser,
-  FaStickyNote,
 } from "react-icons/fa";
 import { format, differenceInDays } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchBloodComponents,
-  fetchBloodTypes,
-} from "@redux/features/bloodSlice";
+import { fetchBloodTypes } from "@redux/features/bloodSlice";
+import { updateUser, fetchUserById } from "@redux/features/userSlice";
+import { toast } from "react-toastify";
 import Avatar from "@components/Avatar_User_Image";
-
-const InputField = ({
-  label,
-  icon: Icon,
-  iconColor = "text-gray-600 dark:text-gray-300",
-  name,
-  type = "text",
-  value,
-  disabled,
-  onChange,
-  children,
-  className = "",
-  labelIcon: LabelIcon,
-  labelIconColor = "text-gray-600 dark:text-gray-300",
-  ...props
-}) => (
-  <div className={`space-y-1 ${className}`}>
-    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 ">
-      {LabelIcon && <LabelIcon className={`${labelIconColor} h-4 w-4`} />}
-      {label} :
-    </label>
-    <div className="flex items-center">
-      {Icon && <Icon className={`${iconColor} mr-2 flex-shrink-0 h-4 w-4`} />}
-      {children || (
-        <input
-          name={name}
-          type={type}
-          value={value}
-          disabled={disabled}
-          onChange={onChange}
-          className="w-full p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-colors disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white h-10"
-          {...props}
-        />
-      )}
-    </div>
-  </div>
-);
+import { InputField } from "./inputField";
 
 const UserProfile = () => {
+  const dispatch = useDispatch();
+  const { selectedUser, loading } = useSelector((state) => state.user);
+  const { bloodTypes } = useSelector((state) => state.blood);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     avatarUrl: "https://i.pravatar.cc/150?img=52",
@@ -74,19 +37,23 @@ const UserProfile = () => {
     nextEligibleDate: "2024-03-15",
     verificationStatus: "verified",
     healthStatus: "Good",
+    ...selectedUser,
   });
-  const dispatch = useDispatch();
-  const { selectedUser } = useSelector((state) => state.user);
-  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+
+  useEffect(() => {
+    dispatch(fetchBloodTypes());
+  }, [dispatch]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  if (!selectedUser) {
+    return <div>No user data available</div>;
+  }
 
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
     label: `${bt.name}${bt.rhFactor}`,
-  }));
-
-  const bloodComponentOptions = bloodComponents.map((bc) => ({
-    value: bc.bloodComponentId.toString(),
-    label: bc.name,
   }));
 
   const statusColors = {
@@ -98,36 +65,65 @@ const UserProfile = () => {
     const { name, value } = e.target;
     setProfile((prev) => ({
       ...prev,
-      [name]: name === "weight" || name === "height" ? Number(value) : value,
+      [name]: name === "bloodTypeId" ? Number(value) : value,
     }));
   };
 
-const StatusIndicator = () => {
-  const statusValue = selectedUser?.statusBit;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isEditing) return;
+    const formData = new FormData();
+    if (profile.password && profile.password.trim() !== "") {
+      formData.append("Password", profile.password);
+    }
+    formData.append("Name", profile.name);
+    formData.append("Email", profile.email);
+    formData.append("Phone", profile.phone);
+    formData.append("DateOfBirth", profile.dateOfBirth);
+    formData.append("Address", profile.address);
+    formData.append("Identification", profile.identification);
+    formData.append("HeightCm", profile.heightCm);
+    formData.append("WeightKg", profile.weightKg);
+    formData.append("MedicalHistory", profile.medicalHistory);
+    formData.append(
+      "BloodTypeId",
+      profile.bloodTypeId ? Number(profile.bloodTypeId) : 1
+    );
+    dispatch(updateUser({ id: selectedUser.userId, formData }))
+      .unwrap()
+      .then(() => {
+        toast.success("Profile updated successfully!");
+        dispatch(fetchUserById(selectedUser.userId));
+      });
+    setIsEditing(false);
+  };
 
-  // Chuyển từ số hoặc chuỗi số sang tên trạng thái
-  const normalizedStatus =
-    statusValue === 1 || statusValue === "1"
-      ? "active"
-      : "inactive"; // mặc định nếu không phải 1 là inactive
+  const StatusIndicator = () => {
+    const statusValue = selectedUser?.statusBit;
 
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <div
-        className={`inline-flex items-center px-4 py-2 rounded-full ${
-          statusColors[normalizedStatus] ||
-          "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
-        } shadow-sm`}
-      >
-        {{
-          active: <FaCheckCircle className="mr-2 animate-pulse" />,
-          inactive: <FaExclamationCircle className="mr-2 animate-pulse" />,
-        }[normalizedStatus]}
-        {normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1)}
+    // Chuyển từ số hoặc chuỗi số sang tên trạng thái
+    const normalizedStatus =
+      statusValue === 1 || statusValue === "1" ? "active" : "inactive"; // mặc định nếu không phải 1 là inactive
+
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <div
+          className={`inline-flex items-center px-4 py-2 rounded-full ${
+            statusColors[normalizedStatus] ||
+            "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+          } shadow-sm`}
+        >
+          {
+            {
+              active: <FaCheckCircle className="mr-2 animate-pulse" />,
+              inactive: <FaExclamationCircle className="mr-2 animate-pulse" />,
+            }[normalizedStatus]
+          }
+          {normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1)}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
   // Donation history mở rộng với nhiều lần hiến máu
   const DonationHistory = () => {
@@ -155,10 +151,6 @@ const StatusIndicator = () => {
         <FaTimesCircle className="text-red-500 dark:text-red-300 mr-1" />
       ),
     };
-
-    if (!profile) {
-      return <div>Loading...</div>;
-    }
 
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow max-w-xl mx-auto">
@@ -235,17 +227,17 @@ const StatusIndicator = () => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-center">
             <div className="h-32 w-32 bg-red-100 dark:bg-red-900 mx-auto mb-4 overflow-hidden rounded-full transform hover:scale-105 transition-transform duration-300">
               <Avatar
-                name={selectedUser?.name}
-                avatarUrl={selectedUser?.avatar}
+                name={profile?.name}
+                avatarUrl={profile?.avatar}
                 size={128}
               />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {selectedUser.userName}
+              {profile.userName}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 mt-1 flex items-center justify-center">
               <FaIdCard className="mr-2" />
-              {selectedUser.identification}
+              {profile.identification}
             </p>
             <StatusIndicator />
           </div>
@@ -260,85 +252,95 @@ const StatusIndicator = () => {
               Personal Information
             </h3>
             <button
-              onClick={() => setIsEditing((e) => !e)}
+              type="submit"
+              onClick={(e) => {
+                if (isEditing) {
+                  handleSubmit(e);
+                } else {
+                  e.preventDefault();
+                  setIsEditing(true);
+                }
+              }}
               className="absolute right-4 top-6 px-2 py-1 bg-gradient-to-br from-rose-400 to-rose-600 text-white rounded-lg hover:brightness-90 hover:scale-105 transform transition-transform duration-300 ease-in-out flex items-center gap-2"
             >
               <FaEdit className="inline-block" />
               {isEditing ? "Save Changes" : "Edit Profile"}
             </button>
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField
+                  label="Identification"
+                  icon={FaIdCard}
+                  iconColor="text-gray-700 dark:text-gray-300"
+                  name="identification"
+                  value={profile.identification || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Password"
+                  icon={FaKey}
+                  name="password"
+                  type="password"
+                  value={profile.password || ""}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="Leave blank to keep current"
+                  isPasswordToggle
+                />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField
+                  label="Full Name"
+                  icon={FaUser}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  name="name"
+                  value={profile.name || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Email"
+                  icon={FaEnvelope}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  type="email"
+                  name="email"
+                  value={profile.email || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Phone"
+                  icon={FaPhone}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  type="tel"
+                  name="phone"
+                  value={profile.phone || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Date of Birth"
+                  icon={FaCalendarAlt}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  type="date"
+                  name="dateOfBirth"
+                  value={profile.dateOfBirth || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+              </div>
               <InputField
-                label="Donor ID"
-                icon={FaIdCard}
-                iconColor="text-gray-700 dark:text-gray-300"
-                name="donorId"
-                value={selectedUser.identification}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-              <InputField
-                label="Password"
-                icon={FaKey}
+                label="Address"
+                icon={FaMapMarkerAlt}
                 iconColor="text-gray-600 dark:text-gray-300"
-                type="password"
-                name="password"
-                value={selectedUser.password}
+                name="address"
+                value={profile.address || ""}
                 disabled={!isEditing}
                 onChange={handleChange}
+                className="mt-6"
+                type="text"
               />
-              <InputField
-                label="Full Name"
-                icon={FaUser}
-                iconColor="text-gray-600 dark:text-gray-300"
-                name="fullName"
-                value={selectedUser.name}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-              <InputField
-                label="Email"
-                icon={FaEnvelope}
-                iconColor="text-gray-600 dark:text-gray-300"
-                type="email"
-                name="email"
-                value={selectedUser.email}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-              <InputField
-                label="Phone"
-                icon={FaPhone}
-                iconColor="text-gray-600 dark:text-gray-300"
-                type="tel"
-                name="phone"
-                value={selectedUser.phone}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-              <InputField
-                label="Date of Birth"
-                icon={FaCalendarAlt}
-                iconColor="text-gray-600 dark:text-gray-300"
-                type="date"
-                name="dob"
-                value={selectedUser.dateOfBirth}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-            </div>
-
-            <InputField
-              label="Address"
-              icon={FaMapMarkerAlt}
-              iconColor="text-gray-600 dark:text-gray-300"
-              name="address"
-              value={selectedUser.address}
-              disabled={!isEditing}
-              onChange={handleChange}
-              className="mt-6"
-              type="text"
-            />
+            </form>
           </div>
 
           {/* Medical Profile */}
@@ -346,73 +348,77 @@ const StatusIndicator = () => {
             <h3 className="text-2xl font-semibold mb-6 text-center text-gray-900 dark:text-white">
               Medical Profile
             </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <InputField
-                label="Blood Type"
-                icon={FaTint}
-                iconColor="text-red-600 dark:text-red-400"
-                name="bloodType"
-                disabled={!isEditing}
-                onChange={handleChange}
-              >
-                <select
-                  name="bloodType"
-                  value={selectedUser.bloodTypeId}
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <InputField
+                  label="Blood Type"
+                  icon={FaTint}
+                  iconColor="text-red-600 dark:text-red-400"
+                  name="bloodTypeId"
                   disabled={!isEditing}
-                  className="w-full h-10 p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white"
                   onChange={handleChange}
                 >
-                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
-                    (type) => (
-                      <option key={type} value={type}>
-                        {type}
+                  <select
+                    name="bloodTypeId"
+                    value={
+                      profile.bloodTypeId != null
+                        ? profile.bloodTypeId.toString()
+                        : bloodTypeOptions[0]?.value || ""
+                    }
+                    disabled={!isEditing}
+                    className="w-full h-10 p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white"
+                    onChange={handleChange}
+                  >
+                    {bloodTypeOptions.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
                       </option>
-                    )
-                  )}
-                </select>
-              </InputField>
-              <InputField
-                label="Height (cm)"
-                icon={FaRulerVertical}
-                iconColor="text-gray-600 dark:text-gray-300"
-                name="height"
-                type="number"
-                min={0}
-                value={selectedUser.heightCm || ""}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-              <InputField
-                label="Weight (kg)"
-                icon={FaWeight}
-                iconColor="text-gray-600 dark:text-gray-300"
-                name="weight"
-                type="number"
-                min={0}
-                value={selectedUser.weightKg}
-                disabled={!isEditing}
-                onChange={handleChange}
-              />
-            </div>
+                    ))}
+                  </select>
+                </InputField>
 
-            <InputField
-              label="Medical History"
-              iconColor="text-gray-600 dark:text-gray-300"
-              name="medicalProfile"
-              disabled={!isEditing}
-              onChange={handleChange}
-              className="mt-6"
-            >
-              <textarea
-                name="medicalProfile"
-                value={selectedUser.medicalHistory}
+                <InputField
+                  label="Height (cm)"
+                  icon={FaRulerVertical}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  name="heightCm"
+                  type="text"
+                  min={0}
+                  value={profile.heightCm || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+                <InputField
+                  label="Weight (kg)"
+                  icon={FaWeight}
+                  iconColor="text-gray-600 dark:text-gray-300"
+                  name="weightKg"
+                  type="text"
+                  min={0}
+                  value={profile.weightKg || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <InputField
+                label="Medical History"
+                iconColor="text-gray-600 dark:text-gray-300"
+                name="medicalHistory"
                 disabled={!isEditing}
                 onChange={handleChange}
-                rows={3}
-                className="w-full p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors resize-none disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white"
-              />
-            </InputField>
+                className="mt-6"
+              >
+                <textarea
+                  name="medicalHistory"
+                  value={profile.medicalHistory || ""}
+                  disabled={!isEditing}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full p-2 border border-gray-400 rounded-md hover:border-blue-500 focus:outline-none focus:ring-1 focus:border-blue-600 transition-colors resize-none disabled:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:hover:border-blue-500 dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:text-white"
+                />
+              </InputField>
+            </form>
           </div>
         </div>
       </div>

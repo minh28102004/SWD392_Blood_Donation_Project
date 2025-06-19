@@ -9,9 +9,12 @@ import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
 import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
-import { createBloodInventory, updateBloodInventory } from "@redux/features/bloodInvSlice";
+import {
+  createBloodInventory,
+  updateBloodInventory,
+} from "@redux/features/bloodInvSlice";
 import { useDispatch } from "react-redux";
-const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
+const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
   const dispatch = useDispatch();
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
@@ -36,7 +39,8 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
     return true;
   };
   const onSubmit = async (data) => {
-    const { BloodTypeId , BloodComponentId , Quantity , Unit ,InventoryLocation} = data;
+    const { BloodTypeId, BloodComponentId, Quantity, Unit, InventoryLocation } =
+      data;
     const formDataToSend = new FormData();
     formDataToSend.append("BloodComponentId", BloodComponentId);
     formDataToSend.append("BloodTypeId", BloodTypeId);
@@ -45,35 +49,40 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
     formDataToSend.append("InventoryLocation", InventoryLocation);
 
     setLoading(true);
-        try {
-          if (selectedInventory) {
-            const resultAction = await dispatch(
-              updateBloodInventory({ id: selectedInventory.id, formData: formDataToSend })
-            );
-            if (updateBloodInventory.fulfilled.match(resultAction)) {
-              toast.success("Blood inventory updated successfully!");
-              onSuccess();
-            } else {
-              toast.error("Update failed: " + resultAction.payload);
-            }
-          } else {
-            const resultAction = await dispatch(
-              createBloodInventory({ formData: formDataToSend })
-            );
-            if (createBloodInventory.fulfilled.match(resultAction)) {
-              toast.success("Blood inventory created successfully!");
-              onSuccess();
-            } else {
-              toast.error("Create failed: " + resultAction.payload);
-            }
-          }
-          reset();
-          onClose();
-        } catch (error) {
-          toast.error("Failed to submit blood inventory");
-          console.error("Error submitting blood inventory:", error);
-        } finally {
-          setLoading(false);
+    try {
+      if (selectedInventory) {
+        const resultAction = await dispatch(
+          updateBloodInventory({
+            id: selectedInventory.id,
+            formData: formDataToSend,
+          })
+        );
+        if (updateBloodInventory.fulfilled.match(resultAction)) {
+          toast.success("Blood inventory updated successfully!");
+
+          onSuccess();
+        } else {
+          toast.error("Update failed: " + resultAction.payload);
+        }
+      } else {
+        const resultAction = await dispatch(
+          createBloodInventory({ formData: formDataToSend })
+        );
+        if (createBloodInventory.fulfilled.match(resultAction)) {
+          toast.success("Blood inventory created successfully!");
+          onSuccess();
+        } else {
+          toast.error("Create failed: " + resultAction.payload);
+        }
+      }
+      reset();
+
+      onClose();
+    } catch (error) {
+      toast.error("Failed to submit blood inventory");
+      console.error("Error submitting blood inventory:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,7 +95,12 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory,onSuccess }) => {
     ],
   };
 
-  const importantFields = ["BloodTypeId", "BloodComponentId", "Quantity", "Unit"];
+  const importantFields = [
+    "BloodTypeId",
+    "BloodComponentId",
+    "Quantity",
+    "Unit",
+  ];
 
   return (
     <Transition appear show={isOpen} as={Fragment}>

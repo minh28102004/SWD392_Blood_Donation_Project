@@ -20,7 +20,7 @@ const TableComponent = ({ columns, data }) => {
         </thead>
       </table>
 
-      <div className="custom-scrollbar overflow-y-auto shadow-md overflow-x-hidden max-h-[60vh]">
+      <div className="custom-scrollbar overflow-y-auto shadow-md overflow-x-hidden max-h-[65vh]">
         <table
           className="w-full text-sm border  border-collapse"
           style={{ tableLayout: "fixed" }}
