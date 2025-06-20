@@ -48,7 +48,7 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
-  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(700);
 
   useEffect(() => {
     const fetchData = async () => {

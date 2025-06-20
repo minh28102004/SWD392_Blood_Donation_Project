@@ -8,8 +8,12 @@ import SuccessModal from "./Success_Modal";
 import { useNavigate } from "react-router-dom";
 import useOutsideClick from "@hooks/useOutsideClick";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { createBloodRequest } from "@redux/features/bloodRequestSlice";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
 
 const BloodDonationModal = ({ isOpen, setIsOpen }) => {
   const [visible, setVisible] = useState(false);
@@ -19,6 +23,17 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
   const modalRef = useRef();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!bloodComponents.length && !bloodTypes.length) {
+        await dispatch(fetchBloodComponents());
+        await dispatch(fetchBloodTypes());
+      }
+    };
+    fetchData();
+  }, [dispatch]);
 
   // Delay unmount to allow exit animation
   useEffect(() => {
@@ -27,7 +42,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
 
   const closeModal = () => {
     setVisible(false);
-    setTimeout(() => setIsOpen(false), 300); 
+    setTimeout(() => setIsOpen(false), 300);
   };
 
   useOutsideClick(modalRef, closeModal, visible);
@@ -42,10 +57,30 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const buildRequestFormData = (data) => {
+      const form = new FormData();
+      form.append("UserId", 1);
+      form.append("Name", data.name);
+      form.append("DateOfBirth", data.dateOfBirth);
+      form.append("Phone", data.contact);
+      form.append("BloodTypeId", parseInt(data.bloodTypeId));
+      form.append("BloodComponentId", parseInt(data.bloodComponentId));
+      form.append(
+        "IsEmergency",
+        data.urgencyLevel === "true" || data.urgencyLevel === true
+      );
+      form.append("Location", data.location);
+      form.append("Quantity", parseInt(data.quantityUnit));
+      form.append("HeightCm", parseFloat(data.height));
+      form.append("WeightKg", parseFloat(data.weight));
+      form.append("HealthInfo", data.medicalContext || "");
+      form.append("Status", 0);
+      return form;
+    };
     if (activeTab === "request") {
       try {
-        await dispatch(createBloodRequest(formData)).unwrap();
+        const formattedData = buildRequestFormData(formData);
+        await dispatch(createBloodRequest(formattedData)).unwrap();
         toast.success("Blood Request created successfully!");
         setModalSuccess(true);
       } catch (error) {
@@ -53,7 +88,7 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
         toast.error("Failed to submit request");
       }
     } else {
-      setModalSuccess(true); 
+      setModalSuccess(true);
     }
   };
 
@@ -127,12 +162,16 @@ const BloodDonationModal = ({ isOpen, setIsOpen }) => {
                   {/* Form */}
                   <form
                     onSubmit={handleSubmit}
-                    className="custom-scrollbar space-y-4 max-h-[65vh] overflow-y-auto pl-1 pr-1"
+                    className="custom-scrollbar space-y-4 max-h-[70vh] overflow-y-auto pl-1 pr-1"
                   >
                     {activeTab === "donate" ? (
                       <DonateForm onChange={handleInputChange} />
                     ) : (
-                      <RequestForm onChange={handleInputChange} />
+                      <RequestForm
+                        onChange={handleInputChange}
+                        bloodTypes={bloodTypes}
+                        bloodComponents={bloodComponents}
+                      />
                     )}
 
                     <div className="flex justify-center mt-4">

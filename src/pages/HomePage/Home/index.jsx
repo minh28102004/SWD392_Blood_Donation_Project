@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { blogPosts } from "@pages/HomePage/Blog/blog_Data";
 import { slides, criteriaList, tips } from "./content_Data";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -9,21 +8,35 @@ import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { baseURL } from "@services/api";
+import { fetchBlogPosts } from "@redux/features/blogPostsSlice";
 import BloodDonationModal from "@pages/Modal_Form_Registration/ModalForm";
+import BlogPostDetailModal from "../Blog/blogPostDetail";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const previewPosts = blogPosts.slice(0, 3);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const { blogList } = useSelector((state) => state.blogPosts);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const previewPosts = [...blogList]
+    .filter((post) => post.createdAt)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 3);
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true });
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 4000);
+    // Load blog posts if not already loaded
+    if (!blogList || blogList.length === 0) {
+      dispatch(fetchBlogPosts({ key: "blogPage", page: 1, size: 9 }));
+    }
     return () => clearInterval(timer);
   }, []);
 
@@ -44,6 +57,10 @@ const Content = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  const handleOpenModal = (post) => {
+    setSelectedPost(post);
+    setModalOpen(true);
+  };
   return (
     <div className="transition-colors duration-300">
       {/* Hero Slider */}
@@ -205,13 +222,13 @@ const Content = () => {
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {previewPosts.map((post, index) => (
               <div
-                key={index}
+                key={post.postId}
                 className="bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
                 data-aos="fade-up"
                 data-aos-delay={index * 200}
               >
                 <img
-                  src={post.image}
+                  src={`${baseURL}${post.imgPath}`}
                   alt={post.title}
                   className="w-full h-48 object-cover"
                 />
@@ -219,12 +236,12 @@ const Content = () => {
                   <h3 className="text-xl font-bold text-black dark:text-white mb-2">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    {post.excerpt}
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    {post.content?.slice(0, 100)}...
                   </p>
                   <button
-                    onClick={() => window.open(post.link, "_blank")}
-                    className="text-white bg-gray-800 dark:bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 dark:hover:text-white dark:hover:bg-blue-900 transition"
+                    onClick={() => handleOpenModal(post)}
+                    className="text-white bg-gray-800 dark:bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 transition"
                   >
                     Read More →
                   </button>
@@ -232,6 +249,13 @@ const Content = () => {
               </div>
             ))}
           </div>
+
+          {/*Blog Post Detail*/}
+          <BlogPostDetailModal
+            isOpen={modalOpen}
+            post={selectedPost}
+            onClose={() => setModalOpen(false)}
+          />
 
           <div className="text-center pb-2">
             <a

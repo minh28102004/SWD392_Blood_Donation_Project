@@ -233,16 +233,16 @@ const UserCreationModal = ({
     "status",
   ];
 
-  // Dynamically generate options for bloodType and bloodComponents
-  const bloodTypeOptions = bloodTypes.map((bt) => ({
-    value: bt.bloodTypeId.toString(),
-    label: `${bt.name}${bt.rhFactor}`,
-  }));
+  // // Dynamically generate options for bloodType and bloodComponents
+  // const bloodTypeOptions = bloodTypes.map((bt) => ({
+  //   value: bt.bloodTypeId.toString(),
+  //   label: `${bt.name}${bt.rhFactor}`,
+  // }));
 
-  const bloodComponentOptions = bloodComponents.map((bc) => ({
-    value: bc.bloodComponentId.toString(),
-    label: bc.name,
-  }));
+  // const bloodComponentOptions = bloodComponents.map((bc) => ({
+  //   value: bc.bloodComponentId.toString(),
+  //   label: bc.name,
+  // }));
 
   // Dynamically generate options for role and status from userList
   const roleOptions = userRole.map((role) => ({

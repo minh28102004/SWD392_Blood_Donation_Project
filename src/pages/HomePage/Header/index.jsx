@@ -16,6 +16,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/features/authSlice";
 import { persistor } from "@redux/store/store";
 import Avatar from "@components/Avatar_User_Image";
+import Tooltip from "@mui/material/Tooltip";
+import { jwtDecode } from "jwt-decode";
+import { fetchUserById } from "@redux/features/userSlice";
 
 const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -28,6 +31,22 @@ const Header = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { selectedUser } = useSelector((state) => state.user);
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   const savedUser = JSON.parse(localStorage.getItem("user"));
+
+  //   if (token && savedUser && !selectedUser) {
+  //     const decoded = jwtDecode(token);
+  //     const userId =
+  //       decoded[
+  //         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+  //       ];
+  //     if (userId) {
+  //       dispatch(fetchUserById(userId));
+  //     }
+  //   }
+  // }, []);
 
   const toggleMenu = (event) => {
     event.stopPropagation();
@@ -133,17 +152,18 @@ const Header = () => {
           {/* Theme toggle & Account */}
           <div className="flex items-center space-x-4 relative">
             {/* Toggle Theme Button */}
-            <button
-              onClick={toggleTheme}
-              title={darkMode ? "Light Mode" : "Dark Mode"}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
-            >
-              {darkMode ? (
-                <FiSun className="text-yellow-400 text-xl" />
-              ) : (
-                <FiMoon className="text-gray-800 dark:text-white text-xl" />
-              )}
-            </button>
+            <Tooltip title={darkMode ? "Light Mode" : "Dark Mode"} arrow>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
+              >
+                {darkMode ? (
+                  <FiSun className="text-yellow-400 text-xl" />
+                ) : (
+                  <FiMoon className="text-gray-800 dark:text-white text-xl" />
+                )}
+              </button>
+            </Tooltip>
 
             {/* User Dropdown */}
             <div className="relative">
@@ -152,7 +172,11 @@ const Header = () => {
                 onClick={toggleMenu}
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
-                <Avatar name={selectedUser?.name} avatarUrl={selectedUser?.avatar} size={36} />
+                <Avatar
+                  name={selectedUser?.name}
+                  avatarUrl={selectedUser?.avatar}
+                  size={36}
+                />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
                   {loadingLogout ? (
                     <div className="flex items-center">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const useLoadingDelay = (delayTime = 1000) => {
+export const useLoadingDelay = (delayTime = 500) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const startLoading = () => {

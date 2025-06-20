@@ -6,23 +6,13 @@ import {
   deleteRequest,
 } from "@services/api";
 
-// [GET] all blog posts
-export const fetchAllBlogPosts = createAsyncThunk(
-  "blogPosts/fetchAll",
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await getRequest("/api/BlogPosts");
-      return res.data.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
-
-// [GET] blog posts with search parameters
+// [GET] blog posts with pagination & search
 export const fetchBlogPosts = createAsyncThunk(
-  "user/fetchAll",
-  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
+  "blogPosts/fetchAll",
+  async (
+    { key, page = 1, size = 8, searchParams = {} },
+    { rejectWithValue }
+  ) => {
     try {
       const queryString = new URLSearchParams({
         page: page.toString(),
@@ -37,7 +27,20 @@ export const fetchBlogPosts = createAsyncThunk(
   }
 );
 
-// [GET] blog post by ID
+// [GET] all blog posts (optional use)
+export const fetchAllBlogPosts = createAsyncThunk(
+  "blogPosts/fetchAllNoPagination",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await getRequest("/api/BlogPosts");
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// [GET] by ID
 export const fetchBlogPostById = createAsyncThunk(
   "blogPosts/fetchById",
   async (id, { rejectWithValue }) => {
@@ -50,7 +53,7 @@ export const fetchBlogPostById = createAsyncThunk(
   }
 );
 
-// [POST] create new blog post (multipart/form-data)
+// [POST]
 export const createBlogPost = createAsyncThunk(
   "blogPosts/create",
   async ({ formData }, { rejectWithValue }) => {
@@ -66,7 +69,7 @@ export const createBlogPost = createAsyncThunk(
   }
 );
 
-// [PUT] update blog post (multipart/form-data)
+// [PUT]
 export const updateBlogPost = createAsyncThunk(
   "blogPosts/update",
   async ({ id, formData }, { rejectWithValue }) => {
@@ -82,7 +85,7 @@ export const updateBlogPost = createAsyncThunk(
   }
 );
 
-// [DELETE] delete blog post by id
+// [DELETE]
 export const deleteBlogPost = createAsyncThunk(
   "blogPosts/delete",
   async (id, { rejectWithValue }) => {
@@ -95,6 +98,8 @@ export const deleteBlogPost = createAsyncThunk(
   }
 );
 
+// --------------------------------------
+
 const blogPostsSlice = createSlice({
   name: "blogPosts",
   initialState: {
@@ -102,10 +107,9 @@ const blogPostsSlice = createSlice({
     selectedPost: null,
     loading: false,
     error: null,
-    totalCount: 0,
-    totalPages: 0,
-    currentPage: 1,
-    pageSize: 6,
+    pagination: {
+      // key: { pageSize, currentPage, totalCount, totalPages }
+    },
   },
   reducers: {
     clearSelectedPost: (state) => {
@@ -115,22 +119,29 @@ const blogPostsSlice = createSlice({
       state.error = null;
     },
     setPagination: (state, action) => {
-      const { totalCount, totalPages, currentPage, pageSize } = action.payload;
-      state.totalCount = totalCount;
-      state.totalPages = totalPages;
-      state.currentPage = currentPage;
-      state.pageSize = pageSize;
+      const { key, totalCount, totalPages, currentPage, pageSize } =
+        action.payload;
+      state.pagination[key] = {
+        totalCount,
+        totalPages,
+        currentPage,
+        pageSize,
+      };
     },
     setCurrentPage: (state, action) => {
-      state.currentPage = action.payload;
+      const { key, currentPage } = action.payload;
+      if (!state.pagination[key]) state.pagination[key] = {};
+      state.pagination[key].currentPage = currentPage;
     },
     setPageSize: (state, action) => {
-      state.pageSize = action.payload;
+      const { key, pageSize } = action.payload;
+      if (!state.pagination[key]) state.pagination[key] = {};
+      state.pagination[key].pageSize = pageSize;
     },
   },
   extraReducers: (builder) => {
     builder
-      // FETCH ALL BLOG POSTS
+      // FETCH Blog Posts (with pagination)
       .addCase(fetchBlogPosts.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -138,17 +149,21 @@ const blogPostsSlice = createSlice({
       .addCase(fetchBlogPosts.fulfilled, (state, action) => {
         state.loading = false;
         state.blogList = action.payload.posts || [];
-        state.totalCount = action.payload.totalCount;
-        state.totalPages = action.payload.totalPages;
-        state.currentPage = action.payload.currentPage;
-        state.pageSize = action.payload.pageSize;
+
+        const { key } = action.meta.arg;
+        state.pagination[key] = {
+          totalCount: action.payload.totalCount,
+          totalPages: action.payload.totalPages,
+          currentPage: action.payload.currentPage,
+          pageSize: action.payload.pageSize,
+        };
       })
       .addCase(fetchBlogPosts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // FETCH BLOG POST BY ID
+      // FETCH by ID
       .addCase(fetchBlogPostById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -162,7 +177,7 @@ const blogPostsSlice = createSlice({
         state.error = action.payload;
       })
 
-      // CREATE BLOG POST
+      // CREATE
       .addCase(createBlogPost.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -176,7 +191,7 @@ const blogPostsSlice = createSlice({
         state.error = action.payload;
       })
 
-      // UPDATE BLOG POST
+      // UPDATE
       .addCase(updateBlogPost.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -198,7 +213,7 @@ const blogPostsSlice = createSlice({
         state.error = action.payload;
       })
 
-      // DELETE BLOG POST
+      // DELETE
       .addCase(deleteBlogPost.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -226,4 +241,5 @@ export const {
   setCurrentPage,
   setPageSize,
 } = blogPostsSlice.actions;
+
 export default blogPostsSlice.reducer;

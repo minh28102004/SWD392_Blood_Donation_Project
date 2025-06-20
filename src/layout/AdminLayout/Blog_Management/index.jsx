@@ -5,8 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
   fetchBlogPosts,
-  createBlogPost,
-  updateBlogPost,
   deleteBlogPost,
   setCurrentPage,
   setPageSize,
@@ -27,8 +25,16 @@ import { baseURL } from "@services/api";
 const BlogPostManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const { blogList, loading, error, totalCount, currentPage, pageSize } =
-    useSelector((state) => state.blogPosts);
+  const { blogList, loading, error, pagination } = useSelector(
+    (state) => state.blogPosts
+  );
+  const componentKey = "blogmanage";
+  const {
+    currentPage = 1,
+    pageSize = 6,
+    totalCount = 0,
+    totalPages = 0,
+  } = pagination[componentKey] || {};
   const [searchParams, setSearchParams] = useState({
     id: "",
     title: "",
@@ -37,7 +43,7 @@ const BlogPostManagement = () => {
   const [selectedPost, setSelectedPost] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
-  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
+  const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(700);
   const [isImageZoomed, setIsImageZoomed] = useState(false);
   const [zoomedImage, setZoomedImage] = useState(null);
 
@@ -46,7 +52,11 @@ const BlogPostManagement = () => {
       startLoading();
       try {
         await dispatch(
-          fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
+          fetchBlogPosts({
+            key: componentKey,
+            page: currentPage,
+            size: pageSize,
+          })
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -59,14 +69,15 @@ const BlogPostManagement = () => {
   }, [dispatch, currentPage, pageSize, searchParams]);
 
   const columns = [
-    { key: "postId", title: "ID", width: "6%" },
+    { key: "postId", title: "ID", width: "6%", className: "text-center" },
     {
       key: "imgPath",
       title: "Image",
       width: "15%",
+      className: "text-center",
       render: (value) =>
         value ? (
-          <div className="relative group cursor-pointer">
+          <div className="relative group cursor-pointer flex justify-center">
             <img
               src={`${baseURL}${value}`}
               alt="Post"
@@ -74,7 +85,6 @@ const BlogPostManagement = () => {
               onClick={() => handleImageZoom(`${baseURL}${value}`)}
               loading="lazy"
             />
-            {/* Icon mắt */}
             <div
               className="w-20 absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex justify-center items-center text-white text-lg font-normal transition duration-200"
               style={{ pointerEvents: "none" }}
@@ -83,18 +93,20 @@ const BlogPostManagement = () => {
             </div>
           </div>
         ) : (
-          <span className="text-gray-400 italic">No Image</span>
+          <div className="flex justify-center items-center text-gray-400 italic">
+            No Image
+          </div>
         ),
     },
-
-    { key: "title", title: "Title", width: "20%" },
+    { key: "title", title: "Title", width: "20%", className: "text-center" },
     {
       key: "content",
       title: "Content Preview",
       width: "20%",
+      className: "text-center",
       render: (value) => {
         if (!value) return "No content";
-        const text = value.replace(/<[^>]+>/g, ""); // loại bỏ thẻ HTML
+        const text = value.replace(/<[^>]+>/g, "");
         return text.length > 80 ? text.slice(0, 77) + "..." : text;
       },
     },
@@ -102,25 +114,34 @@ const BlogPostManagement = () => {
       key: "category",
       title: "Category",
       width: "10%",
+      className: "text-center",
       render: (value) => value || "N/A",
     },
-    { key: "userName", title: "Author", width: "12%" },
+    {
+      key: "userName",
+      title: "Author",
+      width: "12%",
+      className: "text-center",
+    },
     {
       key: "createdAt",
       title: "Created At",
       width: "10%",
+      className: "text-center",
       render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
     {
       key: "updatedAt",
       title: "Updated At",
       width: "10%",
+      className: "text-center",
       render: (value) => (value ? new Date(value).toLocaleDateString() : "N/A"),
     },
     {
       key: "actions",
       title: "Actions",
       width: "12%",
+      className: "text-center",
       render: (_, currentRow) => (
         <div className="flex justify-center gap-2">
           <Tooltip title="Edit post">
@@ -257,11 +278,11 @@ const BlogPostManagement = () => {
           pageSize={pageSize}
           currentPage={currentPage}
           onPageChange={(page) => {
-            dispatch(setCurrentPage(page));
+            dispatch(setCurrentPage({ key: componentKey, currentPage: page }));
           }}
           onPageSizeChange={(size) => {
-            dispatch(setPageSize(size));
-            dispatch(setCurrentPage(1));
+            dispatch(setPageSize({ key: componentKey, pageSize: size }));
+            dispatch(setCurrentPage({ key: componentKey, currentPage: 1 }));
           }}
         />
         {/*Button*/}
