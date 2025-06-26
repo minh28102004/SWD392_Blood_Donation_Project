@@ -1,18 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
   fetchBloodRequests,
-  updateBloodRequest,
+  updateBloodRequestStatus,
   fetchBloodRequestById,
+  setCurrentPage,
 } from "@redux/features/bloodRequestSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
 import Tooltip from "@mui/material/Tooltip";
-import { Button, Modal } from "antd";
+import { Button, Modal, Select } from "antd";
 import { toast } from "react-toastify";
 import { Checkbox } from "@mui/material";
+import CollapsibleSearch from "@components/Collapsible_Search";
+
+const { Option } = Select;
+
+const statusOptions = [
+  { id: 0, label: "Pending" },
+  { id: 1, label: "Successful" },
+  { id: 2, label: "Cancel" },
+];
 
 const BloodRequests = () => {
   const { darkMode } = useOutletContext();
@@ -29,25 +39,26 @@ const BloodRequests = () => {
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [searchParams, setSearchParams] = useState({
+    name: "",
+    bloodType: "",
+    bloodComponent: "",
+  });
 
   useEffect(() => {
     setLoadingDelay(true);
-    dispatch(fetchBloodRequests({ page: currentPage, size: pageSize }))
+    dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }))
       .unwrap()
       .catch((err) => console.error("Fetch failed:", err))
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage, pageSize, searchParams]);
 
-  const handleToggleStatus = async (row) => {
-    const newStatus = row.status.id === 0 ? 1 : 0; // Pending <-> Fulfilled
-    const formData = new FormData();
-    formData.append("bloodRequestId", row.bloodRequestId);
-    formData.append("status.id", newStatus);
+  const handleStatusChange = async (value, row) => {
     try {
-      await dispatch(updateBloodRequest({ id: row.bloodRequestId, formData })).unwrap();
+      await dispatch(updateBloodRequestStatus({ id: row.bloodRequestId, status: value })).unwrap();
       toast.success("Status updated!");
-      dispatch(fetchBloodRequests({ page: currentPage, size: pageSize }));
-    } catch (error) {
+      dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }));
+    } catch {
       toast.error("Failed to update status.");
     }
   };
@@ -57,9 +68,21 @@ const BloodRequests = () => {
       const res = await dispatch(fetchBloodRequestById(row.bloodRequestId)).unwrap();
       setSelectedDetail(res);
       setDetailModalVisible(true);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load detail.");
     }
+  };
+
+  const handleSearch = useCallback((params) => {
+    dispatch(setCurrentPage(1));
+    setSearchParams(params);
+  }, [dispatch]);
+
+  const handleRefresh = () => {
+    setLoadingDelay(true);
+    dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }))
+      .unwrap()
+      .finally(() => setTimeout(() => setLoadingDelay(false), 800));
   };
 
   const columns = [
@@ -68,29 +91,39 @@ const BloodRequests = () => {
     { key: "bloodTypeName", title: "Blood Type", width: "10%" },
     { key: "bloodComponentName", title: "Component", width: "12%" },
     { key: "quantity", title: "Qty", width: "8%" },
-    { key: "isEmergency", title: "Emergency", width: "10%", render: (v) => <Checkbox checked={v} /> },
-    { key: "status", title: "Status", width: "10%", render: (s) => s.name },
+    {
+      key: "isEmergency",
+      title: "Emergency",
+      width: "10%",
+      render: (v) => <Checkbox checked={v} disabled />,
+    },
+    {
+      key: "status",
+      title: "Status",
+      width: "15%",
+      render: (_, row) => (
+        <Select
+          value={row.status.id}
+          onChange={(val) => handleStatusChange(val, row)}
+          size="small"
+          style={{ width: "100%" }}
+        >
+          {statusOptions.map((opt) => (
+            <Option key={opt.id} value={opt.id}>
+              {opt.label}
+            </Option>
+          ))}
+        </Select>
+      ),
+    },
     {
       key: "actions",
       title: "Actions",
-      width: "18%",
+      width: "12%",
       render: (_, row) => (
         <div className="flex gap-2 justify-center">
-          <Tooltip title="Toggle Status">
-            <Button
-              type="primary"
-              size="small"
-              onClick={() => handleToggleStatus(row)}
-            >
-              Toggle Status
-            </Button>
-          </Tooltip>
           <Tooltip title="View Detail">
-            <Button
-              type="default"
-              size="small"
-              onClick={() => handleShowDetail(row)}
-            >
+            <Button type="default" size="small" onClick={() => handleShowDetail(row)}>
               Detail
             </Button>
           </Tooltip>
@@ -102,6 +135,23 @@ const BloodRequests = () => {
   return (
     <div>
       <div className={`rounded-lg shadow-md ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
+        {/* Search */}
+        <CollapsibleSearch
+          searchFields={[
+            { key: "name", type: "text", placeholder: "Search by Name" },
+            { key: "bloodType", type: "text", placeholder: "Search by Blood Type" },
+            { key: "bloodComponent", type: "text", placeholder: "Search by Component" },
+          ]}
+          onSearch={handleSearch}
+          onClear={() =>
+            setSearchParams({
+              name: "",
+              bloodType: "",
+              bloodComponent: "",
+            })
+          }
+        />
+
         <div className="p-2">
           {loading || loadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
@@ -112,6 +162,13 @@ const BloodRequests = () => {
           ) : (
             <TableComponent columns={columns} data={bloodRequestList} />
           )}
+        </div>
+
+        {/* Refresh Button */}
+        <div className="flex justify-end px-4 pb-4">
+          <Button onClick={handleRefresh} loading={loading || loadingDelay}>
+            Refresh
+          </Button>
         </div>
       </div>
 
