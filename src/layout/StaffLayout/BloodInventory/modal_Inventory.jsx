@@ -50,16 +50,18 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
 
     setLoading(true);
     try {
+      console.log("selectedInventory", selectedInventory);
+      console.log("selectedInventory.id", selectedInventory?.id);
+
       if (selectedInventory) {
         const resultAction = await dispatch(
           updateBloodInventory({
-            id: selectedInventory.id,
+            id: selectedInventory.inventoryId,
             formData: formDataToSend,
           })
         );
         if (updateBloodInventory.fulfilled.match(resultAction)) {
           toast.success("Blood inventory updated successfully!");
-
           onSuccess();
         } else {
           toast.error("Update failed: " + resultAction.payload);

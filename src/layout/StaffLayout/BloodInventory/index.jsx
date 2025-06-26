@@ -58,6 +58,7 @@ const BloodInventoryManagement = () => {
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
+              
               aria-label="Edit post"
             >
               <FaEdit size={20} />
@@ -110,6 +111,7 @@ const BloodInventoryManagement = () => {
     setSelectedInventory(inventory);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
+    console.log("Editing inventory:", inventory);
   };
 
   // [DELETE]
