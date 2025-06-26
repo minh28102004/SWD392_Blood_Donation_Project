@@ -47,7 +47,7 @@ export const fetchBloodRequestsByUserId = createAsyncThunk(
         pageSize: pageSize.toString(),
       }).toString();
       const res = await getRequest(
-        `/api/BloodRequests/ByUser/${userId}?${queryString}`
+`/api/BloodRequests/ByUser/search/${userId}?${queryString}`
       );
       return res.data.data; 
     } catch (err) {
