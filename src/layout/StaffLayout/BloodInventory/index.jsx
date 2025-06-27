@@ -1,4 +1,4 @@
-import { useEffect, useState,useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,15 +39,27 @@ const BloodInventoryManagement = () => {
 
   // Columns tương ứng các field
   const columns = [
-    { key: "inventoryId", title: "Inventory ID", width: "20%" },
-    { key: "bloodTypeId", title: "Blood Type", width: "20%" },
+    { key: "inventoryId", title: "Inventory ID", width: "15%" },
     { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
-    { key: "bloodComponentId", title: "Blood Component", width: "20%" },
     { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
-    { key: "quantity", title: "Quantity", width: "20%" },
-    { key: "unit", title: "Unit", width: "20%" },
-    { key: "lastUpdated", title: "Last Updated", width: "20%" },
-    { key: "inventoryLocation", title: "Location", width: "20%" },
+    { key: "quantity", title: "Quantity", width: "10%" },
+    { key: "unit", title: "Unit", width: "10%" },
+    {
+      key: "lastUpdated",
+      title: "Last Updated",
+      width: "15%",
+      render: (text) => {
+        const date = new Date(text);
+        const formattedDate = `${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${date
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear().toString().slice(-2)}`;
+        return formattedDate;
+      },
+    },
+    { key: "inventoryLocation", title: "Location", width: "10%" },
     {
       key: "actions",
       title: "Actions",
@@ -58,7 +70,6 @@ const BloodInventoryManagement = () => {
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
-              
               aria-label="Edit post"
             >
               <FaEdit size={20} />
@@ -116,27 +127,32 @@ const BloodInventoryManagement = () => {
 
   // [DELETE]
   const handleDelete = async (bloodInv) => {
-      Modal.confirm({
-        title: "Are you sure you want to delete this blog post?",
-        content: "( Note: The blog post will be removed from the list )",
-        okText: "OK",
-        cancelText: "Cancel",
-        onOk: async () => {
-          try {
-            await dispatch(deleteBloodInventory(bloodInv.inventoryId)).unwrap();
-            toast.success("Blood inventory has been deleted!");
-            dispatch(
-              fetchBloodInventories({ page: currentPage, size: pageSize, searchParams })
-            );
-          } catch (error) {
-            toast.error(
-              error?.message || "An error occurred while deleting the blood inventory!"
-            );
-          }
-        },
-        style: { top: "30%" },
-      });
-    };
+    Modal.confirm({
+      title: "Are you sure you want to delete this blog post?",
+      content: "( Note: The blog post will be removed from the list )",
+      okText: "OK",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await dispatch(deleteBloodInventory(bloodInv.inventoryId)).unwrap();
+          toast.success("Blood inventory has been deleted!");
+          dispatch(
+            fetchBloodInventories({
+              page: currentPage,
+              size: pageSize,
+              searchParams,
+            })
+          );
+        } catch (error) {
+          toast.error(
+            error?.message ||
+              "An error occurred while deleting the blood inventory!"
+          );
+        }
+      },
+      style: { top: "30%" },
+    });
+  };
   //[SEARCH]
   const handleSearch = useCallback(
     (params) => {
@@ -145,24 +161,24 @@ const BloodInventoryManagement = () => {
     },
     [dispatch]
   );
-// [REFRESH]
-const handleRefresh = () => {
-  startLoading();
-  setTimeout(() => {
-    dispatch(
-      fetchBloodInventories({
-        page: currentPage,
-        size: pageSize,
-        searchParams,
-      })
-    )
-      .unwrap()
-      .finally(() => {
-        stopLoading();
-      });
-  }, 1000);
-};
-return (
+  // [REFRESH]
+  const handleRefresh = () => {
+    startLoading();
+    setTimeout(() => {
+      dispatch(
+        fetchBloodInventories({
+          page: currentPage,
+          size: pageSize,
+          searchParams,
+        })
+      )
+        .unwrap()
+        .finally(() => {
+          stopLoading();
+        });
+    }, 1000);
+  };
+  return (
     <div>
       <div
         className={`rounded-lg shadow-md transition-all duration-300 ${
@@ -172,8 +188,16 @@ return (
         <CollapsibleSearch
           searchFields={[
             { key: "id", type: "text", placeholder: "Search By Id" },
-            { key: "bloodType", type: "text", placeholder: "Search By BloodType" },
-            { key: "bloodComponent", type: "text", placeholder: "Search By Blood Component" },
+            {
+              key: "bloodType",
+              type: "text",
+              placeholder: "Search By BloodType",
+            },
+            {
+              key: "bloodComponent",
+              type: "text",
+              placeholder: "Search By Blood Component",
+            },
           ]}
           onSearch={handleSearch}
           onClear={() =>
@@ -212,7 +236,15 @@ return (
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedInventory={selectedInventory}
-          onSuccess={() => dispatch(fetchBloodInventories({ page: currentPage, size: pageSize, searchParams }))}
+          onSuccess={() =>
+            dispatch(
+              fetchBloodInventories({
+                page: currentPage,
+                size: pageSize,
+                searchParams,
+              })
+            )
+          }
         />
       </div>
     </div>
