@@ -18,6 +18,7 @@ import bloodInventoryReducer from "../features/bloodInvSlice";
 import bloodDonation from "../features/bloodDonationSlice";
 import bloodRequestReducer from "../features/bloodRequestSlice";
 import authReducer from "../features/authSlice";
+import bloodTypeReducer from "../features/bloodTypeSlice";
 
 // Cấu hình persist cho auth và user
 const authPersistConfig = {
@@ -65,6 +66,7 @@ export const store = configureStore({
     donationRequests: bloodDonation,
     bloodRequest: bloodRequestReducer,
     bloodInventory: bloodInventoryReducer,
+    bloodType: bloodTypeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

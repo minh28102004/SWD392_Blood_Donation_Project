@@ -107,8 +107,8 @@ const bloodInventorySlice = createSlice({
     pageSize: 7,
   },
   reducers: {
-    clearSelectedPost: (state) => {
-      state.selectedPost = null;
+    clearSelectedBloodInventory: (state) => {
+      state.selectedBloodInventory = null;
     },
     clearError: (state) => {
       state.error = null;
