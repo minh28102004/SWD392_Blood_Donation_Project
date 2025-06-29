@@ -11,7 +11,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
 import logo from "@assets/logo.png";
 import { useTheme } from "@components/Theme_Context";
-import { MdInventory, MdRequestPage } from "react-icons/md";
+import { MdBloodtype, MdInventory, MdRequestPage } from "react-icons/md";
 import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
 
 const DashboardLayout = () => {
@@ -50,6 +50,11 @@ const DashboardLayout = () => {
       name: "Blood Type",
       icon: <MdInventory />,
       path: "/staffLayout/BloodType",
+    },
+    {
+      name: "Blood Component",
+      icon: <MdBloodtype />,
+      path: "/staffLayout/BloodComponent",
     },
     {
       name: "Blood donation",
