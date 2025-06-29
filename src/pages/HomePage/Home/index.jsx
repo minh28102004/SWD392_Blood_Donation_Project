@@ -107,7 +107,7 @@ const Content = () => {
 
                   <button
                     onClick={handleDonateClick}
-                    className="font-semibold bg-red-700 hover:bg-red-900 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300"
+                    className="font-semibold bg-gradient-to-b from-red-800 via-rose-600 to-red-800 hover:brightness-90 hover:scale-105 text-white px-8 py-3 rounded-full transition duration-300"
                   >
                     Donate Blood Now
                   </button>
@@ -132,7 +132,11 @@ const Content = () => {
 
       {/*Modal Registration*/}
       {showModal && (
-        <BloodDonationModal isOpen={showModal} setIsOpen={setShowModal} />
+        <BloodDonationModal
+          isOpen={showModal}
+          setIsOpen={setShowModal}
+          userId={user?.userId}
+        />
       )}
 
       {/* Eligibility Criteria */}

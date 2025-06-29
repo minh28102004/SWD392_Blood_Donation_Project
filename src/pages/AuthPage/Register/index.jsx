@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "@redux/features/authSlice";
 import { toast } from "react-toastify";
+import LoadingSpinner from "@components/Loading";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -161,7 +162,10 @@ const Register = () => {
               whileTap={{ scale: 0.98 }}
               disabled={loading}
             >
-              {loading ? "Registering..." : "Register"}
+              <div className="flex items-center justify-center gap-2">
+                {loading && <LoadingSpinner size="4" color="white" inline />}
+                {loading ? "Registering..." : "Register"}
+              </div>
             </motion.button>
 
             <div className="flex flex-col items-center gap-4 mt-6">

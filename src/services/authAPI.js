@@ -1,7 +1,7 @@
-import { postRequest } from "./api";
+import { postRequest, postRequestMultipartFormData } from "./api";
 
-export const loginAPI = async (data) => {
-  return await postRequest({ url: "/api/Auth/login", data });
+export const loginAPI = async (formData) => {
+  return await postRequestMultipartFormData({ url: "/api/Auth/login", formData });
 };
 
 export const registerAPI = async (data) => {

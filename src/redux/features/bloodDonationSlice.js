@@ -53,18 +53,32 @@ export const fetchDonationRequestById = createAsyncThunk(
   }
 );
 
-// [GET] Paginated Donation Requests by userId
+// [GET] Paginated Donation Requests by userId with filters
 export const fetchDonationRequestsByUserId = createAsyncThunk(
   "donationRequests/fetchByUserId",
-  async ({ userId, page = 1, size = 10 }, { rejectWithValue }) => {
+  async (
+    { userId, page = 1, pageSize = 10, searchParams = {} },
+    { rejectWithValue }
+  ) => {
     try {
-      const queryString = new URLSearchParams({
+      const params = {
         page: page.toString(),
-        pageSize: size.toString(),
-      }).toString();
-
+        pageSize: pageSize.toString(),
+        ...searchParams,
+      };
+      // Xóa những field rỗng hoặc undefined
+      Object.keys(params).forEach((key) => {
+        if (
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
+        ) {
+          delete params[key];
+        }
+      });
+      const queryString = new URLSearchParams(params).toString();
       const res = await getRequest(
-        `/api/DonationRequests/user/${userId}?${queryString}`
+        `/api/DonationRequests/ByUser/search/${userId}?${queryString}`
       );
       return res.data;
     } catch (err) {

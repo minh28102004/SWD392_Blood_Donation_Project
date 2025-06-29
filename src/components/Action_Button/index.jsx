@@ -14,7 +14,7 @@ const ActionButtons = ({
         <button
           onClick={onReload}
           disabled={loading || loadingDelay}
-          className="flex items-center gap-1 px-2 py-1.5 bg-gradient-to-br from-sky-500 to-blue-500 text-white rounded-md text-sm transition duration-200 hover:scale-105 hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-1 px-2 py-1.5 bg-gradient-to-t from-rose-400 via-rose-500 to-red-400 text-white rounded-md text-sm transition duration-200 hover:scale-105 hover:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <FaSyncAlt
             className={`transition-transform duration-200 ${
@@ -29,7 +29,7 @@ const ActionButtons = ({
         <button
           onClick={onCreate}
           aria-label={`Create new ${createLabel.toLowerCase()}`}
-          className="flex items-center gap-1 px-2 py-1.5 bg-gradient-to-br from-emerald-400 to-green-500 text-white rounded-md text-sm transition duration-200 hover:scale-105 hover:brightness-90"
+          className="flex items-center gap-1 px-2 py-1.5 bg-white text-red-600 border border-red-500 shadow-sm hover:shadow-lg hover:bg-red-50 rounded-md text-sm transition duration-200 hover:scale-105 hover:brightness-90"
         >
           <FaPlus size={14} />
           Create {createLabel}

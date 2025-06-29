@@ -36,7 +36,7 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
       {/* Collapsible search button */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex-shrink-0 bg-blue-600 text-white px-2.5 py-1.5 rounded-lg flex items-center space-x-2 hover:bg-blue-700 transition duration-300"
+        className="flex-shrink-0 bg-gradient-to-t from-gray-600 via-gray-700 to-gray-600 text-white px-2 py-1 rounded-lg flex items-center space-x-2 hover:brightness-90 transition duration-300"
       >
         <FaSearch />
         <span>Search</span>
@@ -157,7 +157,7 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
               {/* Search Button */}
               <Tooltip title="Click to start" color="rgb(117, 117, 117)">
                 <button
-                  className="flex-shrink-0 min-w-[75px] bg-gradient-to-br from-rose-400 to-red-500 text-white rounded-lg 
+                  className="flex-shrink-0 min-w-[75px] bg-gradient-to-t from-rose-400 via-rose-500 to-red-400 text-white rounded-lg 
         transition-all duration-300 transform hover:brightness-90 hover:scale-105"
                   onClick={handleSearchButtonClick}
                 >
@@ -168,8 +168,8 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
               {/* Clear Button */}
               <Tooltip title="Clear search data" color="rgb(117, 117, 117)">
                 <button
-                  className="flex-shrink-0 min-w-[35px] bg-[hsl(210,100%,75%)] text-white rounded-lg 
-        transition-all duration-300 transform hover:bg-[hsl(210,100%,65%)] hover:scale-105"
+                  className="flex-shrink-0 min-w-[35px] bg-gray-500 text-white rounded-lg 
+        transition-all duration-300 transform hover:brightness-90 hover:scale-105"
                   onClick={handleClear}
                 >
                   <RedoOutlined />

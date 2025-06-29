@@ -88,7 +88,8 @@ const UserManagement = () => {
 
   const columns = [
     { key: "userId", title: "ID", width: "12%" },
-    { key: "name", title: "Name", width: "15%" },
+    { key: "name", title: "Full Name", width: "20%" },
+    { key: "email", title: "Email", width: "20%" },
     { key: "roleName", title: "Role", width: "15%" },
     {
       key: "statusName",
@@ -172,7 +173,7 @@ const UserManagement = () => {
         .finally(() => {
           stopLoading();
         });
-    }, 1000);
+    }, 500);
   };
 
   // [SEARCH]

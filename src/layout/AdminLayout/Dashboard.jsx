@@ -2,12 +2,20 @@ import { useRef, useEffect, useState } from "react";
 import {
   FiUsers,
   FiSettings,
+  FiUserPlus,
+  FiLogOut,
   FiMenu,
   FiSun,
   FiMoon,
   FiChevronDown,
 } from "react-icons/fi";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "@redux/features/authSlice";
+import { persistor } from "@redux/store/store";
+import Avatar from "@components/Avatar_User_Image";
+import { jwtDecode } from "jwt-decode";
+import { fetchUserById } from "@redux/features/userSlice";
 import {
   BarChartOutlined,
   UserOutlined,
@@ -17,26 +25,66 @@ import logo from "@assets/logo.png";
 import logo2 from "@assets/logo2.png";
 import { useTheme } from "@components/Theme_Context";
 import Tooltip from "@mui/material/Tooltip";
+import useOutsideClick from "@hooks/useOutsideClick";
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [loadingLogout, setLoadingLogout] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
-
   const { darkMode, toggleTheme } = useTheme();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { selectedUser } = useSelector((state) => state.user);
 
-  const user = {
-    name: "Nguyễn Văn A",
-    email: "a.nguyen@example.com",
-    avatar: "https://i.pravatar.cc/100?img=3",
+  useOutsideClick(dropdownRef, () => setIsUserMenuOpen(false), isUserMenuOpen);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (token && savedUser && !selectedUser) {
+      const decoded = jwtDecode(token);
+      const userId =
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        ];
+      if (userId) {
+        dispatch(fetchUserById(userId));
+      }
+    }
+  }, [dispatch, selectedUser]);
+
+  const handleUserProfileClick = () => {
+    if (selectedUser) {
+      navigate("/userProfile", { state: { user: selectedUser } });
+    } else {
+      console.log("User data is loading...");
+    }
+    setIsUserMenuOpen(false);
   };
 
-  const guestMenuItems = [
-    { label: "Thông tin cá nhân", href: "#", icon: <FiSettings /> },
-    { label: "Đăng xuất", href: "#", isDanger: true },
+  const userMenuItems = [
+    {
+      label: "User Profile",
+      icon: <FiUserPlus className="mr-2 text-lg" />,
+      onClick: handleUserProfileClick,
+    },
+    {
+      label: "Logout",
+      href: "/",
+      icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
+      isDanger: true,
+      onClick: async () => {
+        setLoadingLogout(true);
+        setIsUserMenuOpen(false);
+        dispatch(logout());
+        await persistor.purge();
+      },
+    },
   ];
 
   const menuItems = [
@@ -53,22 +101,6 @@ const DashboardLayout = () => {
     },
   ];
 
-  const toggleMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
-        !buttonRef.current.contains(e.target)
-      ) {
-        setIsUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
     <div
       className={`flex h-screen transition-colors duration-300 ${
@@ -84,9 +116,13 @@ const DashboardLayout = () => {
       >
         <div className="flex items-center justify-between mb-2">
           {sidebarOpen ? (
-            <img src={logo} alt="Logo" className="object-contain " />
+            <img src={logo} alt="Logo" className="object-contain" />
           ) : (
-            <img src={logo2} alt="Logo" className="ml-1 mt-1 object-contain w-10 h-10" />
+            <img
+              src={logo2}
+              alt="Logo"
+              className="ml-1 mt-1 object-contain w-10 h-10"
+            />
           )}
         </div>
         <hr className="border-gray-200 mb-2" />
@@ -166,56 +202,92 @@ const DashboardLayout = () => {
             <div className="relative">
               <button
                 ref={buttonRef}
-                onClick={toggleMenu}
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
-                <img
-                  src={user?.avatar}
-                  alt="User Avatar"
-                  className="w-9 h-9 rounded-full object-cover border-2 border-yellow-600"
+                <Avatar
+                  name={selectedUser?.name}
+                  avatarUrl={selectedUser?.avatar}
+                  size={36}
                 />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
-                  {user?.name}
+                  {loadingLogout ? (
+                    <div className="flex items-center">
+                      <svg
+                        className="animate-spin h-6 w-6 mr-2 text-blue-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8z"
+                        ></path>
+                      </svg>
+                      Logging out...
+                    </div>
+                  ) : (
+                    selectedUser?.userName || "Unknown"
+                  )}
                 </span>
                 <FiChevronDown className="text-gray-500 dark:text-gray-300" />
               </button>
 
+              {/* Dropdown Menu */}
               <div
                 ref={dropdownRef}
-                className={`absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl transform transition-all duration-300 origin-top-right z-50 ${
+                className={`absolute right-0 mt-2 transition-all duration-300 origin-top-right z-50 ${
                   isUserMenuOpen
                     ? "opacity-100 scale-100 translate-y-0"
                     : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                }`}
+                } ${
+                  user ? "w-48" : "w-36"
+                } bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl`}
               >
-                <div className="px-4 py-3 border-b dark:border-gray-700">
-                  <p className="text-sm text-gray-800 dark:text-gray-100 font-semibold">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-300">
-                    {user.email}
-                  </p>
-                </div>
+                {user && (
+                  <div className="px-4 py-3 border-b dark:border-gray-700">
+                    <p className="text-sm text-gray-800 dark:text-white font-semibold">
+                      {selectedUser?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-300">
+                      {selectedUser?.email}
+                    </p>
+                  </div>
+                )}
+
                 <div className="py-1">
-                  {guestMenuItems.map((item, index) => (
-                    <a
-                      key={index}
-                      href={item.href}
-                      className={`flex items-center px-4 py-2 text-sm ${
-                        item.isDanger
-                          ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
-                          : "text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      {item.icon && <span className="mr-2">{item.icon}</span>}
-                      {item.label}
-                    </a>
-                  ))}
+                  {userMenuItems.map(
+                    (item, index) => (
+                      <a
+                        key={index}
+                        href={item.href}
+                        onClick={item.onClick}
+                        className={`flex items-center px-4 py-2 text-sm ${
+                          item.isDanger
+                            ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </a>
+                    )
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         {/* Content */}
         <Outlet context={{ darkMode }} />
       </main>

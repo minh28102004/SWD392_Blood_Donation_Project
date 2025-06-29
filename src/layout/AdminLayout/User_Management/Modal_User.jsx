@@ -8,25 +8,9 @@ import {
   FaLock,
   FaUserTag,
   FaToggleOn,
-  FaPhone,
-  FaIdBadge,
-  FaCalendarAlt,
-  FaAddressCard,
-  FaNotesMedical,
-  FaTint,
-  FaRulerVertical,
-  FaWeight,
   FaTimes,
-  FaInfoCircle,
 } from "react-icons/fa";
-import { format } from "date-fns";
-import {
-  TextInput,
-  PasswordInput,
-  SelectInput,
-  DateInput,
-  TextAreaInput,
-} from "@components/Form_Input";
+import { TextInput, PasswordInput, SelectInput } from "@components/Form_Input";
 import { createUser, updateUser } from "@redux/features/userSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,13 +21,10 @@ const UserCreationModal = ({
   onClose,
   selectedUser,
   onSuccess,
-  bloodTypes = [],
-  bloodComponents = [],
   userRole = [],
   userStatus = [],
 }) => {
   const dispatch = useDispatch();
-  const [showAdditional, setShowAdditional] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const modalRef = useRef(null);
@@ -68,31 +49,15 @@ const UserCreationModal = ({
       reset({
         userName: selectedUser.userName || "",
         name: selectedUser.name || "",
-        // email: selectedUser.email || "",
+        email: selectedUser.email || "",
         roleBit:
           selectedUser.roleBit != null ? selectedUser.roleBit.toString() : "0",
         status: selectedUser.statusBit ? "1" : "0",
-        // phone: selectedUser.phone || "",
-        // dateOfBirth: selectedUser.dateOfBirth
-        //   ? format(new Date(selectedUser.dateOfBirth), "yyyy-MM-dd")
-        //   : "",
-        // identification: selectedUser.identification || "",
-        // bloodType: selectedUser.bloodTypeId?.toString() || "",
-        // bloodComponent: selectedUser.bloodComponentId?.toString() || "",
-        // height:
-        //   selectedUser.heightCm != null ? selectedUser.heightCm.toString() : "",
-        // weight:
-        //   selectedUser.weightKg != null ? selectedUser.weightKg.toString() : "",
-        // address: selectedUser.address || "",
-        // medicalHistory: selectedUser.medicalHistory || "",
       });
-
-      setShowAdditional(true);
     } else {
       reset({
         status: "1", // Set lại giá trị mặc định nếu không có selectedUser
       });
-      setShowAdditional(false);
     }
   }, [selectedUser, reset]);
 
@@ -121,27 +86,8 @@ const UserCreationModal = ({
     formData.append("UserName", normalizeNull(data.userName));
     formData.append("Name", normalizeNull(data.name));
     formData.append("Email", normalizeNull(data.email));
-    // formData.append("Phone", normalizeNull(data.phone));
-    // formData.append("DateOfBirth", normalizeNull(data.dateOfBirth));
-    // formData.append("Address", normalizeNull(data.address));
-    // formData.append("Identification", normalizeNull(data.identification));
-    // formData.append("MedicalHistory", normalizeNull(data.medicalHistory));
-    if (selectedUser) {
-      // PUT cập nhật: gửi "true"/"false"
-      formData.append("StatusBit", data.status === "1" ? "true" : "false");
-    } else {
-      // POST tạo mới: gửi 1 hoặc 0
-      formData.append("StatusBit", data.status === "1" ? 1 : 0);
-    }
+    formData.append("StatusBit", data.status === "1" ? 1 : 0);
     formData.append("RoleBit", Number(data.roleBit));
-    // formData.append("HeightCm", data.height ? Number(data.height) : 0);
-    // formData.append("WeightKg", data.weight ? Number(data.weight) : 0);
-    // formData.append("BloodTypeId", data.bloodType ? Number(data.bloodType) : 0);
-    // formData.append(
-    //   "BloodComponentId",
-    //   data.bloodComponent ? Number(data.bloodComponent) : 0
-    // );
-
     // Xử lý password:
     // Nếu là tạo mới (không có selectedUser) -> luôn gửi password (bắt buộc)
     // Nếu là cập nhật (có selectedUser) và user có nhập password thì gửi
@@ -233,17 +179,6 @@ const UserCreationModal = ({
     "status",
   ];
 
-  // // Dynamically generate options for bloodType and bloodComponents
-  // const bloodTypeOptions = bloodTypes.map((bt) => ({
-  //   value: bt.bloodTypeId.toString(),
-  //   label: `${bt.name}${bt.rhFactor}`,
-  // }));
-
-  // const bloodComponentOptions = bloodComponents.map((bc) => ({
-  //   value: bc.bloodComponentId.toString(),
-  //   label: bc.name,
-  // }));
-
   // Dynamically generate options for role and status from userList
   const roleOptions = userRole.map((role) => ({
     value: role.id,
@@ -258,17 +193,7 @@ const UserCreationModal = ({
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-70"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-70"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-70" />
-        </Transition.Child>
+        <div className="fixed inset-0 bg-black bg-opacity-70" />
 
         <div className="fixed inset-0 ">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
@@ -299,6 +224,7 @@ const UserCreationModal = ({
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-5">
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Full Name */}
                       <TextInput
                         label={
                           <>
@@ -320,22 +246,31 @@ const UserCreationModal = ({
                         placeholder="Enter full name"
                         icon={FaUser}
                       />
-                      <SelectInput
+
+                      {/* Email */}
+                      <TextInput
                         label={
                           <>
-                            {importantFields.includes("roleBit") && (
+                            {importantFields.includes("email") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Role :
+                            Email :
                           </>
                         }
-                        name="roleBit"
+                        name="email"
                         register={register}
                         errors={errors}
-                        options={roleOptions}
-                        placeholder="Select role"
-                        icon={FaUserTag}
+                        validation={{
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address",
+                          },
+                        }}
+                        placeholder="Enter email"
+                        icon={FaEnvelope}
                       />
+
+                      {/* Username */}
                       <TextInput
                         label={
                           <>
@@ -362,24 +297,26 @@ const UserCreationModal = ({
                         placeholder="Enter username"
                         icon={FaUser}
                       />
+
+                      {/* Role */}
                       <SelectInput
                         label={
                           <>
-                            {importantFields.includes("status") && (
+                            {importantFields.includes("roleBit") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
-                            Status :
+                            Role :
                           </>
                         }
-                        name="status"
+                        name="roleBit"
                         register={register}
                         errors={errors}
-                        options={statusOptions}
-                        icon={FaToggleOn}
-                        disabled={!selectedUser} // Disabled nếu không có selectedUser (tạo mới)
-                        // Nếu không phải tạo mới (chỉnh sửa), người dùng có thể thay đổi status
+                        options={roleOptions}
+                        placeholder="Select role"
+                        icon={FaUserTag}
                       />
 
+                      {/* Password */}
                       <PasswordInput
                         label={
                           <>
@@ -400,12 +337,6 @@ const UserCreationModal = ({
                             value: 4,
                             message: "At least 4 characters",
                           },
-                          // pattern: {
-                          //   value:
-                          //     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                          //   message:
-                          //     "Must contain uppercase, lowercase, number, special char",
-                          // },
                         }}
                         placeholder={
                           selectedUser
@@ -414,7 +345,7 @@ const UserCreationModal = ({
                         }
                         icon={FaLock}
                       />
-
+                      {/* Password strength (only in create mode) */}
                       {!selectedUser && (
                         <div className="mt-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -445,146 +376,28 @@ const UserCreationModal = ({
                           )}
                         </div>
                       )}
-                    </div>
 
-                    {/* <div className="flex items-center space-x-2 py-4 border-t border-b border-gray-100 ">
-                      <input
-                        type="checkbox"
-                        id="showAdditional"
-                        checked={showAdditional}
-                        onChange={(e) => setShowAdditional(e.target.checked)}
-                        className="w-4 h-4 rounded-md border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                      />
-                      <label
-                        htmlFor="showAdditional"
-                        className="text-sm font-medium text-gray-700 dark:text-gray-300 dark:hover:text-yellow-500 flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors"
-                      >
-                        <span>Show Additional Information</span>
-                        <FaInfoCircle
-                          className="text-blue-500"
-                          title="Toggle additional fields"
+                      {/* Status (only in edit) */}
+                      {selectedUser && (
+                        <SelectInput
+                          label={
+                            <>
+                              {importantFields.includes("status") && (
+                                <span className="text-red-600 mr-1">*</span>
+                              )}
+                              Status :
+                            </>
+                          }
+                          name="status"
+                          register={register}
+                          errors={errors}
+                          options={statusOptions}
+                          icon={FaToggleOn}
                         />
-                      </label>
+                      )}
                     </div>
 
-                    {showAdditional && (
-                      <div className="space-y-6 transition-all duration-300 ease-in-out transform">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <SelectInput
-                            label="Blood Type :"
-                            name="bloodType"
-                            register={register}
-                            errors={errors}
-                            options={bloodTypeOptions}
-                            placeholder="Select blood type"
-                            icon={FaTint}
-                          />
-
-                          <SelectInput
-                            label="Blood Component :"
-                            name="bloodComponent"
-                            register={register}
-                            errors={errors}
-                            options={bloodComponentOptions}
-                            placeholder="Select blood component"
-                            icon={FaTint}
-                          />
-                          <TextInput
-                            label="Phone :"
-                            name="phone"
-                            register={register}
-                            errors={errors}
-                            placeholder="Enter phone number"
-                            icon={FaPhone}
-                            validation={{
-                              // required: "Phone number is required",
-                              pattern: {
-                                value: /^[+\d]?(?:[\d\s-]{3,14}\d)$/,
-                                message: "Invalid phone number format",
-                              },
-                              minLength: {
-                                value: 9,
-                                message: "Phone number too short",
-                              },
-                              maxLength: {
-                                value: 15,
-                                message: "Phone number too long",
-                              },
-                            }}
-                          />
-
-                          <DateInput
-                            label="Date of Birth :"
-                            name="dateOfBirth"
-                            register={register}
-                            errors={errors}
-                            max={format(new Date(), "yyyy-MM-dd")}
-                            icon={FaCalendarAlt}
-                          />
-                          <TextInput
-                            label="Identification :"
-                            name="identification"
-                            register={register}
-                            errors={errors}
-                            placeholder="Enter identification"
-                            icon={FaIdBadge}
-                          />
-                          <TextInput
-                            label="Email :"
-                            name="email"
-                            register={register}
-                            errors={errors}
-                            validation={{
-                              // required: "Email is required",
-                              pattern: {
-                                value:
-                                  /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                message: "Invalid email address",
-                              },
-                            }}
-                            placeholder="Enter email"
-                            icon={FaEnvelope}
-                          />
-                          <TextInput
-                            label="Height (cm) :"
-                            name="height"
-                            register={register}
-                            errors={errors}
-                            placeholder="Enter height"
-                            icon={FaRulerVertical}
-                          />
-
-                          <TextInput
-                            label="Weight (kg) :"
-                            name="weight"
-                            register={register}
-                            errors={errors}
-                            placeholder="Enter weight"
-                            icon={FaWeight}
-                          />
-                          <TextAreaInput
-                            label="Address :"
-                            name="address"
-                            register={register}
-                            errors={errors}
-                            rows={3}
-                            placeholder="Enter address"
-                            icon={FaAddressCard}
-                          />
-                          <TextAreaInput
-                            label="Medical History :"
-                            name="medicalHistory"
-                            register={register}
-                            errors={errors}
-                            rows={3}
-                            placeholder="Enter medical history"
-                            icon={FaNotesMedical}
-                          />
-                        </div>
-                        <hr className="border-gray-100" />
-                      </div>
-                    )} */}
-
+                    {/* Buttons */}
                     <div className="flex justify-end space-x-4 pt-2">
                       <button
                         type="button"
@@ -596,7 +409,7 @@ const UserCreationModal = ({
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-t from-rose-400 via-rose-500 to-red-400 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
                           ? selectedUser

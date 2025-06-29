@@ -40,13 +40,7 @@ export function TextInput({
     </label>
   );
 }
-export function Checkbox({
-  label,
-  register,
-  name,
-  errors,
-  validation,
-}) {
+export function Checkbox({ label, register, name, errors, validation }) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
       <div className="flex items-center gap-2 mt-1">
@@ -226,6 +220,48 @@ export function TextAreaInput({
           className={`${baseClass} mt-1 block w-full px-2 py-1.5 min-h-[80px] resize-y ${
             Icon ? "pl-8" : ""
           }`}
+        />
+      </div>
+      {errors[name] && (
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+          {errors[name].message}
+        </p>
+      )}
+    </label>
+  );
+}
+
+export function NumberInput({
+  label,
+  register,
+  name,
+  errors,
+  validation,
+  placeholder,
+  icon: Icon,
+  step = "any",
+  min,
+  max,
+}) {
+  return (
+    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
+      {label}
+      <div className="relative">
+        {Icon && (
+          <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-gray-400 dark:text-gray-400">
+            <Icon />
+          </div>
+        )}
+        <input
+          type="number"
+          {...register(name, validation)}
+          placeholder={placeholder}
+          step={step}
+          min={min}
+          max={max}
+          className={`${baseClass} mt-1 block w-full px-2 py-1.5 h-9 ${
+            Icon ? "pl-8" : ""
+          } ${errors[name] ? "border-red-500 dark:border-red-400" : ""}`}
         />
       </div>
       {errors[name] && (

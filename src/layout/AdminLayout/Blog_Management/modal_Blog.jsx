@@ -51,7 +51,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
   const onSubmit = async (data) => {
     const { title, category, userId } = data;
     const formDataToSend = new FormData();
-     if (!selectedPost) {
+    if (!selectedPost) {
       formDataToSend.append("UserId", userId); // Add userId for POST requests
     }
     formDataToSend.append("Title", title);
@@ -108,17 +108,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-70"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-70"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-70" />
-        </Transition.Child>
+        <div className="fixed inset-0 bg-black bg-opacity-70" />
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
@@ -256,7 +246,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-t from-rose-400 via-rose-500 to-red-400 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
                           ? selectedPost

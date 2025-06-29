@@ -1,13 +1,37 @@
 import { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaSearch, FaFilter, FaHeart, FaTint } from "react-icons/fa";
+import { AnimatePresence } from "framer-motion";
 import Header from "@pages/HomePage/Header";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
 import RequestHistory from "./Request_History";
 import DonationHistory from "./Donation_History";
+import { useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 const BloodHistoryPage = () => {
+  const dispatch = useDispatch();
   const [selectedTab, setSelectedTab] = useState(0);
+  const location = useLocation();
+  const selectedUser = location.state?.user;
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+
+  useEffect(() => {
+    dispatch(fetchBloodTypes());
+    dispatch(fetchBloodComponents());
+  }, [dispatch]);
+
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
 
   return (
     <div
@@ -49,11 +73,19 @@ const BloodHistoryPage = () => {
             <Tab.Panels as="div" className="mt-4">
               <AnimatePresence mode="wait">
                 <Tab.Panel as="div" key="donation" className="space-y-4">
-                  <DonationHistory />
+                  <DonationHistory
+                    user={selectedUser}
+                    bloodType={bloodTypeOptions}
+                    bloodComponent={bloodComponentOptions}
+                  />
                 </Tab.Panel>
 
                 <Tab.Panel as="div" key="reception" className="space-y-4">
-                  <RequestHistory />
+                  <RequestHistory
+                    user={selectedUser}
+                    bloodType={bloodTypeOptions}
+                    bloodComponent={bloodComponentOptions}
+                  />
                 </Tab.Panel>
               </AnimatePresence>
             </Tab.Panels>

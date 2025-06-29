@@ -23,10 +23,13 @@ import { updateUser, fetchUserById } from "@redux/features/userSlice";
 import { toast } from "react-toastify";
 import Avatar from "@components/Avatar_User_Image";
 import { InputField } from "./inputField";
+import { useLocation } from "react-router-dom";
 
 const UserProfile = () => {
   const dispatch = useDispatch();
-  const { selectedUser, loading } = useSelector((state) => state.user);
+  // const { selectedUser, loading } = useSelector((state) => state.user);
+  const location = useLocation();
+  const selectedUser = location.state?.user;
   const { bloodTypes } = useSelector((state) => state.blood);
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
@@ -44,9 +47,6 @@ const UserProfile = () => {
     dispatch(fetchBloodTypes());
   }, [dispatch]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
   if (!selectedUser) {
     return <div>No user data available</div>;
   }
@@ -78,13 +78,13 @@ const UserProfile = () => {
     }
     formData.append("Name", profile.name);
     formData.append("Email", profile.email);
-    formData.append("Phone", profile.phone);
-    formData.append("DateOfBirth", profile.dateOfBirth);
-    formData.append("Address", profile.address);
+    formData.append("Phone", profile.phone || "");
+    formData.append("DateOfBirth", profile.dateOfBirth || "");
+    formData.append("Address", profile.address || "");
     formData.append("Identification", profile.identification);
-    formData.append("HeightCm", profile.heightCm);
-    formData.append("WeightKg", profile.weightKg);
-    formData.append("MedicalHistory", profile.medicalHistory);
+    formData.append("HeightCm", profile.heightCm || 0);
+    formData.append("WeightKg", profile.weightKg || 0);
+    formData.append("MedicalHistory", profile.medicalHistory || "");
     formData.append(
       "BloodTypeId",
       profile.bloodTypeId ? Number(profile.bloodTypeId) : 1

@@ -40,16 +40,31 @@ export const fetchBloodRequestById = createAsyncThunk(
 // [GET] blood requests by user ID
 export const fetchBloodRequestsByUserId = createAsyncThunk(
   "bloodRequest/fetchByUserId",
-  async ({ userId, page = 1, pageSize = 10 }, { rejectWithValue }) => {
+  async (
+    { userId, page = 1, pageSize = 10, searchParams = {} },
+    { rejectWithValue }
+  ) => {
     try {
-      const queryString = new URLSearchParams({
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-      }).toString();
+      const params = {
+        page,
+        pageSize,
+        ...searchParams,
+      };
+      // Xóa key nào rỗng để tránh gửi params thừa
+      Object.keys(params).forEach((key) => {
+        if (
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
+        ) {
+          delete params[key];
+        }
+      });
+      const queryString = new URLSearchParams(params).toString();
       const res = await getRequest(
-        `/api/BloodRequests/ByUser/${userId}?${queryString}`
+        `/api/BloodRequests/ByUser/search/${userId}?${queryString}`
       );
-      return res.data.data; 
+      return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }

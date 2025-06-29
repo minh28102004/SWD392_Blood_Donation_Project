@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { FaEdit, FaExclamationCircle, FaEye, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchDonationRequests,
+  fetchDonationRequestsByUserId,
   updateDonationRequest,
   deleteDonationRequest,
   setCurrentPage,
@@ -23,22 +23,21 @@ import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
 
-const DonationHistory = () => {
+const DonationHistory = ({ user, bloodType, bloodComponent }) => {
   const dispatch = useDispatch();
   const { donationList, loading, error, totalCount, currentPage, pageSize } =
     useSelector((state) => state.donationRequests);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [searchParams, setSearchParams] = useState({
-    BloodTypeId: "",
-    BloodComponentId: "",
+    bloodTypeId: "",
+    bloodComponentId: "",
     UrgencyLevel: "",
-    Status: "",
+    status: "",
   });
   const [selectedBD, setSelectedBD] = useState(null);
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
-  console.log("List: ", donationList);
 
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
@@ -51,11 +50,14 @@ const DonationHistory = () => {
   }));
 
   useEffect(() => {
+    if (!user?.userId) return;
+
     const fetchData = async () => {
       startLoading();
       try {
         await dispatch(
-          fetchDonationRequests({
+          fetchDonationRequestsByUserId({
+            userId: user.userId,
             page: currentPage,
             size: pageSize,
             searchParams,
@@ -69,7 +71,7 @@ const DonationHistory = () => {
     };
 
     fetchData();
-  }, [dispatch, currentPage, pageSize, searchParams]);
+  }, [dispatch, currentPage, pageSize, searchParams, user]);
 
   const columns = [
     { key: "donateRequestId", title: "Donation Request ID", width: "15%" },
@@ -153,10 +155,13 @@ const DonationHistory = () => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          await dispatch(deleteDonationRequest(request.donateRequestId)).unwrap();
+          await dispatch(
+            deleteDonationRequest(request.donateRequestId)
+          ).unwrap();
           toast.success("Request has been deleted!");
           dispatch(
-            fetchBloodRequests({
+            fetchDonationRequestsByUserId({
+              userId: user.userId,
               page: currentPage,
               size: pageSize,
               searchParams,
@@ -177,7 +182,8 @@ const DonationHistory = () => {
     startLoading();
     setTimeout(() => {
       dispatch(
-        fetchDonationRequests({
+        fetchDonationRequestsByUserId({
+          userId: user.userId,
           page: currentPage,
           size: pageSize,
           searchParams,
@@ -187,7 +193,7 @@ const DonationHistory = () => {
         .finally(() => {
           stopLoading();
         });
-    }, 1000);
+    }, 500);
   };
 
   // [SEARCH]
@@ -225,34 +231,38 @@ const DonationHistory = () => {
             key: "BloodTypeId",
             type: "select",
             placeholder: "Search by blood type",
-            options: bloodTypeOptions,
+            options: bloodType,
           },
           {
             key: "BloodComponentId",
             type: "select",
             placeholder: "Search by blood component",
-            options: bloodComponentOptions,
+            options: bloodComponent,
           },
           {
             key: "UrgencyLevel",
             type: "select",
             placeholder: "Search by urgencyLevel",
-            options: bloodTypeOptions,
+            options: bloodComponent,
           },
           {
-            key: "Status",
+            key: "status",
             type: "select",
-            placeholder: "Search by status",
-            options: bloodComponentOptions,
+            placeholder: "Search by Status",
+            options: [
+              { value: "0", label: "Pending" },
+              { value: "1", label: "Successful" },
+              { value: "2", label: "Cancelled" },
+            ],
           },
         ]}
         onSearch={handleSearch}
         onClear={() =>
           setSearchParams({
-            BloodTypeId: "",
-            BloodComponentId: "",
+            bloodTypeId: "",
+            bloodComponentId: "",
             UrgencyLevel: "",
-            Status: "",
+            status: "",
           })
         }
       />

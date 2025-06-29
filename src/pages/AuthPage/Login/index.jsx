@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "@redux/features/authSlice";
+import LoadingSpinner from "@components/Loading";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,15 +43,16 @@ const Login = () => {
     try {
       const resultAction = await dispatch(
         loginUser({
-          userName: formData.username,
-          password: formData.password,
+          UserName: formData.username,
+          Password: formData.password,
         })
       );
 
       if (loginUser.fulfilled.match(resultAction)) {
-        if (role === "Staff") {
+        const userRole = resultAction.payload.role;
+        if (userRole === "Staff") {
           navigate("/staffLayout");
-        } else if (role === "Admin") {
+        } else if (userRole === "Admin") {
           navigate("/adminLayout");
         } else {
           navigate("/");
@@ -150,7 +152,10 @@ const Login = () => {
             whileHover={!loading && { scale: 1.02, brightness: 1.1 }}
             whileTap={!loading && { scale: 0.98 }}
           >
-            {loading ? "Logging in..." : "Login"}
+            <div className="flex items-center justify-center gap-2">
+              {loading && <LoadingSpinner size="4" color="white" inline />}
+              {loading ? "Logging in..." : "Login"}
+            </div>
           </motion.button>
 
           <div className="flex flex-col items-center gap-4 mt-6">

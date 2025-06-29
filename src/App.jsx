@@ -51,8 +51,8 @@ function AppRoutes() {
         <Route
           path={endPoint.ADMINLAYOUT}
           element={
-            <AdminLayout />
-            // <ProtectedRoute element={<AdminLayout />} requiredRole="Admin" />
+            // <AdminLayout />
+            <ProtectedRoute element={<AdminLayout />} requiredRole="Admin" />
           }
         >
           <Route index element={<Statistic />} />
@@ -64,8 +64,8 @@ function AppRoutes() {
         <Route
           path={endPoint.STAFFLAYOUT}
           element={
-            <StaffLayout />
-            // <ProtectedRoute element={<StaffLayout />} requiredRole="Staff" />
+            // <StaffLayout />
+            <ProtectedRoute element={<StaffLayout />} requiredRole="Staff" />
           }
         >
           <Route index element={<BloodRequests />} />

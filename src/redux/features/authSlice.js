@@ -3,24 +3,43 @@ import { loginAPI, registerAPI } from "@services/authAPI";
 import { jwtDecode } from "jwt-decode";
 import { fetchUserById } from "@redux/features/userSlice";
 
-// LOGIN
+// Helper: decode token to get userId
+const getUserIdFromToken = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    return decoded[
+      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+    ];
+  } catch {
+    return null;
+  }
+};
+
+// Helper: save to localStorage
+const saveAuthToLocalStorage = (data) => {
+  localStorage.setItem("accessToken", data.token);
+  localStorage.setItem("user", JSON.stringify(data));
+};
+
+// Helper: extract minimal user info
+const extractUserInfo = (data) => {
+  return {
+    name: data.name,
+    email: data.email,
+    userName: data.userName,
+    userId: getUserIdFromToken(data.token),
+  };
+};
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload, thunkAPI) => {
     try {
-      const response = await loginAPI(payload); 
-      const data = response; 
-      localStorage.setItem("accessToken", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      // Decode token to get userId
-      const decoded = jwtDecode(data.token);
-      const userId =
-        decoded[
-          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-        ];
-      // Dispatch fetchUserById
+      const data = await loginAPI(payload);
+      saveAuthToLocalStorage(data);
+      const userId = getUserIdFromToken(data.token);
       if (userId) {
-        thunkAPI.dispatch(fetchUserById(userId));
+        await thunkAPI.dispatch(fetchUserById(userId));
       }
       return data;
     } catch (error) {
@@ -31,13 +50,12 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// REGISTER
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (payload, thunkAPI) => {
     try {
-      const response = await registerAPI(payload);
-      return response;
+      const data = await registerAPI(payload);
+      return data;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message || "Register failed");
     }
@@ -47,11 +65,11 @@ export const registerUser = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
+    user: null, // Only user info (not token or full payload)
     token: null,
+    role: null,
     loading: false,
     error: null,
-    role: null,
   },
   reducers: {
     logout: (state) => {
@@ -70,21 +88,28 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
         state.token = action.payload.token;
         state.role = action.payload.role;
+        state.user = extractUserInfo(action.payload);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed";
       })
+
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
         state.token = action.payload.token;
         state.role = action.payload.role;
-        localStorage.setItem("accessToken", action.payload.token);
-        localStorage.setItem("user", JSON.stringify(action.payload));
+        state.user = extractUserInfo(action.payload);
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Register failed";
       });
   },
 });

@@ -2,16 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 import { FaEdit, FaExclamationCircle, FaEye, FaTrash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchBloodRequests,
+  fetchBloodRequestsByUserId,
   updateBloodRequest,
   deleteBloodRequest,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodRequestSlice";
-import {
-  fetchBloodComponents,
-  fetchBloodTypes,
-} from "@redux/features/bloodSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -22,8 +18,10 @@ import { toast } from "react-toastify";
 import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import ViewDetailRequest from "./ViewDetail";
+import RequestCreationModal from "./EditModal";
 
-const RequestHistory = () => {
+const RequestHistory = ({ user, bloodType, bloodComponent }) => {
   const dispatch = useDispatch();
   const {
     bloodRequestList,
@@ -33,34 +31,32 @@ const RequestHistory = () => {
     currentPage,
     pageSize,
   } = useSelector((state) => state.bloodRequest);
-  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [searchParams, setSearchParams] = useState({
-    BloodTypeId: "",
-    BloodComponentId: "",
-    UrgencyLevel: "",
-    Status: "",
+    bloodTypeId: "",
+    bloodComponentId: "",
+    isEmergency: "",
+    status: "",
   });
   const [selectedBR, setSelectedBR] = useState(null);
   const [formKey, setFormKey] = useState(0);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
-  const bloodTypeOptions = bloodTypes.map((bt) => ({
-    value: bt.bloodTypeId.toString(),
-    label: `${bt.name}${bt.rhFactor}`,
-  }));
-
-  const bloodComponentOptions = bloodComponents.map((bc) => ({
-    value: bc.bloodComponentId.toString(),
-    label: bc.name,
-  }));
+  const handleView = (currentRow) => {
+    setSelectedBR(currentRow);
+    setIsViewModalOpen(true);
+  };
 
   useEffect(() => {
+    if (!user?.userId) return;
+
     const fetchData = async () => {
       startLoading();
       try {
         await dispatch(
-          fetchBloodRequests({
+          fetchBloodRequestsByUserId({
+            userId: user.userId,
             page: currentPage,
             size: pageSize,
             searchParams,
@@ -74,17 +70,37 @@ const RequestHistory = () => {
     };
 
     fetchData();
-  }, [dispatch, currentPage, pageSize, searchParams]);
+  }, [dispatch, currentPage, pageSize, searchParams, user]);
 
   const columns = [
-    { key: "bloodRequestId", title: "Blood Request ID", width: "15%" },
-    { key: "userName", title: "User Name", width: "20%" },
-    { key: "bloodTypeName", title: "Blood Type", width: "15%" },
-    { key: "quantity", title: "Quantity", width: "10%" },
+    { key: "bloodRequestId", title: "Blood Request ID", width: "12%" },
+    { key: "bloodTypeName", title: "Blood Type", width: "10%" },
+    { key: "bloodComponentName", title: "Blood Component", width: "15%" },
+    {
+      key: "isEmergency",
+      title: "Emergency",
+      width: "10%",
+      render: (value) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            value
+              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          }`}
+        >
+          {value ? "Yes" : "No"}
+        </span>
+      ),
+    },
+    {
+      key: "quantity",
+      title: "Quantity (ml)",
+      width: "10%",
+    },
     {
       key: "createdAt",
       title: "Created At",
-      width: "20%",
+      width: "15%",
       render: (value) => new Date(value).toLocaleDateString(),
     },
     {
@@ -92,20 +108,21 @@ const RequestHistory = () => {
       title: "Status",
       width: "10%",
       render: (value) => {
+        const statusName = value?.name || "N/A";
         return (
           <span
             className={`px-2 py-1 rounded-full text-sm ${
-              value === "pending"
+              statusName.toLowerCase() === "pending"
                 ? "bg-yellow-100 text-yellow-800"
                 : "bg-green-100 text-green-800"
             }`}
           >
-            {value}
+            {statusName}
           </span>
         );
       },
     },
-    { key: "location", title: "Location", width: "20%" },
+    { key: "location", title: "Location", width: "13%" },
     {
       key: "actions",
       title: "Actions",
@@ -120,14 +137,19 @@ const RequestHistory = () => {
               <FaEye size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="Edit request field">
-            <button
-              className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
-              onClick={() => handleEdit(currentRow)}
-            >
-              <FaEdit size={20} />
-            </button>
-          </Tooltip>
+
+          {/* Chỉ hiển thị nút Edit nếu status là "Pending" */}
+          {currentRow?.status?.name?.toLowerCase() === "pending" && (
+            <Tooltip title="Edit request field">
+              <button
+                className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
+                onClick={() => handleEdit(currentRow)}
+              >
+                <FaEdit size={20} />
+              </button>
+            </Tooltip>
+          )}
+
           <Tooltip title="Cancel request send">
             <button
               className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
@@ -145,14 +167,14 @@ const RequestHistory = () => {
   // [EDIT]
   const handleEdit = (value) => {
     setSelectedBR(value);
-    setFormKey((prev) => prev + 1); // Reset form
-    setModalOpen(true);
+    setFormKey((prev) => prev + 1); // reset form
+    setIsEditModalOpen(true);
   };
 
   // [DELETE]
   const handleDelete = async (request) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this request?",
+      title: "Are you sure you want to cancel this request?",
       content: "(Note: The blood request will be removed from the list)",
       okText: "OK",
       cancelText: "Cancel",
@@ -161,7 +183,8 @@ const RequestHistory = () => {
           await dispatch(deleteBloodRequest(request.bloodRequestId)).unwrap();
           toast.success("Request has been deleted!");
           dispatch(
-            fetchBloodRequests({
+            fetchBloodRequestsByUserId({
+              userId: user.userId,
               page: currentPage,
               size: pageSize,
               searchParams,
@@ -182,13 +205,18 @@ const RequestHistory = () => {
     startLoading();
     setTimeout(() => {
       dispatch(
-        fetchBloodRequests({ page: currentPage, size: pageSize, searchParams })
+        fetchBloodRequestsByUserId({
+          userId: user.userId,
+          page: currentPage,
+          size: pageSize,
+          searchParams,
+        })
       )
         .unwrap()
         .finally(() => {
           stopLoading();
         });
-    }, 1000);
+    }, 500);
   };
 
   // [SEARCH]
@@ -223,37 +251,44 @@ const RequestHistory = () => {
       <CollapsibleSearch
         searchFields={[
           {
-            key: "BloodTypeId",
+            key: "bloodTypeId",
             type: "select",
             placeholder: "Search by blood type",
-            options: bloodTypeOptions,
+            options: bloodType,
           },
           {
-            key: "BloodComponentId",
+            key: "bloodComponentId",
             type: "select",
             placeholder: "Search by blood component",
-            options: bloodComponentOptions,
+            options: bloodComponent,
           },
           {
-            key: "UrgencyLevel",
+            key: "isEmergency",
             type: "select",
-            placeholder: "Search by urgencyLevel",
-            options: bloodTypeOptions,
+            placeholder: "Search by Emergency status",
+            options: [
+              { value: "true", label: "Yes" },
+              { value: "false", label: "No" },
+            ],
           },
           {
-            key: "Status",
+            key: "status",
             type: "select",
-            placeholder: "Search by status",
-            options: bloodComponentOptions,
+            placeholder: "Search by Status",
+            options: [
+              { value: "0", label: "Pending" },
+              { value: "1", label: "Successful" },
+              { value: "2", label: "Cancelled" },
+            ],
           },
         ]}
         onSearch={handleSearch}
         onClear={() =>
           setSearchParams({
-            BloodTypeId: "",
-            BloodComponentId: "",
-            UrgencyLevel: "",
-            Status: "",
+            bloodTypeId: "",
+            bloodComponentId: "",
+            isEmergency: "",
+            status: "",
           })
         }
       />
@@ -290,7 +325,35 @@ const RequestHistory = () => {
         loading={loading}
         loadingDelay={isLoadingDelay}
         onReload={handleRefresh}
-      />
+      />{" "}
+      {/* View Request Detail */}
+      {isViewModalOpen && (
+        <ViewDetailRequest
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          data={selectedBR}
+        />
+      )}
+      {/* Edit Request Modal */}
+      {isEditModalOpen && selectedBR && (
+        <RequestCreationModal
+          key={formKey}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          selectedRequest={selectedBR}
+          onSuccess={() => {
+            handleRefresh();
+            setIsEditModalOpen(false);
+          }}
+          bloodTypeList={bloodType}
+          bloodComponentList={bloodComponent}
+          statusList={[
+            { id: 0, name: "Pending" },
+            { id: 1, name: "Successful" },
+            { id: 2, name: "Cancelled" },
+          ]}
+        />
+      )}
     </div>
   );
 };

@@ -13,10 +13,7 @@ const BloodInfoPage = () => {
     <div className="text-gray-900 dark:bg-gray-900 dark:text-white min-h-screen">
       {/* Blood Types */}
       <section className="container mx-auto pt-20 pb-8 px-4">
-        <h2
-          
-          className="text-3xl font-semibold mb-7 text-center flex items-center justify-center gap-3 text-red-800 dark:text-rose-200"
-        >
+        <h2 className="text-3xl font-semibold mb-7 text-center flex items-center justify-center gap-3 text-red-800 dark:text-rose-200">
           <FaTint className="text-red-700 dark:text-rose-300 text-2xl" />
           Blood Types Overview
         </h2>
@@ -90,9 +87,9 @@ const BloodInfoPage = () => {
         <div className="container mx-auto">
           <h2
             data-aos="fade-down"
-            className="text-3xl font-semibold mb-8 text-center flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200"
+            className="text-3xl font-semibold mb-8 text-center flex items-center justify-center gap-3 text-red-800 dark:text-rose-200"
           >
-            <FaMicroscope className="text-blue-700 dark:text-blue-300 text-2xl" />
+            <FaMicroscope className="text-red-700 dark:text-rose-300 text-2xl" />
             Blood Components
           </h2>
 

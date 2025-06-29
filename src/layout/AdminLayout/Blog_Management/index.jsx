@@ -77,19 +77,22 @@ const BlogPostManagement = () => {
       className: "text-center",
       render: (value) =>
         value ? (
-          <div className="relative group cursor-pointer flex justify-center">
-            <img
-              src={`${baseURL}${value}`}
-              alt="Post"
-              className="h-20 w-20 object-cover rounded shadow-md cursor-pointer"
-              onClick={() => handleImageZoom(`${baseURL}${value}`)}
-              loading="lazy"
-            />
-            <div
-              className="w-20 absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 flex justify-center items-center text-white text-lg font-normal transition duration-200"
-              style={{ pointerEvents: "none" }}
-            >
-              <FaEye size={18} />
+          <div className="flex justify-center">
+            <div className="relative group cursor-pointer">
+              <img
+                src={`${baseURL}${value}`}
+                alt="Post"
+                className="h-20 w-20 object-cover rounded shadow-md"
+                loading="lazy"
+              />
+              <Tooltip title="Zoom image">
+                <div
+                  className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 flex justify-center items-center text-white text-lg font-normal transition duration-200 cursor-pointer"
+                  onClick={() => handleImageZoom(`${baseURL}${value}`)}
+                >
+                  <FaEye size={18} />
+                </div>
+              </Tooltip>
             </div>
           </div>
         ) : (
@@ -216,7 +219,7 @@ const BlogPostManagement = () => {
         .finally(() => {
           stopLoading();
         });
-    }, 1000);
+    }, 500);
   };
 
   // [SEARCH]

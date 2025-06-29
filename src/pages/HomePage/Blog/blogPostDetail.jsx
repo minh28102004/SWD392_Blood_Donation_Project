@@ -25,17 +25,7 @@ const BlogPostDetailModal = ({ isOpen, onClose, post }) => {
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         {/* Overlay */}
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-65"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-65"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-65" />
-        </Transition.Child>
+        <div className="fixed inset-0 bg-black bg-opacity-65" />
 
         {/* Modal content */}
         <div className="fixed inset-0 overflow-y-auto">

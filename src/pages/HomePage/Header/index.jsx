@@ -32,21 +32,21 @@ const Header = () => {
   const { user } = useSelector((state) => state.auth);
   const { selectedUser } = useSelector((state) => state.user);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("accessToken");
-  //   const savedUser = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const savedUser = JSON.parse(localStorage.getItem("user"));
 
-  //   if (token && savedUser && !selectedUser) {
-  //     const decoded = jwtDecode(token);
-  //     const userId =
-  //       decoded[
-  //         "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-  //       ];
-  //     if (userId) {
-  //       dispatch(fetchUserById(userId));
-  //     }
-  //   }
-  // }, []);
+    if (token && savedUser && !selectedUser) {
+      const decoded = jwtDecode(token);
+      const userId =
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        ];
+      if (userId) {
+        dispatch(fetchUserById(userId));
+      }
+    }
+  }, []);
 
   const toggleMenu = (event) => {
     event.stopPropagation();
@@ -64,19 +64,15 @@ const Header = () => {
     setIsUserMenuOpen(false);
   };
 
-  // Trường hợp chưa đăng nhập:
-  const guestMenuItems = [
-    {
-      label: "Log In",
-      href: "/authPage/login",
-      icon: <FiLogIn className="mr-2 text-lg" />,
-    },
-    {
-      label: "Register",
-      href: "/authPage/register",
-      icon: <FiUserPlus className="mr-2 text-lg" />,
-    },
-  ];
+  const handleRequestHistoryClick = () => {
+    if (selectedUser) {
+      navigate("/userHistory", { state: { user: user } });
+      console.log("user: ",user)
+    } else {
+      console.log("User data is loading...");
+    }
+    setIsUserMenuOpen(false);
+  };
 
   // Cập nhật menu khi đã đăng nhập
   const userMenuItems = [
@@ -87,8 +83,8 @@ const Header = () => {
     },
     {
       label: "Request History",
-      href: "/userHistory",
       icon: <FiList className="mr-2 text-lg" />,
+      onClick: handleRequestHistoryClick,
     },
     {
       label: "Logout",
@@ -164,94 +160,114 @@ const Header = () => {
                 )}
               </button>
             </Tooltip>
+            {selectedUser ? (
+              // Nếu đã đăng nhập: Avatar + Dropdown
+              <div className="relative">
+                <button
+                  ref={buttonRef}
+                  onClick={toggleMenu}
+                  className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
+                >
+                  <Avatar
+                    name={selectedUser?.name}
+                    avatarUrl={selectedUser?.avatar}
+                    size={36}
+                  />
+                  <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
+                    {loadingLogout ? (
+                      <div className="flex items-center">
+                        <svg
+                          className="animate-spin h-6 w-6 mr-2 text-blue-500"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          ></path>
+                        </svg>
+                        Logging out...
+                      </div>
+                    ) : (
+                      selectedUser?.userName || "Unknown"
+                    )}
+                  </span>
+                  <FiChevronDown className="text-gray-500 dark:text-gray-300" />
+                </button>
 
-            {/* User Dropdown */}
-            <div className="relative">
-              <button
-                ref={buttonRef}
-                onClick={toggleMenu}
-                className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
-              >
-                <Avatar
-                  name={selectedUser?.name}
-                  avatarUrl={selectedUser?.avatar}
-                  size={36}
-                />
-                <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
-                  {loadingLogout ? (
-                    <div className="flex items-center">
-                      <svg
-                        className="animate-spin h-6 w-6 mr-2 text-blue-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8z"
-                        ></path>
-                      </svg>
-                      Logging out...
+                {/* Dropdown Menu */}
+                <div
+                  ref={dropdownRef}
+                  className={`absolute right-0 mt-2 transition-all duration-300 origin-top-right z-50 ${
+                    isUserMenuOpen
+                      ? "opacity-100 scale-100 translate-y-0"
+                      : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                  } ${
+                    user ? "w-48" : "w-36"
+                  } bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl`}
+                >
+                  {user && (
+                    <div className="px-4 py-3 border-b dark:border-gray-700">
+                      <p className="text-sm text-gray-800 dark:text-white font-semibold">
+                        {selectedUser.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-300">
+                        {selectedUser.email}
+                      </p>
                     </div>
-                  ) : (
-                    selectedUser?.userName || "Unknown"
                   )}
-                </span>
-                <FiChevronDown className="text-gray-500 dark:text-gray-300" />
-              </button>
 
-              {/* Dropdown Menu */}
-              <div
-                ref={dropdownRef}
-                className={`absolute right-0 mt-2 transition-all duration-300 origin-top-right z-50 ${
-                  isUserMenuOpen
-                    ? "opacity-100 scale-100 translate-y-0"
-                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                } ${
-                  user ? "w-48" : "w-36"
-                } bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl`}
-              >
-                {user && (
-                  <div className="px-4 py-3 border-b dark:border-gray-700">
-                    <p className="text-sm text-gray-800 dark:text-white font-semibold">
-                      {selectedUser.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-300">
-                      {selectedUser.email}
-                    </p>
+                  <div className="py-1">
+                    {userMenuItems.map(
+                      (item, index) => (
+                        <a
+                          key={index}
+                          href={item.href}
+                          onClick={item.onClick}
+                          className={`flex items-center px-4 py-2 text-sm ${
+                            item.isDanger
+                              ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
+                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          {item.icon && item.icon}
+                          {item.label}
+                        </a>
+                      )
+                    )}
                   </div>
-                )}
-
-                <div className="py-1">
-                  {(user ? userMenuItems : guestMenuItems).map(
-                    (item, index) => (
-                      <a
-                        key={index}
-                        href={item.href}
-                        onClick={item.onClick}
-                        className={`flex items-center px-4 py-2 text-sm ${
-                          item.isDanger
-                            ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
-                        }`}
-                      >
-                        {item.icon && item.icon}
-                        {item.label}
-                      </a>
-                    )
-                  )}
                 </div>
               </div>
-            </div>
+            ) : (
+              // Nếu chưa đăng nhập: Hiện Sign In và Sign Up
+              <div className="flex gap-3">
+                <Link
+                  to="/authPage/login"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-xl bg-white text-red-600 border border-red-500 shadow-sm hover:shadow-lg hover:bg-red-50 transform transition duration-300 hover:scale-105 active:scale-95"
+                >
+                  <FiLogIn className="text-red-600" />
+                  Sign In
+                </Link>
+
+                <Link
+                  to="/authPage/register"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-xl bg-gradient-to-t from-rose-400 via-rose-500 to-red-600 text-white shadow-sm hover:shadow-lg hover:brightness-90 transform transition duration-300 hover:scale-105 active:scale-95"
+                >
+                  <FiUserPlus className="text-white" />
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </nav>
