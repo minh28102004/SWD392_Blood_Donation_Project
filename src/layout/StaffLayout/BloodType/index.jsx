@@ -4,82 +4,66 @@ import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
-  fetchBloodInventories,
-  createBloodInventory,
-  updateBloodInventory,
-  deleteBloodInventory,
+  fetchBloodTypes,
+  createBloodType,
+  updateBloodType,
+  deleteBloodType,
   setCurrentPage,
   setPageSize,
-} from "@redux/features/bloodInvSlice";
+} from "@redux/features/bloodTypeSlice";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
 import ActionButtons from "@components/Action_Button";
 import Tooltip from "@mui/material/Tooltip";
-import InventoryModal from "./modal_Inventory";
+import BloodTypeModal from "./modal_BloodType";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
-const BloodInventoryManagement = () => {
+import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
+const BloodTypeManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const { bloodList, loading, error, totalCount, currentPage, pageSize } =
-    useSelector((state) => state.bloodInventory);
+  const { bloodTypeList, loading, error, totalCount, currentPage, pageSize } =
+    useSelector((state) => state.bloodType);
   const [searchParams, setSearchParams] = useState({
-    inventoryId: "",
-    bloodComponentId: "",
     bloodTypeId: "",
+    name: "",
+    rhFactor: "",
   });
 
-  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [selectedBloodType, setSelectedBloodType] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
   // Columns tương ứng các field
+
   const columns = [
-    { key: "inventoryId", title: "Inventory ID", width: "15%" },
-    { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
-    { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
-    { key: "quantity", title: "Quantity", width: "10%" },
-    { key: "unit", title: "Unit", width: "10%" },
-    {
-      key: "lastUpdated",
-      title: "Last Updated",
-      width: "15%",
-      render: (text) => {
-        const date = new Date(text);
-        const formattedDate = `${(date.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}/${date
-          .getDate()
-          .toString()
-          .padStart(2, "0")}/${date.getFullYear().toString().slice(-2)}`;
-        return formattedDate;
-      },
-    },
-    { key: "inventoryLocation", title: "Location", width: "10%" },
+    { key: "bloodTypeId", title: "Blood Type ID", width: "15%" },
+    { key: "name", title: "Name", width: "20%" },
+    { key: "rhFactor", title: "Rh Factor", width: "20%" },
     {
       key: "actions",
       title: "Actions",
       width: "12%",
       render: (_, currentRow) => (
         <div className="flex justify-center gap-2">
-          <Tooltip title="Edit Inventory">
+          <Tooltip title="Edit post">
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
-              aria-label="Edit Inventory"
+              aria-label="Edit Blood Type"
             >
               <FaEdit size={20} />
             </button>
           </Tooltip>
-          <Tooltip title="Delete Inventory">
+          <Tooltip title="Delete Blood Type">
             <button
               className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-500 transform transition-transform hover:scale-110"
               onClick={() => handleDelete(currentRow)}
-              aria-label="Delete Inventory"
+              aria-label="Delete Blood Type"
             >
               <FaTrash size={20} />
             </button>
@@ -88,13 +72,17 @@ const BloodInventoryManagement = () => {
       ),
     },
   ];
+useEffect(() => {
+  console.log("FETCHED BLOOD TYPES:", bloodTypeList);
+  console.log("SEARCH PARAMS:", searchParams);
+}, [bloodTypeList, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
       startLoading();
       try {
         await dispatch(
-          fetchBloodInventories({
+          fetchBloodTypes({
             page: currentPage,
             size: pageSize,
             searchParams,
@@ -110,34 +98,34 @@ const BloodInventoryManagement = () => {
     fetchData();
   }, [dispatch, currentPage, pageSize, searchParams]);
 
-  // [CREATE] CreateInventory
-  const handleCreateInventory = () => {
-    setSelectedInventory(null);
+  // [CREATE]
+  const handleCreateBloodType = () => {
+    setSelectedBloodType(null);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [EDIT]
-  const handleEdit = (inventory) => {
-    setSelectedInventory(inventory);
+  const handleEdit = (bloodType) => {
+    setSelectedBloodType(bloodType);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
-    console.log("Editing inventory:", inventory);
+    console.log("Editing blood type:", bloodType);
   };
 
   // [DELETE]
-  const handleDelete = async (bloodInv) => {
+  const handleDelete = async (bloodType) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this inventory?",
-      content: "( Note: The inventory will be removed from the list )",
+      title: "Are you sure you want to delete this blood type?",
+      content: "( Note: The blood type will be removed from the list )",
       okText: "OK",
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          await dispatch(deleteBloodInventory(bloodInv.inventoryId)).unwrap();
-          toast.success("Blood inventory has been deleted!");
+          await dispatch(deleteBloodType(bloodType.bloodTypeId)).unwrap();
+          toast.success("Blood type has been deleted!");
           dispatch(
-            fetchBloodInventories({
+            fetchBloodTypes({
               page: currentPage,
               size: pageSize,
               searchParams,
@@ -145,8 +133,7 @@ const BloodInventoryManagement = () => {
           );
         } catch (error) {
           toast.error(
-            error?.message ||
-              "An error occurred while deleting the blood inventory!"
+            error?.message || "An error occurred while deleting the blood type!"
           );
         }
       },
@@ -154,19 +141,17 @@ const BloodInventoryManagement = () => {
     });
   };
   //[SEARCH]
-  const handleSearch = useCallback(
-    (params) => {
-      dispatch(setCurrentPage(1));
-      setSearchParams(params);
-    },
-    [dispatch]
-  );
+  const handleSearch = useCallback((params) => {
+  dispatch(setCurrentPage(1));
+  setSearchParams(params); // OK
+}, [dispatch]);
+
   // [REFRESH]
   const handleRefresh = () => {
     startLoading();
     setTimeout(() => {
       dispatch(
-        fetchBloodInventories({
+        fetchBloodTypes({
           page: currentPage,
           size: pageSize,
           searchParams,
@@ -178,6 +163,7 @@ const BloodInventoryManagement = () => {
         });
     }, 1000);
   };
+
   return (
     <div>
       <div
@@ -187,24 +173,20 @@ const BloodInventoryManagement = () => {
       >
         <CollapsibleSearch
           searchFields={[
-            { key: "id", type: "text", placeholder: "Search By Id" },
+            { key: "bloodTypeId", type: "text", placeholder: "Search By Id" },
+            { key: "name", type: "text", placeholder: "Search By Blood Type" },
             {
-              key: "bloodType",
+              key: "rhFactor",
               type: "text",
-              placeholder: "Search By BloodType",
-            },
-            {
-              key: "bloodComponent",
-              type: "text",
-              placeholder: "Search By Blood Component",
+              placeholder: "Search By Rh Factor (+ or -)",
             },
           ]}
           onSearch={handleSearch}
           onClear={() =>
             setSearchParams({
-              id: "",
-              bloodType: "",
-              bloodComponent: "",
+              bloodTypeId: "",
+              name: "",
+              rhFactor: "",
             })
           }
         />
@@ -213,13 +195,13 @@ const BloodInventoryManagement = () => {
             <LoadingSpinner color="blue" size="8" />
           ) : error ? (
             <ErrorMessage message={error} />
-          ) : bloodList.length === 0 ? (
+          ) : bloodTypeList.length === 0 ? (
             <div className="flex justify-center items-center text-red-500 gap-2 text-lg">
               <MdArticle className="text-xl" />
-              <p>No blood inventories found.</p>
+              <p>No blood types found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={bloodList} />
+            <TableComponent columns={columns} data={bloodTypeList} />
           )}
         </div>
         {/*Button*/}
@@ -227,18 +209,18 @@ const BloodInventoryManagement = () => {
           loading={loading}
           loadingDelay={isLoadingDelay}
           onReload={handleRefresh}
-          onCreate={handleCreateInventory}
-          createLabel="Inventory"
+          onCreate={handleCreateBloodType}
+          createLabel="Blood Type"
         />
         {/*Modal*/}
-        <InventoryModal
+        <BloodTypeModal
           key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          selectedInventory={selectedInventory}
+          selectedBloodType={selectedBloodType}
           onSuccess={() =>
             dispatch(
-              fetchBloodInventories({
+              fetchBloodTypes({
                 page: currentPage,
                 size: pageSize,
                 searchParams,
@@ -251,4 +233,4 @@ const BloodInventoryManagement = () => {
   );
 };
 
-export default BloodInventoryManagement;
+export default BloodTypeManagement;

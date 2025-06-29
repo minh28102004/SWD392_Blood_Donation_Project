@@ -21,6 +21,8 @@ import BlogManagement from "@layout/AdminLayout/Blog_Management";
 import StaffLayout from "@layout/StaffLayout/Dashboard";
 import BloodRequests from "@layout/StaffLayout/BloodRequests";
 import BloodInventory from "@layout/StaffLayout/BloodInventory";
+import BloodType from "@layout/StaffLayout/BloodType";
+import BloodComponentManagement from "@layout/StaffLayout/BloodComponent";
 import BloodDonation from "@layout/StaffLayout/BloodDonation";
 import UserProfile from "@pages/User_Profile";
 import UserHistory from "@pages/User_History/userHistory";
@@ -71,6 +73,11 @@ function AppRoutes() {
           <Route index element={<BloodRequests />} />
           <Route path="BloodInventory" element={<BloodInventory />} />
           <Route path="BloodDonation" element={<BloodDonation />} />
+          <Route path="BloodType" element={<BloodType />} />
+          <Route
+            path="BloodComponent"
+            element={<BloodComponentManagement />}
+          />
         </Route>
 
         {/* Auth Pages */}

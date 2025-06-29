@@ -4,6 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
+  patchRequest 
 } from "@services/api";
 
 // [GET] all blood requests with search parameters
@@ -115,6 +116,22 @@ export const deleteBloodRequest = createAsyncThunk(
     }
   }
 );
+export const updateBloodRequestStatus = createAsyncThunk(
+  "bloodRequest/updateStatus",
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      await patchRequest({
+        url: `/api/BloodRequests/${id}/status`,
+        data: { status },
+      });
+      // API thành công, nhưng không trả dữ liệu, nên bạn tự return:
+      return { id, status };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 
 const bloodRequestSlice = createSlice({
   name: "bloodRequest",
@@ -216,13 +233,15 @@ const bloodRequestSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateBloodRequest.fulfilled, (state, action) => {
-        state.loading = false;
-        const index = state.bloodRequestList.findIndex(
-          (r) => r.id === action.payload.id
-        );
-        if (index !== -1) state.bloodRequestList[index] = action.payload;
-      })
+      
+.addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
+  const { id, status } = action.payload;
+  const item = state.bloodRequestList.find((r) => r.bloodRequestId === id);
+  if (item) {
+    item.status.id = status;
+    item.status.name = status === 0 ? "Pending" : status === 1 ? "Successful" : "Cancel";
+  }
+})
       .addCase(updateBloodRequest.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

@@ -10,8 +10,8 @@ import {
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChartOutlined, UserOutlined } from "@ant-design/icons";
 import logo from "@assets/logo.png";
-import { useTheme } from "@components/Theme_Context"; 
-import { MdInventory, MdRequestPage } from "react-icons/md";
+import { useTheme } from "@components/Theme_Context";
+import { MdBloodtype, MdInventory, MdRequestPage } from "react-icons/md";
 import { VscGitPullRequestGoToChanges } from "react-icons/vsc";
 
 const DashboardLayout = () => {
@@ -22,7 +22,7 @@ const DashboardLayout = () => {
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  const { darkMode, toggleTheme } = useTheme(); 
+  const { darkMode, toggleTheme } = useTheme();
 
   const user = {
     name: "Nguyen Lam",
@@ -36,13 +36,27 @@ const DashboardLayout = () => {
   ];
 
   const menuItems = [
-    { name: "Blood Requests", icon: <VscGitPullRequestGoToChanges  />, path: "/staffLayout" },
+    {
+      name: "Blood Requests",
+      icon: <VscGitPullRequestGoToChanges />,
+      path: "/staffLayout",
+    },
     {
       name: "Blood Inventory",
       icon: <MdInventory />,
       path: "/staffLayout/BloodInventory",
     },
-       {
+    {
+      name: "Blood Type",
+      icon: <MdInventory />,
+      path: "/staffLayout/BloodType",
+    },
+    {
+      name: "Blood Component",
+      icon: <MdBloodtype />,
+      path: "/staffLayout/BloodComponent",
+    },
+    {
       name: "Blood donation",
       icon: <MdInventory />,
       path: "/staffLayout/BloodDonation",
