@@ -97,7 +97,7 @@ const Header = () => {
         setTimeout(async () => {
           await dispatch(logout());
           await persistor.purge();
-          window.location.replace("/");
+          window.location.replace("/homePage");
         }, 250);
       },
     },

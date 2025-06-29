@@ -5,6 +5,7 @@ import endPoint from "./routers/router";
 import ErrorBoundary from "@components/Error_Boundary";
 import { PersistGate } from "redux-persist/integration/react";
 import ProtectedRoute from "@services/ProtectedRoute";
+import RoleRedirectWrapper from "@services/roleRedirectWrapper";
 // Pages
 import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";
@@ -34,7 +35,14 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to={endPoint.HOMEPAGE} replace />} />
 
         {/* Public Routes */}
-        <Route path={endPoint.HOMEPAGE} element={<HomePage />}>
+        <Route
+          path={endPoint.HOMEPAGE}
+          element={
+            <RoleRedirectWrapper>
+              <HomePage />
+            </RoleRedirectWrapper>
+          }
+        >
           <Route index element={<Home />} />
           <Route path="faqs" element={<FAQs />} />
           <Route path="blog" element={<Blog />} />
