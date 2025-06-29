@@ -9,7 +9,7 @@ import {
   FiSun,
 } from "react-icons/fi";
 import logo from "@assets/logo.png";
-import { href, Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@components/Theme_Context";
 import useOutsideClick from "@hooks/useOutsideClick";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,7 +67,7 @@ const Header = () => {
   const handleRequestHistoryClick = () => {
     if (selectedUser) {
       navigate("/userHistory", { state: { user: user } });
-      console.log("user: ",user)
+      console.log("user: ", user);
     } else {
       console.log("User data is loading...");
     }
@@ -88,24 +88,20 @@ const Header = () => {
     },
     {
       label: "Logout",
-      href: "/",
+      // href: "/",
       icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
       isDanger: true,
       onClick: async () => {
-        setLoadingLogout(true);
         setIsUserMenuOpen(false);
-        dispatch(logout());
-        await persistor.purge();
+        setLoadingLogout(true);
+        setTimeout(async () => {
+          await dispatch(logout());
+          await persistor.purge();
+          window.location.replace("/");
+        }, 250);
       },
     },
   ];
-
-  useEffect(() => {
-    if (loadingLogout) {
-      const timeoutId = setTimeout(() => {}, 2000);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [loadingLogout]);
 
   return (
     <header className="fixed w-full bg-white dark:bg-gray-800 shadow-sm z-50 transition-all duration-300 ease-in-out">
@@ -228,23 +224,21 @@ const Header = () => {
                   )}
 
                   <div className="py-1">
-                    {userMenuItems.map(
-                      (item, index) => (
-                        <a
-                          key={index}
-                          href={item.href}
-                          onClick={item.onClick}
-                          className={`flex items-center px-4 py-2 text-sm ${
-                            item.isDanger
-                              ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
-                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
-                          }`}
-                        >
-                          {item.icon && item.icon}
-                          {item.label}
-                        </a>
-                      )
-                    )}
+                    {userMenuItems.map((item, index) => (
+                      <a
+                        key={index}
+                        href={item.href}
+                        onClick={item.onClick}
+                        className={`flex items-center px-4 py-2 text-sm ${
+                          item.isDanger
+                            ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
+                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        {item.icon && item.icon}
+                        {item.label}
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>

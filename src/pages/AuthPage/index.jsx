@@ -27,7 +27,7 @@ const AuthPage = () => {
   }, []);
 
   const handleToHomePage = () => {
-    navigate("/homepage");
+    navigate("/homePage");
   };
 
   return (

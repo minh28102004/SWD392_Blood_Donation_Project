@@ -1,7 +1,5 @@
 import { useRef, useEffect, useState } from "react";
 import {
-  FiUsers,
-  FiSettings,
   FiUserPlus,
   FiLogOut,
   FiMenu,
@@ -9,7 +7,8 @@ import {
   FiMoon,
   FiChevronDown,
 } from "react-icons/fi";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { MdBloodtype, MdInventory, MdRequestPage } from "react-icons/md";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@redux/features/authSlice";
 import { persistor } from "@redux/store/store";
@@ -31,13 +30,15 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [loadingLogout, setLoadingLogout] = useState(false);
+  const [localUser, setLocalUser] = useState(null); // Local user riêng
+
   const navigate = useNavigate();
   const location = useLocation();
   const buttonRef = useRef(null);
   const dropdownRef = useRef(null);
   const { darkMode, toggleTheme } = useTheme();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user, role } = useSelector((state) => state.auth);
   const { selectedUser } = useSelector((state) => state.user);
 
   useOutsideClick(dropdownRef, () => setIsUserMenuOpen(false), isUserMenuOpen);
@@ -58,6 +59,12 @@ const DashboardLayout = () => {
     }
   }, [dispatch, selectedUser]);
 
+  useEffect(() => {
+    if (selectedUser) {
+      setLocalUser(selectedUser); // Cập nhật localUser khi Redux có dữ liệu
+    }
+  }, [selectedUser]);
+
   const handleUserProfileClick = () => {
     if (selectedUser) {
       navigate("/userProfile", { state: { user: selectedUser } });
@@ -67,6 +74,53 @@ const DashboardLayout = () => {
     setIsUserMenuOpen(false);
   };
 
+  let menuItems = [];
+
+  const menuItemsAdmin = [
+    {
+      name: "Statistic",
+      icon: <BarChartOutlined />,
+      path: "/dashboard/statistic",
+    },
+    {
+      name: "User Management",
+      icon: <UserOutlined />,
+      path: "/dashboard/userManagement",
+    },
+    {
+      name: "Blog Management",
+      icon: <FileTextOutlined />,
+      path: "/dashboard/blogManagement",
+    },
+  ];
+
+  const menuItemsStaff = [
+    {
+      name: "Blood Requests",
+      icon: <MdRequestPage />,
+      path: "/dashboard/bloodRequests",
+    },
+    {
+      name: "Blood Inventory",
+      icon: <MdInventory />,
+      path: "/dashboard/bloodInventory",
+    },
+    { name: "Blood Type", icon: <MdInventory />, path: "/dashboard/bloodType" },
+    {
+      name: "Blood Component",
+      icon: <MdBloodtype />,
+      path: "/dashboard/bloodComponent",
+    },
+    {
+      name: "Blood Donation",
+      icon: <MdInventory />,
+      path: "/dashboard/bloodDonation",
+    },
+  ];
+
+  if (role === "Admin") menuItems = menuItemsAdmin;
+  else if (role === "Staff") menuItems = menuItemsStaff;
+
   const userMenuItems = [
     {
       label: "User Profile",
@@ -75,29 +129,17 @@ const DashboardLayout = () => {
     },
     {
       label: "Logout",
-      href: "/",
       icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
       isDanger: true,
-      onClick: async () => {
-        setLoadingLogout(true);
+      onClick: () => {
         setIsUserMenuOpen(false);
-        dispatch(logout());
-        await persistor.purge();
+        setLoadingLogout(true);
+        setTimeout(async () => {
+          await dispatch(logout());
+          await persistor.purge();
+          window.location.replace("/"); 
+        }, 250);
       },
-    },
-  ];
-
-  const menuItems = [
-    { name: "Statistic", icon: <BarChartOutlined />, path: "/adminLayout" },
-    {
-      name: "User Management",
-      icon: <UserOutlined />,
-      path: "/adminLayout/userManagement",
-    },
-    {
-      name: "Blog Management",
-      icon: <FileTextOutlined />,
-      path: "/adminLayout/blogManagement",
     },
   ];
 
@@ -111,8 +153,7 @@ const DashboardLayout = () => {
       <aside
         className={`${
           sidebarOpen ? "min-w-60 max-w-60" : "min-w-16 max-w-16"
-        } transition-all duration-500 ease-in-out 
-        bg-white dark:bg-gray-800 p-2 shadow-xl overflow-hidden`}
+        } transition-all duration-500 ease-in-out bg-white dark:bg-gray-800 p-2 shadow-xl overflow-hidden`}
       >
         <div className="flex items-center justify-between mb-2">
           {sidebarOpen ? (
@@ -128,7 +169,7 @@ const DashboardLayout = () => {
         <hr className="border-gray-200 mb-2" />
         <nav>
           {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive = location.pathname.startsWith(item.path);
             const button = (
               <button
                 key={item.name}
@@ -155,7 +196,6 @@ const DashboardLayout = () => {
                 </span>
               </button>
             );
-
             return sidebarOpen ? (
               button
             ) : (
@@ -206,8 +246,8 @@ const DashboardLayout = () => {
                 className="flex items-center space-x-2 p-1 pr-3 bg-gray-200 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 rounded-full shadow-sm transition duration-300"
               >
                 <Avatar
-                  name={selectedUser?.name}
-                  avatarUrl={selectedUser?.avatar}
+                  name={localUser?.name}
+                  avatarUrl={localUser?.avatar}
                   size={36}
                 />
                 <span className="hidden md:inline text-sm font-medium text-gray-800 dark:text-white">
@@ -226,17 +266,17 @@ const DashboardLayout = () => {
                           r="10"
                           stroke="currentColor"
                           strokeWidth="4"
-                        ></circle>
+                        />
                         <path
                           className="opacity-75"
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8v8z"
-                        ></path>
+                        />
                       </svg>
                       Logging out...
                     </div>
                   ) : (
-                    selectedUser?.userName || "Unknown"
+                    localUser?.userName || "Unknown"
                   )}
                 </span>
                 <FiChevronDown className="text-gray-500 dark:text-gray-300" />
@@ -253,35 +293,31 @@ const DashboardLayout = () => {
                   user ? "w-48" : "w-36"
                 } bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl`}
               >
-                {user && (
+                {localUser && (
                   <div className="px-4 py-3 border-b dark:border-gray-700">
                     <p className="text-sm text-gray-800 dark:text-white font-semibold">
-                      {selectedUser?.name}
+                      {localUser?.name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-300">
-                      {selectedUser?.email}
+                      {localUser?.email}
                     </p>
                   </div>
                 )}
-
                 <div className="py-1">
-                  {userMenuItems.map(
-                    (item, index) => (
-                      <a
-                        key={index}
-                        href={item.href}
-                        onClick={item.onClick}
-                        className={`flex items-center px-4 py-2 text-sm ${
-                          item.isDanger
-                            ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
-                            : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
-                        }`}
-                      >
-                        {item.icon}
-                        {item.label}
-                      </a>
-                    )
-                  )}
+                  {userMenuItems.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={item.onClick}
+                      className={`flex items-center w-full text-left px-4 py-2 text-sm ${
+                        item.isDanger
+                          ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-800"
+                          : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 hover:text-blue-500 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

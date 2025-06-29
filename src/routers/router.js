@@ -1,14 +1,13 @@
 const endPoint = {
   ALL: "/",
-  AUTHPAGE:"/authpage",
-  LOGIN:"login",
-  REGISTER:"register",
-  HOMEPAGE:"/homePage",
-  USERPROFILE:"/userProfile",
+  AUTHPAGE: "/authPage",
+  LOGIN: "login",
+  REGISTER: "register",
+  HOMEPAGE: "/homePage",
+  USERPROFILE: "/userProfile",
   USERHISTORY: "/userHistory",
-  ADMINLAYOUT:"/adminLayout",
-  STAFFLAYOUT:"/staffLayout",
-  UNAUTHORIZEDPAGE:"/unauthorizedPage",
+  DASHBOARDLAYOUT: "/dashboard",
+  UNAUTHORIZEDPAGE: "/unauthorizedPage",
 };
 
 export default endPoint;

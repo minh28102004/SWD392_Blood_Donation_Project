@@ -51,9 +51,9 @@ const Login = () => {
       if (loginUser.fulfilled.match(resultAction)) {
         const userRole = resultAction.payload.role;
         if (userRole === "Staff") {
-          navigate("/staffLayout");
+          navigate("/dashboard/bloodRequests");
         } else if (userRole === "Admin") {
-          navigate("/adminLayout");
+          navigate("/dashboard/statistic");
         } else {
           navigate("/");
         }

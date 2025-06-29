@@ -14,11 +14,9 @@ import Home from "@pages/HomePage/Home";
 import FAQs from "@pages/HomePage/FAQs";
 import Blog from "@pages/HomePage/Blog";
 import About_blood from "@pages/HomePage/About_blood";
-import AdminLayout from "@layout/AdminLayout/Dashboard";
 import Statistic from "@layout/AdminLayout/Statistics";
 import UserManagement from "@layout/AdminLayout/User_Management";
 import BlogManagement from "@layout/AdminLayout/Blog_Management";
-import StaffLayout from "@layout/StaffLayout/Dashboard";
 import BloodRequests from "@layout/StaffLayout/BloodRequests";
 import BloodInventory from "@layout/StaffLayout/BloodInventory";
 import BloodType from "@layout/StaffLayout/BloodType";
@@ -27,6 +25,7 @@ import BloodDonation from "@layout/StaffLayout/BloodDonation";
 import UserProfile from "@pages/User_Profile";
 import UserHistory from "@pages/User_History/userHistory";
 import UnauthorizedPage from "@pages/Unauthorized_Page";
+import DashBoardLayout from "@layout/DashboardLayout";
 
 function AppRoutes() {
   return (
@@ -49,35 +48,37 @@ function AppRoutes() {
           element={<UnauthorizedPage />}
         />
 
-        {/* Admin Protected Routes */}
+        {/* Dashboard Layout */}
         <Route
-          path={endPoint.ADMINLAYOUT}
+          path="/dashboard"
           element={
-            // <AdminLayout />
-            <ProtectedRoute element={<AdminLayout />} requiredRole="Admin" />
+            <ProtectedRoute
+              element={<DashBoardLayout />}
+              requiredRole="Admin"
+            />
           }
         >
-          <Route index element={<Statistic />} />
+          {/* Admin Pages */}
+          <Route path="statistic" element={<Statistic />} />
           <Route path="userManagement" element={<UserManagement />} />
           <Route path="blogManagement" element={<BlogManagement />} />
         </Route>
 
-        {/* Staff Protected Routes */}
         <Route
-          path={endPoint.STAFFLAYOUT}
+          path="/dashboard"
           element={
-            // <StaffLayout />
-            <ProtectedRoute element={<StaffLayout />} requiredRole="Staff" />
+            <ProtectedRoute
+              element={<DashBoardLayout />}
+              requiredRole="Staff"
+            />
           }
         >
-          <Route index element={<BloodRequests />} />
-          <Route path="BloodInventory" element={<BloodInventory />} />
-          <Route path="BloodDonation" element={<BloodDonation />} />
-          <Route path="BloodType" element={<BloodType />} />
-          <Route
-            path="BloodComponent"
-            element={<BloodComponentManagement />}
-          />
+          {/* Staff Pages */}
+          <Route path="bloodRequests" element={<BloodRequests />} />
+          <Route path="bloodInventory" element={<BloodInventory />} />
+          <Route path="bloodDonation" element={<BloodDonation />} />
+          <Route path="bloodType" element={<BloodType />} />
+          <Route path="bloodComponent" element={<BloodComponentManagement />} />
         </Route>
 
         {/* Auth Pages */}

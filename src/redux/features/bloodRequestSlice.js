@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-  patchRequest 
+  patchRequest,
 } from "@services/api";
 
 // [GET] all blood requests with search parameters
@@ -104,18 +104,7 @@ export const updateBloodRequest = createAsyncThunk(
   }
 );
 
-// [DELETE] delete blood request
-export const deleteBloodRequest = createAsyncThunk(
-  "bloodRequest/delete",
-  async (id, { rejectWithValue }) => {
-    try {
-      const res = await deleteRequest({ url: `/api/BloodRequests/${id}` });
-      return res;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || err.message);
-    }
-  }
-);
+// [PATCH] update blood request status
 export const updateBloodRequestStatus = createAsyncThunk(
   "bloodRequest/updateStatus",
   async ({ id, status }, { rejectWithValue }) => {
@@ -132,6 +121,18 @@ export const updateBloodRequestStatus = createAsyncThunk(
   }
 );
 
+// [DELETE] delete blood request
+export const deleteBloodRequest = createAsyncThunk(
+  "bloodRequest/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await deleteRequest({ url: `/api/BloodRequests/${id}` });
+      return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 
 const bloodRequestSlice = createSlice({
   name: "bloodRequest",
@@ -233,16 +234,34 @@ const bloodRequestSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      
-.addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
-  const { id, status } = action.payload;
-  const item = state.bloodRequestList.find((r) => r.bloodRequestId === id);
-  if (item) {
-    item.status.id = status;
-    item.status.name = status === 0 ? "Pending" : status === 1 ? "Successful" : "Cancel";
-  }
-})
+      .addCase(updateBloodRequest.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.bloodRequestList.findIndex(
+          (r) => r.id === action.payload.id
+        );
+        if (index !== -1) state.bloodRequestList[index] = action.payload;
+      })
       .addCase(updateBloodRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // --- UPDATE BLOOD REQUESTS STATUS ---
+      .addCase(updateBloodRequestStatus.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
+        const { id, status } = action.payload;
+        const item = state.bloodRequestList.find(
+          (r) => r.bloodRequestId === id
+        );
+        if (item) {
+          item.status.id = status;
+          item.status.name =
+            status === 0 ? "Pending" : status === 1 ? "Successful" : "Cancel";
+        }
+      })
+      .addCase(updateBloodRequestStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
