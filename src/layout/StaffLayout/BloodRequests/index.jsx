@@ -53,15 +53,27 @@ const BloodRequests = () => {
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
   }, [dispatch, currentPage, pageSize, searchParams]);
 
-  const handleStatusChange = async (value, row) => {
-    try {
-      await dispatch(updateBloodRequestStatus({ id: row.bloodRequestId, status: value })).unwrap();
-      toast.success("Status updated!");
-      dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }));
-    } catch {
-      toast.error("Failed to update status.");
-    }
-  };
+const handleStatusChange = async (value, row) => {
+  try {
+    await dispatch(updateBloodRequestStatus({
+      id: row.bloodRequestId,
+      status: value
+    })).unwrap();
+
+    toast.success("Status updated!");
+
+    await dispatch(fetchBloodRequests({
+      page: currentPage,
+      size: pageSize,
+      searchParams
+    })).unwrap(); //
+
+  } catch (err) {
+    console.error("Update failed:", err);
+    toast.error("Failed to update status.");
+  }
+};
+
 
   const handleShowDetail = async (row) => {
     try {
