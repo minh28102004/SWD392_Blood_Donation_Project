@@ -112,8 +112,8 @@ export const updateBloodRequestStatus = createAsyncThunk(
   async ({ id, status }, { rejectWithValue }) => {
     try {
       const res = await patchRequest({
-        url: `/api/BloodRequests/${id}/status`,
-        data: { status }, //  gửi JSON
+     url: `/api/BloodRequests/status`,
+data: { id, status }
       });
 
       return res; // res.data đã được trả từ patchRequest

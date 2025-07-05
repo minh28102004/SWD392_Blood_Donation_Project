@@ -4,6 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
+  patchRequest
 } from "@services/api";
 
 // [GET] All Donation Requests
@@ -126,6 +127,23 @@ export const deleteDonationRequest = createAsyncThunk(
     try {
       const res = await deleteRequest({ url: `/api/DonationRequests/${id}` });
       return res;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+
+
+export const updateBloodDonationStatus = createAsyncThunk(
+  "donationRequest/updateStatus",
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const res = await patchRequest({
+        url: `/api/DonationRequests/status`,
+        data: { id, status }, // Gửi dạng JSON
+      });
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
