@@ -11,6 +11,7 @@ import {
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodTypeSlice";
+import Pagination from "@components/Pagination";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -72,10 +73,10 @@ const BloodTypeManagement = () => {
       ),
     },
   ];
-useEffect(() => {
-  console.log("FETCHED BLOOD TYPES:", bloodTypeList);
-  console.log("SEARCH PARAMS:", searchParams);
-}, [bloodTypeList, searchParams]);
+  useEffect(() => {
+    console.log("FETCHED BLOOD TYPES:", bloodTypeList);
+    console.log("SEARCH PARAMS:", searchParams);
+  }, [bloodTypeList, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,10 +142,13 @@ useEffect(() => {
     });
   };
   //[SEARCH]
-  const handleSearch = useCallback((params) => {
-  dispatch(setCurrentPage(1));
-  setSearchParams(params); // OK
-}, [dispatch]);
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params); // OK
+    },
+    [dispatch]
+  );
 
   // [REFRESH]
   const handleRefresh = () => {
@@ -201,9 +205,25 @@ useEffect(() => {
               <p>No blood types found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={bloodTypeList} />
+            <TableComponent
+              columns={columns}
+              data={bloodTypeList.slice(
+                (currentPage - 1) * pageSize,
+                currentPage * pageSize
+              )}
+            />
           )}
         </div>
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
         {/*Button*/}
         <ActionButtons
           loading={loading}
@@ -222,7 +242,7 @@ useEffect(() => {
             dispatch(
               fetchBloodTypes({
                 page: currentPage,
-                size: pageSize,
+                size: 5,
                 searchParams,
               })
             )

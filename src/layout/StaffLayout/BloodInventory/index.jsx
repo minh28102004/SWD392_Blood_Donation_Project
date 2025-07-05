@@ -11,6 +11,7 @@ import {
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodInvSlice";
+import Pagination from "@components/Pagination";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -219,9 +220,25 @@ const BloodInventoryManagement = () => {
               <p>No blood inventories found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={bloodList} />
+            <TableComponent
+              columns={columns}
+              data={bloodList.slice(
+                (currentPage - 1) * pageSize,
+                currentPage * pageSize
+              )}
+            />
           )}
         </div>
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
         {/*Button*/}
         <ActionButtons
           loading={loading}

@@ -21,7 +21,7 @@ export const fetchAllBloodInventories = createAsyncThunk(
 // [GET] blood inventories with search parameters
 export const fetchBloodInventories = createAsyncThunk(
   "bloodInventory/fetchAll",
-  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
+  async ({ page = 1, size = 5, searchParams = {} }, { rejectWithValue }) => {
     try {
       const queryString = new URLSearchParams({
         page: page.toString(),
