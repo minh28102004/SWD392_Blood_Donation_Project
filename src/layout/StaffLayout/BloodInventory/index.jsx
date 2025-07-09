@@ -8,6 +8,7 @@ import {
   createBloodInventory,
   updateBloodInventory,
   deleteBloodInventory,
+  fetchAllBloodInventories,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodInvSlice";
@@ -33,7 +34,7 @@ const BloodInventoryManagement = () => {
     bloodTypeId: "",
   });
 
-  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [selectedBloodInventory, setSelectedBloodInventory] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
@@ -95,12 +96,14 @@ const BloodInventoryManagement = () => {
       startLoading();
       try {
         await dispatch(
-          fetchBloodInventories({
+          fetchAllBloodInventories({
             page: currentPage,
             size: pageSize,
             searchParams,
           })
         );
+        console.log("BloodList:", bloodList);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -113,14 +116,14 @@ const BloodInventoryManagement = () => {
 
   // [CREATE] CreateInventory
   const handleCreateInventory = () => {
-    setSelectedInventory(null);
+    setSelectedBloodInventory(null);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [EDIT]
   const handleEdit = (inventory) => {
-    setSelectedInventory(inventory);
+    setSelectedBloodInventory(inventory);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
     console.log("Editing inventory:", inventory);
@@ -252,7 +255,7 @@ const BloodInventoryManagement = () => {
           key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          selectedInventory={selectedInventory}
+          selectedBloodInventory={selectedBloodInventory}
           onSuccess={() =>
             dispatch(
               fetchBloodInventories({

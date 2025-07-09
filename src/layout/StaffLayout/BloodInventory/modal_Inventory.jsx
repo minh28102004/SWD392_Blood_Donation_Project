@@ -25,7 +25,7 @@ const bloodComponentOptions = [
   { value: "5", label: "Whole Blood" },
 ];
 
-const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
+const InventoryModal = ({ isOpen, onClose, selectedBloodInventory, onSuccess }) => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
@@ -37,23 +37,23 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
     setValue,
   } = useForm({
     defaultValues: {
-      bloodComponentId: selectedInventory?.bloodComponentId || "",
-      bloodTypeId: selectedInventory?.bloodTypeId || "",
-      quantity: selectedInventory?.quantity || "",
-      unit: selectedInventory?.unit || "",
-      inventoryLocation: selectedInventory?.inventoryLocation || "",
+      bloodComponentId: selectedBloodInventory?.bloodComponentId || "",
+      bloodTypeId: selectedBloodInventory?.bloodTypeId || "",
+      quantity: selectedBloodInventory?.quantity || "",
+      unit: selectedBloodInventory?.unit || "",
+      inventoryLocation: selectedBloodInventory?.inventoryLocation || "",
     },
   });
 
   useEffect(() => {
-    if (selectedInventory) {
-      setValue("bloodComponentId", selectedInventory.bloodComponentId);
-      setValue("bloodTypeId", selectedInventory.bloodTypeId);
-      setValue("quantity", selectedInventory.quantity);
-      setValue("unit", selectedInventory.unit);
-      setValue("inventoryLocation", selectedInventory.inventoryLocation);
+    if (selectedBloodInventory) {
+      setValue("bloodComponentId", selectedBloodInventory.bloodComponentId);
+      setValue("bloodTypeId", selectedBloodInventory.bloodTypeId);
+      setValue("quantity", selectedBloodInventory.quantity);
+      setValue("unit", selectedBloodInventory.unit);
+      setValue("inventoryLocation", selectedBloodInventory.inventoryLocation);
     }
-  }, [selectedInventory, setValue]);
+  }, [selectedBloodInventory, setValue]);
 
   const onSubmit = async (data) => {
     const { bloodTypeId, bloodComponentId, quantity, unit, inventoryLocation } = data;
@@ -66,10 +66,10 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
 
     setLoading(true);
     try {
-      if (selectedInventory) {
+      if (selectedBloodInventory) {
         const resultAction = await dispatch(
           updateBloodInventory({
-            id: selectedInventory.inventoryId,
+            id: selectedBloodInventory.inventoryId,
             formData: formDataToSend,
           })
         );
@@ -137,7 +137,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
                   as="h2"
                   className="text-2xl font-bold leading-6 text-gray-900 dark:text-white mb-4 text-center"
                 >
-                  {selectedInventory ? "Edit Inventory" : "Create New Inventory"}
+                  {selectedBloodInventory ? "Edit Inventory" : "Create New Inventory"}
                 </Dialog.Title>
                 <hr className="border-gray-100 mb-6" />
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
@@ -153,7 +153,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
                           {...register("bloodTypeId", {
                             required: "Blood Type is required",
                           })}
-                          defaultValue={selectedInventory?.bloodTypeId || ""}
+                          defaultValue={selectedBloodInventory?.bloodTypeId || ""}
                           className="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
                         >
                           <option value="">-- Select Blood Type --</option>
@@ -167,7 +167,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
                           <p className="text-red-500 text-sm mt-1">{errors.bloodTypeId.message}</p>
                         )}
                       </div>
-
+                      {/* Spacer for layout */}
                       {/* Blood Component Dropdown */}
                       <div>
                         <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-white">
@@ -177,7 +177,7 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
                           {...register("bloodComponentId", {
                             required: "Blood Component is required",
                           })}
-                          defaultValue={selectedInventory?.bloodComponentId || ""}
+                          defaultValue={selectedBloodInventory?.bloodComponentId || ""}
                           className="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
                         >
                           <option value="">-- Select Blood Component --</option>
@@ -240,10 +240,10 @@ const InventoryModal = ({ isOpen, onClose, selectedInventory, onSuccess }) => {
                         className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
-                          ? selectedInventory
+                          ? selectedBloodInventory
                             ? "Updating..."
                             : "Creating..."
-                          : selectedInventory
+                          : selectedBloodInventory
                           ? "Update Inventory"
                           : "Create Inventory"}
                       </button>
