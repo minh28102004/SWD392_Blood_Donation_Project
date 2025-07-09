@@ -1,4 +1,8 @@
+import { useSelector } from "react-redux";
 const TableComponent = ({ columns, data }) => {
+  const { currentPage, pageSize } =
+    useSelector((state) => state.bloodInventory);
+ 
   return (
     <div className="p-2">
       <table
@@ -41,7 +45,7 @@ const TableComponent = ({ columns, data }) => {
                     title={item[col.key]}
                   >
                     {typeof col.render === "function"
-                      ? col.render(item[col.key], item)
+                      ? col.render(item[col.key], item, (currentPage - 1) * pageSize + idx)
                       : item[col.key]}
                   </td>
                 ))}

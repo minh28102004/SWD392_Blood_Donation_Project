@@ -47,6 +47,7 @@ const BloodComponentManagement = () => {
   // Columns tương ứng các field
 
   const columns = [
+    { key: "No.", title: "No.", width: "15%", render: (_, __, index) => index + 1 },
     { key: "name", title: "Name", width: "20%" },
 
     {

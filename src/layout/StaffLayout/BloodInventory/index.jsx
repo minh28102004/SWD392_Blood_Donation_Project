@@ -41,7 +41,7 @@ const BloodInventoryManagement = () => {
 
   // Columns tương ứng các field
   const columns = [
-    { key: "inventoryId", title: "Inventory ID", width: "15%" },
+    { key: "No.", title: "No.", width: "15%",  render: (_, __, index) => index + 1 },
     { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
     { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
     { key: "quantity", title: "Quantity", width: "10%" },
@@ -96,14 +96,12 @@ const BloodInventoryManagement = () => {
       startLoading();
       try {
         await dispatch(
-          fetchAllBloodInventories({
+          fetchBloodInventories({
             page: currentPage,
             size: pageSize,
             searchParams,
           })
         );
-        console.log("BloodList:", bloodList);
-        
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -223,15 +221,10 @@ const BloodInventoryManagement = () => {
               <p>No blood inventories found.</p>
             </div>
           ) : (
-            <TableComponent
-              columns={columns}
-              data={bloodList.slice(
-                (currentPage - 1) * pageSize,
-                currentPage * pageSize
-              )}
-            />
+            <TableComponent columns={columns} data={bloodList} />
           )}
         </div>
+        {/*Pagination*/}
         <Pagination
           totalCount={totalCount}
           pageSize={pageSize}

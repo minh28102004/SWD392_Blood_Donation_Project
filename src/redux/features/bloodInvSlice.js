@@ -141,6 +141,12 @@ const bloodInventorySlice = createSlice({
         state.bloodList = action.payload.inventories || [];
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
+        console.log("Total Pages:", action.payload.totalPages);
+        console.log("Total Count:", action.payload.totalCount);
+        console.log("Current Page:", action.payload.currentPage);
+        if (action.payload.totalPages < action.payload.currentPage && action.payload.totalPages > 0) {
+          action.payload.currentPage = action.payload.totalPages;
+        }
         state.currentPage = action.payload.currentPage;
         state.pageSize = action.payload.pageSize;
       })
