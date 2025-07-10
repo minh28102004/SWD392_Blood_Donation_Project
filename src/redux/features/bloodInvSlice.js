@@ -223,7 +223,6 @@ const bloodInventorySlice = createSlice({
       })
       .addCase(deleteBloodInventory.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });
