@@ -202,7 +202,6 @@ const bloodTypeSlice = createSlice({
       })
       .addCase(updateBloodType.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       })
 
       // DELETE BLOOD TYPE
