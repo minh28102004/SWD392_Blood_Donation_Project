@@ -4,14 +4,15 @@ import { slides, criteriaList, tips } from "./content_Data";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion } from "framer-motion";
-import { FaHeartbeat, FaRegLightbulb, FaBookOpen } from "react-icons/fa";
+import { FaHeartbeat, FaBookOpen } from "react-icons/fa";
+import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { baseURL } from "@services/api";
+import { baseURL } from "@services/API/api";
 import { fetchBlogPosts } from "@redux/features/blogPostsSlice";
 import BloodDonationModal from "@pages/Modal_Form_Registration/ModalForm";
 import BlogPostDetailModal from "../Blog/blogPostDetail";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -131,13 +132,11 @@ const Content = () => {
       </motion.div>
 
       {/*Modal Registration*/}
-      {showModal && (
-        <BloodDonationModal
-          isOpen={showModal}
-          setIsOpen={setShowModal}
-          userId={user?.userId}
-        />
-      )}
+      <BloodDonationModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        userId={user?.userId}
+      />
 
       {/* Eligibility Criteria */}
       <section
@@ -224,34 +223,41 @@ const Content = () => {
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {previewPosts.map((post, index) => (
-              <div
-                key={post.postId}
-                className="bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
-                data-aos="fade-up"
-                data-aos-delay={index * 200}
-              >
-                <img
-                  src={`${baseURL}${post.imgPath}`}
-                  alt={post.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-black dark:text-white mb-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                    {post.content?.slice(0, 100)}...
-                  </p>
-                  <button
-                    onClick={() => handleOpenModal(post)}
-                    className="text-white bg-gray-800 dark:bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 transition"
-                  >
-                    Read More →
-                  </button>
-                </div>
+            {previewPosts.length === 0 ? (
+              <div className="col-span-3 flex justify-center items-center text-red-500 gap-2 text-lg ">
+                <MdArticle className="text-2xl" />
+                <p>No blog posts found.</p>
               </div>
-            ))}
+            ) : (
+              previewPosts.map((post, index) => (
+                <div
+                  key={post.postId}
+                  className="bg-white dark:bg-gray-700 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transform hover:scale-105 transition duration-300"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 200}
+                >
+                  <img
+                    src={`${baseURL}${post.imgPath}`}
+                    alt={post.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-black dark:text-white mb-2">
+                      {post.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                      {post.content?.slice(0, 100)}...
+                    </p>
+                    <button
+                      onClick={() => handleOpenModal(post)}
+                      className="text-white bg-gray-800 dark:bg-gray-800 font-semibold px-4 py-2 rounded hover:text-yellow-500 hover:bg-gray-900 transition"
+                    >
+                      Read More →
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/*Blog Post Detail*/}
@@ -262,15 +268,15 @@ const Content = () => {
           />
 
           <div className="text-center pb-2">
-            <a
-              href="/homepage/blog"
-              className="inline-block relative text-blue-600 dark:text-white text-base font-normal transition-all duration-300 hover:text-blue-700 dark:hover:text-blue-300 group"
+            <Link
+              to="/homePage/blog"
+              className="inline-block relative text-blue-600 dark:text-white text-base font-normal transition-all duration-300 hover:text-blue-800 dark:hover:text-blue-300 group"
             >
               <span className="inline-flex items-center transition-transform duration-300 group-hover:translate-x-1">
-                View more&nbsp;&gt;&gt;
+                View more &raquo;
               </span>
-              <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-blue-500 dark:bg-blue-400  transition-all duration-300 group-hover:w-full"></span>
-            </a>
+              <span className="absolute left-0 bottom-0 h-[1px] w-0 bg-blue-500 dark:bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
           </div>
         </div>
       </section>

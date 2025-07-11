@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] all blood inventories
 export const fetchAllBloodInventories = createAsyncThunk(
@@ -223,7 +223,6 @@ const bloodInventorySlice = createSlice({
       })
       .addCase(deleteBloodInventory.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });

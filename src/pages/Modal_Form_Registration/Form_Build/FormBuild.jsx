@@ -35,6 +35,8 @@ const InputField = ({
   required,
   validation = {},
   error,
+  placeholder,
+  ...rest
 }) => (
   <div className={getColSpanClass(colSpan)}>
     <label
@@ -46,9 +48,11 @@ const InputField = ({
     <input
       id={name}
       type={type}
+      placeholder={placeholder}
       {...(register && register(name, validation))}
       required={required}
       aria-invalid={!!error}
+      {...rest}
       className={`h-10 w-full px-4 py-2 border ${
         error ? "border-red-500" : "border-gray-300 dark:border-gray-600"
       } bg-white dark:bg-gray-700 text-black dark:text-white rounded-lg
@@ -69,6 +73,8 @@ const SelectField = ({
   required,
   validation = {},
   error,
+  placeholder = "Select",
+  onChange,
 }) => (
   <div className={getColSpanClass(colSpan)}>
     <label
@@ -82,13 +88,14 @@ const SelectField = ({
       {...(register && register(name, validation))}
       required={required}
       aria-invalid={!!error}
+      onChange={onChange}
       className={`h-10 w-full px-4 border ${
         error ? "border-red-500" : "border-gray-300 dark:border-gray-600"
       } bg-white dark:bg-gray-700 text-black dark:text-white rounded-lg
       hover:border-blue-500 focus:border-blue-600 dark:hover:border-white focus:outline-none focus:ring-1 transition-all duration-200`}
     >
       <option value="" disabled hidden>
-        Select
+        {placeholder}
       </option>
       {options.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -111,6 +118,7 @@ const TextAreaField = ({
   validation = {},
   rows = 3,
   error,
+  placeholder,
 }) => (
   <div className={getColSpanClass(colSpan)}>
     <label
@@ -122,6 +130,7 @@ const TextAreaField = ({
     <textarea
       id={name}
       rows={rows}
+      placeholder={placeholder}
       {...(register && register(name, validation))}
       required={required}
       aria-invalid={!!error}
@@ -136,4 +145,4 @@ const TextAreaField = ({
   </div>
 );
 
-export { FormRow, InputField, SelectField, TextAreaField };
+export { FormRow, InputField, SelectField, TextAreaField, getColSpanClass };

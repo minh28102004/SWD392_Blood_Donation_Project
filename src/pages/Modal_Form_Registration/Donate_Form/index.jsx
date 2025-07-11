@@ -1,104 +1,166 @@
-// DonateForm.jsx
-import React from "react";
 import {
   FormRow,
   InputField,
   SelectField,
   TextAreaField,
 } from "@pages/Modal_Form_Registration/Form_Build/FormBuild";
+import LocationSelector from "@pages/Modal_Form_Registration/Form_Build/LocationSelector";
 
-const DonateForm = ({ onChange }) => (
-  <>
-    <FormRow columns={2}>
-      <InputField
-        label="Full Name"
-        name="fullName"
-        onChange={onChange}
+const DonateForm = ({
+  register,
+  bloodTypes,
+  bloodComponents,
+  errors,
+  setValue,
+  watch,
+}) => {
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
+
+  return (
+    <>
+      <FormRow columns={2}>
+        <InputField
+          label="Full Name"
+          name="name"
+          required
+          register={register}
+          placeholder="Enter full name"
+        />
+        <InputField
+          label="Contact Number"
+          name="contact"
+          required
+          register={register}
+          placeholder="E.g: 0912345678"
+          validation={{
+            required: "Phone is required",
+            pattern: {
+              value: /^[0-9]{8,15}$/,
+              message: "Phone must be a number with 8–15 digits",
+            },
+          }}
+          error={errors.contact}
+        />
+      </FormRow>
+
+      <FormRow columns={3}>
+        <InputField
+          label="Date of Birth"
+          name="dateOfBirth"
+          type="date"
+          required
+          register={register}
+          placeholder="Select date of birth"
+        />
+        <InputField
+          label="Last Donate Date (If have)"
+          name="lastDonationDate"
+          type="date"
+          required
+          register={register}
+          placeholder="Select last donation date"
+        />
+        <InputField
+          label="Prefer Date"
+          name="preferredDate"
+          type="date"
+          required
+          register={register}
+          placeholder="Select preferred date"
+        />
+      </FormRow>
+
+      <FormRow columns={3}>
+        <SelectField
+          label="Blood Type"
+          name="bloodTypeId"
+          required
+          options={bloodTypeOptions}
+          register={register}
+          placeholder="Select blood type"
+          validation={{ required: "Select blood type" }}
+        />
+        <SelectField
+          label="Blood Component"
+          name="bloodComponentId"
+          required
+          options={bloodComponentOptions}
+          register={register}
+          placeholder="Select component"
+          validation={{ required: "Select component" }}
+        />
+        <InputField
+          label="Quantity (ml)"
+          name="quantityUnit"
+          required
+          register={register}
+          placeholder="E.g: 250, 300, 350"
+          validation={{
+            required: "Quantity is required",
+            pattern: {
+              value: /^[1-9][0-9]*$/,
+              message: "Must be a positive number",
+            },
+          }}
+          error={errors.quantityUnit}
+        />
+      </FormRow>
+
+      <FormRow columns={3}>
+        <InputField
+          label="Height (cm)"
+          name="height"
+          type="number"
+          required
+          step="any"
+          register={register}
+          placeholder="E.g: 170, 165"
+          validation={{
+            required: "Height is required",
+            min: { value: 50, message: "Minimum 50cm" },
+          }}
+          error={errors.height}
+        />
+        <InputField
+          label="Weight (kg)"
+          name="weight"
+          type="number"
+          required
+          step="any"
+          register={register}
+          placeholder="E.g: 60, 75"
+          validation={{
+            required: "Weight is required",
+            min: { value: 30, message: "Minimum 30kg" },
+          }}
+          error={errors.weight}
+        />
+      </FormRow>
+      <LocationSelector
+        register={register}
+        setValue={setValue}
+        getValues={watch}
+        errors={errors}
         required
       />
-      <InputField
-        label="Age"
-        name="age"
-        type="number"
-        min="18"
-        max="65"
-        onChange={onChange}
+      <TextAreaField
+        label="Medical History"
+        name="medicalContext"
+        register={register}
+        rows={3}
         required
+        placeholder="E.g: Diabetes, Hypertension, Asthma... If none, write 'None'"
       />
-    </FormRow>
-    <FormRow columns={2}>
-      <SelectField
-        label="Blood Type"
-        name="bloodType"
-        options={["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]}
-        onChange={onChange}
-        required
-      />
-      <SelectField
-        label="Blood Component"
-        name="bloodComponent"
-        options={["Plasma", "Red Blood Cell", "White Blood Cell", "Platelet"]}
-        onChange={onChange}
-        required
-      />
-    </FormRow>
-    <FormRow columns={2}>
-      <InputField
-        label="Quantity Unit (e.g. 350ml)"
-        name="quantityUnit"
-        onChange={onChange}
-        required
-      />
-      <InputField
-        label="Contact Number"
-        name="contact"
-        onChange={onChange}
-        required
-      />
-    </FormRow>
-    <FormRow columns={3}>
-      <InputField
-        label="Height (cm)"
-        name="height"
-        type="number"
-        onChange={onChange}
-        required
-      />
-      <InputField
-        label="Weight (kg)"
-        name="height"
-        type="number"
-        onChange={onChange}
-        required
-      />
-      <InputField
-        label="Preferred Date"
-        name="preferredDate"
-        type="date"
-        onChange={onChange}
-        required
-      />
-    </FormRow>
-    <InputField label="Location" name="location" onChange={onChange} required />
-    <TextAreaField
-      label="Patient History"
-      name="medicalContext"
-      rows={3}
-      onChange={onChange}
-    />
-    <div className="flex items-start gap-2">
-      <input
-        type="checkbox"
-        name="healthScreening"
-        required
-        onChange={onChange}
-        className="mt-1"
-      />
-      <label className="text-sm text-gray-700 dark:text-gray-200">
-        I confirm that I am in good health and eligible to donate blood
-      </label>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 export default DonateForm;

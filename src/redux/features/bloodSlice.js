@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getRequest } from "@services/api";
+import { getRequest } from "@services/API/api";
 
 // [GET] all blood components
 export const fetchBloodComponents = createAsyncThunk(

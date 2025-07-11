@@ -9,6 +9,7 @@ import {
   deleteUser,
   setCurrentPage,
   setPageSize,
+  setShouldReloadList,
 } from "@redux/features/userSlice";
 import {
   fetchBloodComponents,
@@ -20,11 +21,11 @@ import TableComponent from "@components/Table";
 import ActionButtons from "@components/Action_Button";
 import Tooltip from "@mui/material/Tooltip";
 import UserCreationModal from "./Modal_User";
-import { Modal } from "antd";
 import { toast } from "react-toastify";
 import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import { useDeleteWithConfirm } from "@hooks/useDeleteWithConfirm";
 
 const UserManagement = () => {
   const { darkMode } = useOutletContext();
@@ -38,6 +39,7 @@ const UserManagement = () => {
     totalCount,
     currentPage,
     pageSize,
+    shouldReloadList,
   } = useSelector((state) => state.user);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [searchParams, setSearchParams] = useState({
@@ -49,6 +51,13 @@ const UserManagement = () => {
   const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(700);
+
+  useEffect(() => {
+    if (shouldReloadList) {
+      dispatch(fetchUsers({ page: currentPage, size: pageSize, searchParams }));
+      dispatch(setShouldReloadList(false));
+    }
+  }, [shouldReloadList, dispatch, currentPage, pageSize, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,26 +150,16 @@ const UserManagement = () => {
   };
 
   // [DELETE]
-  const handleDelete = async (user) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this user?",
-      content: "(Note: The user will be removed from the list)",
-      okText: "OK",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await dispatch(deleteUser(user.userId)).unwrap();
-          toast.success("User has been deleted!");
-          dispatch(
-            fetchUsers({ page: currentPage, size: pageSize, searchParams })
-          );
-        } catch (error) {
-          toast.error(
-            error?.message || "An error occurred while deleting the user!"
-          );
-        }
-      },
-      style: { top: "30%" },
+  const confirmDeleteUser = useDeleteWithConfirm(
+    "skipDeleteUserConfirm",
+    "Are you sure you want to delete this user?",
+    "Note: The user will be removed from the list"
+  );
+  const handleDelete = (user) => {
+    confirmDeleteUser(async () => {
+      await dispatch(deleteUser(user.userId)).unwrap();
+      toast.success("User has been deleted!");
+      dispatch(fetchUsers({ page: currentPage, size: pageSize, searchParams }));
     });
   };
 

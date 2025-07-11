@@ -13,9 +13,14 @@ export function TextInput({
   validation,
   placeholder,
   icon: Icon,
+  colSpan, 
 }) {
   return (
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
+    <label
+      className={`block text-sm font-medium text-gray-700 dark:text-gray-300 relative ${
+        colSpan ? `col-span-${colSpan}` : ""
+      }`} 
+    >
       {label}
       <div className="relative">
         {Icon && (
@@ -40,6 +45,7 @@ export function TextInput({
     </label>
   );
 }
+
 export function Checkbox({ label, register, name, errors, validation }) {
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

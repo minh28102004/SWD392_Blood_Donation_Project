@@ -6,20 +6,21 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import DonateForm from "./Donate_Form";
 import RequestForm from "./Request_Form";
-import useOutsideClick from "@hooks/useOutsideClick";
 import { createBloodRequest } from "@redux/features/bloodRequestSlice";
+import { createDonationRequest } from "@redux/features/bloodDonationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBloodComponents,
   fetchBloodTypes,
 } from "@redux/features/bloodSlice";
+import { setShouldReloadList } from "@redux/features/notificationSlice";
 
-const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
-  const [visible, setVisible] = useState(false);
+const BloodDonationModal = ({ isOpen, userId, onClose }) => {
   const [activeTab, setActiveTab] = useState("donate");
-  const modalRef = useRef();
   const dispatch = useDispatch();
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [formData, setFormData] = useState(null);
 
   const {
     register,
@@ -39,10 +40,6 @@ const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (isOpen) setVisible(true);
-  }, [isOpen]);
-
-  useEffect(() => {
     if (bloodTypes.length && bloodComponents.length) {
       setValue("bloodTypeId", bloodTypes[0].bloodTypeId.toString());
       setValue(
@@ -53,42 +50,52 @@ const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
     }
   }, [bloodTypes, bloodComponents, setValue]);
 
-  const closeModal = () => {
-    setVisible(false);
-    setTimeout(() => setIsOpen(false), 300);
+  const handleClose = () => {
+    reset();
+    onClose();
   };
 
-  useOutsideClick(modalRef, closeModal, visible);
+  const buildFormData = (data, isRequest) => {
+    const form = new FormData();
+    form.append("UserId", userId);
+    form.append("Name", data.name);
+    form.append("DateOfBirth", data.dateOfBirth);
+    form.append("Phone", data.contact);
+    form.append("BloodTypeId", parseInt(data.bloodTypeId));
+    form.append("BloodComponentId", parseInt(data.bloodComponentId));
+    form.append("Quantity", parseInt(data.quantityUnit));
+    form.append("HeightCm", parseFloat(data.height));
+    form.append("WeightKg", parseFloat(data.weight));
+    form.append("HealthInfo", data.medicalContext || "");
+    form.append("Location", data.location || "");
+    if (isRequest) {
+      form.append("IsEmergency", data.urgencyLevel === "true");
+      form.append("Status", 0);
+    } else {
+      form.append("LastDonationDate", data.lastDonationDate || "");
+      form.append("PreferredDate", data.preferredDate || "");
+      form.append("Status", 0);
+    }
+    return form;
+  };
 
   const onSubmit = async (data) => {
-    const buildRequestFormData = () => {
-      const form = new FormData();
-      form.append("UserId", userId);
-      form.append("Name", data.name);
-      form.append("DateOfBirth", data.dateOfBirth);
-      form.append("Phone", data.contact);
-      form.append("BloodTypeId", parseInt(data.bloodTypeId));
-      form.append("BloodComponentId", parseInt(data.bloodComponentId));
-      form.append("IsEmergency", data.urgencyLevel === "true");
-      form.append("Location", data.location);
-      form.append("Quantity", parseInt(data.quantityUnit));
-      form.append("HeightCm", parseFloat(data.height));
-      form.append("WeightKg", parseFloat(data.weight));
-      form.append("HealthInfo", data.medicalContext || "");
-      form.append("Status", 0);
-      return form;
-    };
-
     try {
+      const form = buildFormData(data, activeTab === "request");
+
       if (activeTab === "request") {
-        const form = buildRequestFormData();
         await dispatch(createBloodRequest(form)).unwrap();
         toast.success("Blood Request created successfully!");
       } else {
-        toast.success("Thank you for registering your donation!");
+        for (let [key, val] of form.entries()) {
+          console.log(`${key}:`, val);
+        }
+        await dispatch(createDonationRequest(form)).unwrap();
+        toast.success("Donation Request created successfully!");
       }
+      dispatch(setShouldReloadList(true));
       reset();
-      closeModal();
+      handleClose();
     } catch (error) {
       console.error("Failed to submit:", error);
       toast.error("Failed to submit form");
@@ -96,19 +103,9 @@ const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
   };
 
   return (
-    <Transition appear show={visible} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={closeModal}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-70"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-70"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
-        </Transition.Child>
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm" />
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
@@ -121,15 +118,12 @@ const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
-              <Dialog.Panel
-                ref={modalRef}
-                className="inline-block w-full max-w-2xl px-8 py-6 text-left align-middle bg-white dark:bg-gray-900 shadow-2xl rounded-3xl border border-gray-200 dark:border-gray-700 relative z-50"
-              >
+              <Dialog.Panel className="inline-block w-full max-w-2xl px-8 py-6 text-left align-middle bg-white dark:bg-gray-900 shadow-2xl rounded-3xl border border-gray-200 dark:border-gray-700 relative z-50">
                 <div className="flex justify-between items-center mb-4">
                   <Dialog.Title className="w-full text-2xl ml-9 text-center font-bold text-gray-900 dark:text-white">
                     Blood Donation & Request Portal
                   </Dialog.Title>
-                  <button onClick={closeModal}>
+                  <button onClick={handleClose}>
                     <FaTimes className="text-xl text-gray-500" />
                   </button>
                 </div>
@@ -162,16 +156,40 @@ const BloodDonationModal = ({ isOpen, setIsOpen, userId }) => {
                   className="custom-scrollbar space-y-4 max-h-[70vh] overflow-y-auto pl-1 pr-1"
                 >
                   {activeTab === "donate" ? (
-                    <DonateForm register={register} />
+                    <DonateForm
+                      register={register}
+                      watch={watch}
+                      setValue={setValue}
+                      errors={errors}
+                      bloodTypes={bloodTypes}
+                      bloodComponents={bloodComponents}
+                    />
                   ) : (
                     <RequestForm
                       register={register}
                       watch={watch}
+                      setValue={setValue}
                       errors={errors}
                       bloodTypes={bloodTypes}
                       bloodComponents={bloodComponents}
                     />
                   )}
+                  <div className="flex items-start gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="agreeCheck"
+                      name="agreeCheck"
+                      required
+                      className="h-3 w-3 mt-1"
+                    />
+                    <label
+                      htmlFor="agreeCheck"
+                      className="text-sm text-gray-700 dark:text-gray-300"
+                    >
+                      I confirm that all provided information is accurate and
+                      complete.
+                    </label>
+                  </div>
 
                   <div className="flex justify-center mt-4">
                     <button

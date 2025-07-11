@@ -20,6 +20,7 @@ import bloodRequestReducer from "../features/bloodRequestSlice";
 import authReducer from "../features/authSlice";
 import bloodTypeReducer from "../features/bloodTypeSlice";
 import bloodComponentReducer from "../features/bloodComponentSlice";
+import notificationReducer from "../features/notificationSlice";
 
 // Cấu hình persist cho auth và user
 const authPersistConfig = {
@@ -69,8 +70,7 @@ export const store = configureStore({
     bloodInventory: bloodInventoryReducer,
     bloodType: bloodTypeReducer,
     bloodComponent: bloodComponentReducer,
-    
-    
+    notification: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

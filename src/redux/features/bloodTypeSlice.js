@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 const initialState = {
   bloodTypeList: [],
@@ -202,7 +202,6 @@ const bloodTypeSlice = createSlice({
       })
       .addCase(updateBloodType.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       })
 
       // DELETE BLOOD TYPE
@@ -221,7 +220,6 @@ const bloodTypeSlice = createSlice({
       })
       .addCase(deleteBloodType.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });

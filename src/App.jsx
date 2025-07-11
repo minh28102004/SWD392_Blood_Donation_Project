@@ -4,8 +4,8 @@ import { store, persistor } from "@redux/store/store";
 import endPoint from "./routers/router";
 import ErrorBoundary from "@components/Error_Boundary";
 import { PersistGate } from "redux-persist/integration/react";
-import ProtectedRoute from "@services/ProtectedRoute";
-import RoleRedirectWrapper from "@services/roleRedirectWrapper";
+import ProtectedRoute from "@services/RouteApp/protectedRoute";
+import RoleRedirectWrapper from "@services/RouteApp/roleRedirectWrapper";
 // Pages
 import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";

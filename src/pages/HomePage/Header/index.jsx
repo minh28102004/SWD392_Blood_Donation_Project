@@ -19,6 +19,7 @@ import Avatar from "@components/Avatar_User_Image";
 import Tooltip from "@mui/material/Tooltip";
 import { jwtDecode } from "jwt-decode";
 import { fetchUserById } from "@redux/features/userSlice";
+import Notification from "./notification";
 
 const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -88,7 +89,6 @@ const Header = () => {
     },
     {
       label: "Logout",
-      // href: "/",
       icon: <FiLogOut className="mr-2 text-lg text-red-600" />,
       isDanger: true,
       onClick: async () => {
@@ -109,11 +109,15 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <img src={logo} alt="BloodLife Logo" className="h-14 w-auto" />
+            <img src={logo} alt="BloodLife Logo" className="h-12 w-auto" />
           </div>
 
           {/* Navigation */}
-          <div className="hidden md:flex space-x-10 text-base font-semibold">
+          <div
+            className={`hidden md:flex space-x-10 ${
+              selectedUser ? "ml-11" : "ml-12"
+            } text-base font-semibold`}
+          >
             {[
               { label: "Home", path: "/homePage" },
               { label: "FAQs", path: "/homePage/faqs" },
@@ -143,19 +147,25 @@ const Header = () => {
 
           {/* Theme toggle & Account */}
           <div className="flex items-center space-x-4 relative">
-            {/* Toggle Theme Button */}
-            <Tooltip title={darkMode ? "Light Mode" : "Dark Mode"} arrow>
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-300"
-              >
-                {darkMode ? (
-                  <FiSun className="text-yellow-400 text-xl" />
-                ) : (
-                  <FiMoon className="text-gray-800 dark:text-white text-xl" />
-                )}
-              </button>
-            </Tooltip>
+            <div className="flex items-center space-x-3 relative ">
+              {/* Toggle Theme Button */}
+              <Tooltip title={darkMode ? "Light Mode" : "Dark Mode"} arrow>
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-full bg-gray-100 hover:brightness-90 dark:bg-gray-700 dark:hover:bg-gray-600 transition duration-300"
+                >
+                  {darkMode ? (
+                    <FiSun className="text-yellow-400 text-xl" />
+                  ) : (
+                    <FiMoon className="text-gray-800 dark:text-white text-xl" />
+                  )}
+                </button>
+              </Tooltip>
+
+              {/* Notification Bell */}
+              {selectedUser && <Notification user={user} />}
+            </div>
+
             {selectedUser ? (
               // Nếu đã đăng nhập: Avatar + Dropdown
               <div className="relative">
@@ -192,7 +202,7 @@ const Header = () => {
                             d="M4 12a8 8 0 018-8v8z"
                           ></path>
                         </svg>
-                        Logging out...
+                        <div className="text-blue-500">Logging out...</div>
                       </div>
                     ) : (
                       selectedUser?.userName || "Unknown"
@@ -247,7 +257,7 @@ const Header = () => {
               <div className="flex gap-3">
                 <Link
                   to="/authPage/login"
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-xl bg-white text-red-600 border border-red-500 shadow-sm hover:shadow-lg hover:bg-red-50 transform transition duration-300 hover:scale-105 active:scale-95"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-xl bg-white text-red-600 border border-red-500 shadow-sm hover:shadow-lg hover:bg-red-50 transform transition duration-300 hover:scale-105 active:scale-95"
                 >
                   <FiLogIn className="text-red-600" />
                   Sign In
@@ -255,7 +265,7 @@ const Header = () => {
 
                 <Link
                   to="/authPage/register"
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-xl bg-gradient-to-t from-rose-400 via-rose-500 to-red-600 text-white shadow-sm hover:shadow-lg hover:brightness-90 transform transition duration-300 hover:scale-105 active:scale-95"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-xl bg-gradient-to-t from-rose-400 via-rose-500 to-red-600 text-white shadow-sm hover:shadow-lg hover:brightness-90 transform transition duration-300 hover:scale-105 active:scale-95"
                 >
                   <FiUserPlus className="text-white" />
                   Sign Up

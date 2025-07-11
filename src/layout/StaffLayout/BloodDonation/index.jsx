@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
+import ActionButtons from "@components/Action_Button";
 import {
   searchDonationRequests,
   updateBloodDonationStatus,
@@ -31,14 +32,8 @@ const BloodDonation = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
 
-  const {
-    donationList,
-    loading,
-    error,
-    totalCount,
-    currentPage,
-    pageSize,
-  } = useSelector((state) => state.donationRequests);
+  const { donationList, loading, error, totalCount, currentPage, pageSize } =
+    useSelector((state) => state.donationRequests);
 
   const bloodTypes = useSelector((state) => state.bloodType.bloodTypeList || []);
   const bloodComponents = useSelector((state) => state.bloodComponent.bloodComponentList || []);
@@ -73,7 +68,9 @@ const BloodDonation = () => {
 
   const handleStatusChange = async (value, row) => {
     try {
-      await dispatch(updateBloodDonationStatus({ id: row.donateRequestId, status: value })).unwrap();
+      await dispatch(
+        updateBloodDonationStatus({ id: row.donateRequestId, status: value })
+      ).unwrap();
       toast.success("Status updated!");
       dispatch(searchDonationRequests({ page: currentPage, size: pageSize, filters: searchParams }));
     } catch (err) {
@@ -113,7 +110,7 @@ const BloodDonation = () => {
       key: "preferredDate",
       title: "Preferred Date",
       width: "12%",
-      render: (val) => val ? new Date(val).toLocaleDateString() : "N/A"
+      render: (val) => (val ? new Date(val).toLocaleDateString() : "N/A"),
     },
     { key: "quantity", title: "Quantity (ml)", width: "10%" },
     {
@@ -142,7 +139,11 @@ const BloodDonation = () => {
       render: (_, row) => (
         <div className="flex gap-2 justify-center">
           <Tooltip title="View Detail">
-            <Button type="default" size="small" onClick={() => handleShowDetail(row)}>
+            <Button
+              type="default"
+              size="small"
+              onClick={() => handleShowDetail(row)}
+            >
               Detail
             </Button>
           </Tooltip>
@@ -198,7 +199,9 @@ const BloodDonation = () => {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : donationList.length === 0 ? (
-            <div className="text-center text-red-500">No donation requests found.</div>
+            <div className="text-center text-red-500">
+              No donation requests found.
+            </div>
           ) : (
             <TableComponent columns={columns} data={donationList} />
           )}

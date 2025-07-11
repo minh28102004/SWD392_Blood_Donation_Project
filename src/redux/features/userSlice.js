@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] all users with search parameters
 export const fetchUsers = createAsyncThunk(
@@ -121,6 +121,7 @@ const userSlice = createSlice({
     totalPages: 0,
     currentPage: 1,
     pageSize: 8,
+    shouldReloadList: false,
   },
   reducers: {
     clearSelectedUser: (state) => {
@@ -141,6 +142,9 @@ const userSlice = createSlice({
     },
     setPageSize: (state, action) => {
       state.pageSize = action.payload;
+    },
+    setShouldReloadList: (state, action) => {
+      state.shouldReloadList = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -252,5 +256,7 @@ export const {
   setPagination,
   setCurrentPage,
   setPageSize,
+  setShouldReloadList,
 } = userSlice.actions;
+
 export default userSlice.reducer;

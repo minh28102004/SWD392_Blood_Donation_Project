@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginAPI, registerAPI } from "@services/authAPI";
+import { loginAPI, registerAPI } from "@services/API/authAPI";
 import { jwtDecode } from "jwt-decode";
 import { fetchUserById } from "@redux/features/userSlice";
 

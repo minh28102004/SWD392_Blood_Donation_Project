@@ -5,7 +5,7 @@ import {
   putRequestMultipartFormData,
   deleteRequest,
   patchRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] all blood requests with search parameters
 export const fetchBloodRequests = createAsyncThunk(
@@ -42,7 +42,7 @@ export const fetchBloodRequestById = createAsyncThunk(
 export const fetchBloodRequestsByUserId = createAsyncThunk(
   "bloodRequest/fetchByUserId",
   async (
-    { userId, page = 1, pageSize = 10, searchParams = {} },
+    { userId, page = 1, pageSize = 12, searchParams = {} },
     { rejectWithValue }
   ) => {
     try {
@@ -112,8 +112,8 @@ export const updateBloodRequestStatus = createAsyncThunk(
   async ({ id, status }, { rejectWithValue }) => {
     try {
       const res = await patchRequest({
-     url: `/api/BloodRequests/status`,
-data: { id, status }
+        url: `/api/BloodRequests/status`,
+        data: { id, status },
       });
 
       return res; // res.data đã được trả từ patchRequest
@@ -122,8 +122,6 @@ data: { id, status }
     }
   }
 );
-
-
 
 // [DELETE] delete blood request
 export const deleteBloodRequest = createAsyncThunk(
@@ -178,7 +176,7 @@ const bloodRequestSlice = createSlice({
     totalCount: 0,
     totalPages: 0,
     currentPage: 1,
-    pageSize: 7,
+    pageSize: 8,
   },
   reducers: {
     clearSelectedRequest: (state) => {
@@ -268,33 +266,40 @@ const bloodRequestSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-.addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
-  const { id, status } = action.payload || {};
-
-  // tìm trong danh sách request
-  const item = state.bloodRequestList.find(
-    (r) => r.bloodRequestId === id // hoặc r.id === id tùy backend
-  );
-
-  if (item) {
-    item.status = {
-      id: status,
-      name:
-        status === 0
-          ? "Pending"
-          : status === 1
-          ? "Successful"
-          : "Cancel",
-    };
-  }
-
-  state.loading = false;
-})
+      .addCase(updateBloodRequest.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.bloodRequestList.findIndex(
+          (r) => r.id === action.payload.id
+        );
+        if (index !== -1) state.bloodRequestList[index] = action.payload;
+      })
+      .addCase(updateBloodRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
       // --- UPDATE BLOOD REQUESTS STATUS ---
       .addCase(updateBloodRequestStatus.pending, (state) => {
         state.loading = true;
         state.error = null;
+      })
+      .addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
+        const { id, status } = action.payload || {};
+
+        // tìm trong danh sách request
+        const item = state.bloodRequestList.find(
+          (r) => r.bloodRequestId === id // hoặc r.id === id tùy backend
+        );
+
+        if (item) {
+          item.status = {
+            id: status,
+            name:
+              status === 0 ? "Pending" : status === 1 ? "Successful" : "Cancel",
+          };
+        }
+
+        state.loading = false;
       })
 
       .addCase(updateBloodRequestStatus.rejected, (state, action) => {
