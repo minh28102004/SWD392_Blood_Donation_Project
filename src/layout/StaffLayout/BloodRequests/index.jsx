@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Pagination from "@components/Pagination";
 import { useOutletContext } from "react-router-dom";
+import ActionButtons from "@components/Action_Button";
 import {
   fetchBloodRequests,
   updateBloodRequestStatus,
@@ -34,6 +36,7 @@ const BloodRequests = () => {
     error,
     currentPage,
     pageSize,
+    totalCount,
   } = useSelector((state) => state.bloodRequest);
 
   const [loadingDelay, setLoadingDelay] = useState(true);
@@ -47,7 +50,9 @@ const BloodRequests = () => {
 
   useEffect(() => {
     setLoadingDelay(true);
-    dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }))
+    dispatch(
+      fetchBloodRequests({ page: currentPage, size: pageSize, searchParams })
+    )
       .unwrap()
       .catch((err) => console.error("Fetch failed:", err))
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
@@ -55,17 +60,33 @@ const BloodRequests = () => {
 
   const handleStatusChange = async (value, row) => {
     try {
-      await dispatch(updateBloodRequestStatus({ id: row.bloodRequestId, status: value })).unwrap();
+      await dispatch(
+        updateBloodRequestStatus({
+          id: row.bloodRequestId,
+          status: value,
+        })
+      ).unwrap();
+
       toast.success("Status updated!");
-      dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }));
-    } catch {
+
+      await dispatch(
+        fetchBloodRequests({
+          page: currentPage,
+          size: pageSize,
+          searchParams,
+        })
+      ).unwrap(); //
+    } catch (err) {
+      console.error("Update failed:", err);
       toast.error("Failed to update status.");
     }
   };
 
   const handleShowDetail = async (row) => {
     try {
-      const res = await dispatch(fetchBloodRequestById(row.bloodRequestId)).unwrap();
+      const res = await dispatch(
+        fetchBloodRequestById(row.bloodRequestId)
+      ).unwrap();
       setSelectedDetail(res);
       setDetailModalVisible(true);
     } catch {
@@ -73,14 +94,19 @@ const BloodRequests = () => {
     }
   };
 
-  const handleSearch = useCallback((params) => {
-    dispatch(setCurrentPage(1));
-    setSearchParams(params);
-  }, [dispatch]);
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params);
+    },
+    [dispatch]
+  );
 
   const handleRefresh = () => {
     setLoadingDelay(true);
-    dispatch(fetchBloodRequests({ page: currentPage, size: pageSize, searchParams }))
+    dispatch(
+      fetchBloodRequests({ page: currentPage, size: pageSize, searchParams })
+    )
       .unwrap()
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
   };
@@ -123,7 +149,11 @@ const BloodRequests = () => {
       render: (_, row) => (
         <div className="flex gap-2 justify-center">
           <Tooltip title="View Detail">
-            <Button type="default" size="small" onClick={() => handleShowDetail(row)}>
+            <Button
+              type="default"
+              size="small"
+              onClick={() => handleShowDetail(row)}
+            >
               Detail
             </Button>
           </Tooltip>
@@ -134,13 +164,25 @@ const BloodRequests = () => {
 
   return (
     <div>
-      <div className={`rounded-lg shadow-md ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
+      <div
+        className={`rounded-lg shadow-md ${
+          darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+        }`}
+      >
         {/* Search */}
         <CollapsibleSearch
           searchFields={[
             { key: "name", type: "text", placeholder: "Search by Name" },
-            { key: "bloodType", type: "text", placeholder: "Search by Blood Type" },
-            { key: "bloodComponent", type: "text", placeholder: "Search by Component" },
+            {
+              key: "bloodType",
+              type: "text",
+              placeholder: "Search by Blood Type",
+            },
+            {
+              key: "bloodComponent",
+              type: "text",
+              placeholder: "Search by Component",
+            },
           ]}
           onSearch={handleSearch}
           onClear={() =>
@@ -158,18 +200,29 @@ const BloodRequests = () => {
           ) : error ? (
             <ErrorMessage message={error} />
           ) : bloodRequestList.length === 0 ? (
-            <div className="text-center text-red-500">No blood requests found.</div>
+            <div className="text-center text-red-500">
+              No blood requests found.
+            </div>
           ) : (
             <TableComponent columns={columns} data={bloodRequestList} />
           )}
         </div>
-
-        {/* Refresh Button */}
-        <div className="flex justify-end px-4 pb-4">
-          <Button onClick={handleRefresh} loading={loading || loadingDelay}>
-            Refresh
-          </Button>
-        </div>
+        {/*Pagination*/}
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
+        <ActionButtons
+          loading={loading}
+          loadingDelay={loadingDelay}
+          onReload={handleRefresh}
+        />
       </div>
 
       {/* Modal for Detail */}
@@ -181,22 +234,57 @@ const BloodRequests = () => {
       >
         {selectedDetail && (
           <div className="space-y-2 text-sm">
-            <p><strong>ID:</strong> {selectedDetail.bloodRequestId}</p>
-            <p><strong>Name:</strong> {selectedDetail.name}</p>
-            <p><strong>User ID:</strong> {selectedDetail.userId}</p>
-            <p><strong>Phone:</strong> {selectedDetail.phone}</p>
-            <p><strong>Blood Type:</strong> {selectedDetail.bloodTypeName}</p>
-            <p><strong>Component:</strong> {selectedDetail.bloodComponentName}</p>
-            <p><strong>Emergency:</strong> {selectedDetail.isEmergency ? "Yes" : "No"}</p>
-            <p><strong>Quantity:</strong> {selectedDetail.quantity}</p>
-            <p><strong>Location:</strong> {selectedDetail.location}</p>
-            <p><strong>Status:</strong> {selectedDetail.status.name}</p>
-            <p><strong>Fulfilled:</strong> {selectedDetail.fulfilled ? "Yes" : "No"}</p>
-            <p><strong>Health Info:</strong> {selectedDetail.healthInfo}</p>
-            <p><strong>Height:</strong> {selectedDetail.heightCm} cm</p>
-            <p><strong>Weight:</strong> {selectedDetail.weightKg} kg</p>
-            <p><strong>Date of Birth:</strong> {selectedDetail.dateOfBirth}</p>
-            <p><strong>Created At:</strong> {new Date(selectedDetail.createdAt).toLocaleString()}</p>
+            <p>
+              <strong>ID:</strong> {selectedDetail.bloodRequestId}
+            </p>
+            <p>
+              <strong>Name:</strong> {selectedDetail.name}
+            </p>
+            <p>
+              <strong>User ID:</strong> {selectedDetail.userId}
+            </p>
+            <p>
+              <strong>Phone:</strong> {selectedDetail.phone}
+            </p>
+            <p>
+              <strong>Blood Type:</strong> {selectedDetail.bloodTypeName}
+            </p>
+            <p>
+              <strong>Component:</strong> {selectedDetail.bloodComponentName}
+            </p>
+            <p>
+              <strong>Emergency:</strong>{" "}
+              {selectedDetail.isEmergency ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Quantity:</strong> {selectedDetail.quantity}
+            </p>
+            <p>
+              <strong>Location:</strong> {selectedDetail.location}
+            </p>
+            <p>
+              <strong>Status:</strong> {selectedDetail.status.name}
+            </p>
+            <p>
+              <strong>Fulfilled:</strong>{" "}
+              {selectedDetail.fulfilled ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Health Info:</strong> {selectedDetail.healthInfo}
+            </p>
+            <p>
+              <strong>Height:</strong> {selectedDetail.heightCm} cm
+            </p>
+            <p>
+              <strong>Weight:</strong> {selectedDetail.weightKg} kg
+            </p>
+            <p>
+              <strong>Date of Birth:</strong> {selectedDetail.dateOfBirth}
+            </p>
+            <p>
+              <strong>Created At:</strong>{" "}
+              {new Date(selectedDetail.createdAt).toLocaleString()}
+            </p>
           </div>
         )}
       </Modal>

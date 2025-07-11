@@ -219,7 +219,6 @@ const bloodComponentSlice = createSlice({
       })
       .addCase(deleteBloodComponent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });

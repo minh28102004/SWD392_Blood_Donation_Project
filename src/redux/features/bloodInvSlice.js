@@ -21,7 +21,7 @@ export const fetchAllBloodInventories = createAsyncThunk(
 // [GET] blood inventories with search parameters
 export const fetchBloodInventories = createAsyncThunk(
   "bloodInventory/fetchAll",
-  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
+  async ({ page = 1, size = 5, searchParams = {} }, { rejectWithValue }) => {
     try {
       const queryString = new URLSearchParams({
         page: page.toString(),
@@ -60,7 +60,9 @@ export const createBloodInventory = createAsyncThunk(
         url: "/api/BloodInventories",
         formData,
       });
-      return res;
+      console.log("Create Blood Inventory Response:", res.data);
+      
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
@@ -139,6 +141,12 @@ const bloodInventorySlice = createSlice({
         state.bloodList = action.payload.inventories || [];
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
+        console.log("Total Pages:", action.payload.totalPages);
+        console.log("Total Count:", action.payload.totalCount);
+        console.log("Current Page:", action.payload.currentPage);
+        if (action.payload.totalPages < action.payload.currentPage && action.payload.totalPages > 0) {
+          action.payload.currentPage = action.payload.totalPages;
+        }
         state.currentPage = action.payload.currentPage;
         state.pageSize = action.payload.pageSize;
       })
@@ -146,6 +154,7 @@ const bloodInventorySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+     
 
       // FETCH BLOOD INVENTORY BY ID
       .addCase(fetchBloodInventoryById.pending, (state) => {
@@ -168,8 +177,9 @@ const bloodInventorySlice = createSlice({
       })
       .addCase(createBloodInventory.fulfilled, (state, action) => {
         state.loading = false;
-        state.bloodList.push(action.payload);
+        
       })
+      
       .addCase(createBloodInventory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
@@ -213,12 +223,11 @@ const bloodInventorySlice = createSlice({
       })
       .addCase(deleteBloodInventory.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
       });
   },
 });
 export const {
-  clearSelectedBlood,
+  clearSelectedBloodInventory,
   clearError,
   setPagination,
   setCurrentPage,

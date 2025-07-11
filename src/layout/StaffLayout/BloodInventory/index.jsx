@@ -8,9 +8,11 @@ import {
   createBloodInventory,
   updateBloodInventory,
   deleteBloodInventory,
+  fetchAllBloodInventories,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodInvSlice";
+import Pagination from "@components/Pagination";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -32,14 +34,14 @@ const BloodInventoryManagement = () => {
     bloodTypeId: "",
   });
 
-  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [selectedBloodInventory, setSelectedBloodInventory] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
   // Columns tương ứng các field
   const columns = [
-    { key: "inventoryId", title: "Inventory ID", width: "15%" },
+    { key: "No.", title: "No.", width: "15%",  render: (_, __, index) => index + 1 },
     { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
     { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
     { key: "quantity", title: "Quantity", width: "10%" },
@@ -112,14 +114,14 @@ const BloodInventoryManagement = () => {
 
   // [CREATE] CreateInventory
   const handleCreateInventory = () => {
-    setSelectedInventory(null);
+    setSelectedBloodInventory(null);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
   };
 
   // [EDIT]
   const handleEdit = (inventory) => {
-    setSelectedInventory(inventory);
+    setSelectedBloodInventory(inventory);
     setFormKey((prev) => prev + 1); // reset form modal
     setModalOpen(true);
     console.log("Editing inventory:", inventory);
@@ -222,6 +224,17 @@ const BloodInventoryManagement = () => {
             <TableComponent columns={columns} data={bloodList} />
           )}
         </div>
+        {/*Pagination*/}
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
         {/*Button*/}
         <ActionButtons
           loading={loading}
@@ -235,7 +248,7 @@ const BloodInventoryManagement = () => {
           key={formKey} // reset modal mỗi lần mở
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          selectedInventory={selectedInventory}
+          selectedBloodInventory={selectedBloodInventory}
           onSuccess={() =>
             dispatch(
               fetchBloodInventories({

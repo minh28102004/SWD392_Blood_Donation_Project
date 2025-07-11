@@ -105,21 +105,25 @@ export const updateBloodRequest = createAsyncThunk(
 );
 
 // [PATCH] update blood request status
+// Trước đây bạn dùng FormData — giờ bỏ đi và dùng object JSON
+
 export const updateBloodRequestStatus = createAsyncThunk(
   "bloodRequest/updateStatus",
   async ({ id, status }, { rejectWithValue }) => {
     try {
-      await patchRequest({
-        url: `/api/BloodRequests/${id}/status`,
-        data: { status },
+      const res = await patchRequest({
+     url: `/api/BloodRequests/status`,
+data: { id, status }
       });
-      // API thành công, nhưng không trả dữ liệu, nên bạn tự return:
-      return { id, status };
+
+      return res; // res.data đã được trả từ patchRequest
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
+
 
 // [DELETE] delete blood request
 export const deleteBloodRequest = createAsyncThunk(
@@ -234,33 +238,35 @@ const bloodRequestSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateBloodRequest.fulfilled, (state, action) => {
-        state.loading = false;
-        const index = state.bloodRequestList.findIndex(
-          (r) => r.id === action.payload.id
-        );
-        if (index !== -1) state.bloodRequestList[index] = action.payload;
-      })
-      .addCase(updateBloodRequest.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
+.addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
+  const { id, status } = action.payload || {};
+
+  // tìm trong danh sách request
+  const item = state.bloodRequestList.find(
+    (r) => r.bloodRequestId === id // hoặc r.id === id tùy backend
+  );
+
+  if (item) {
+    item.status = {
+      id: status,
+      name:
+        status === 0
+          ? "Pending"
+          : status === 1
+          ? "Successful"
+          : "Cancel",
+    };
+  }
+
+  state.loading = false;
+})
+
       // --- UPDATE BLOOD REQUESTS STATUS ---
       .addCase(updateBloodRequestStatus.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateBloodRequestStatus.fulfilled, (state, action) => {
-        const { id, status } = action.payload;
-        const item = state.bloodRequestList.find(
-          (r) => r.bloodRequestId === id
-        );
-        if (item) {
-          item.status.id = status;
-          item.status.name =
-            status === 0 ? "Pending" : status === 1 ? "Successful" : "Cancel";
-        }
-      })
+
       .addCase(updateBloodRequestStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

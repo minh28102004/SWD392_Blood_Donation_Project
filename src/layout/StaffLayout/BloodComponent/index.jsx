@@ -21,6 +21,7 @@ import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import Pagination from "@components/Pagination";
 
 const BloodComponentManagement = () => {
   const { darkMode } = useOutletContext();
@@ -46,7 +47,7 @@ const BloodComponentManagement = () => {
   // Columns tương ứng các field
 
   const columns = [
-    { key: "bloodComponentId", title: "Blood Component ID", width: "15%" },
+    { key: "No.", title: "No.", width: "15%", render: (_, __, index) => index + 1 },
     { key: "name", title: "Name", width: "20%" },
 
     {
@@ -214,9 +215,35 @@ const BloodComponentManagement = () => {
               <p>No blood components found.</p>
             </div>
           ) : (
-            <TableComponent columns={columns} data={bloodComponentList} />
+            <TableComponent
+              columns={columns}
+              data={bloodComponentList.slice(
+                (currentPage - 1) * pageSize,
+                currentPage * pageSize
+              )}
+            />
           )}
         </div>
+        <Pagination
+          totalCount={totalCount}
+          pageSize={pageSize}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
+        {/*Button*/}
+        <ActionButtons
+          loading={loading}
+          currentPage={currentPage}
+          onPageChange={(page) => dispatch(setCurrentPage(page))}
+          onPageSizeChange={(size) => {
+            dispatch(setPageSize(size));
+            dispatch(setCurrentPage(1));
+          }}
+        />
         {/*Button*/}
         <ActionButtons
           loading={loading}

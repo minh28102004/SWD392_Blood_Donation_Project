@@ -124,13 +124,18 @@ const putRequestParams = async ({ url, params }) => {
 // [PATCH]
 const patchRequest = async ({ url, data }) => {
   try {
-    const res = await api.patch(url, data);
+    const res = await api.patch(url, data, {
+      headers: {
+        "Content-Type": "application/json", // 🔒 đảm bảo rõ ràng
+      },
+    });
     return res.data;
   } catch (error) {
     console.error("PATCH request error:", error);
     throw error;
   }
 };
+
 
 // [POST] multipart/form-data
 const postRequestMultipartFormData = async ({ url, formData }) => {
