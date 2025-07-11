@@ -163,11 +163,7 @@ const AdminProfileModal = ({
             avatarUrl={initialData?.avatar}
             size={64}
           />
-          <Typography
-            variant="h6"
-       
-            className="text-gray-600 dark:text-gray-300"
-          >
+          <Typography variant="h6" className="text-gray-600 dark:text-gray-300">
             {initialData?.userName}
           </Typography>
         </Box>
@@ -278,7 +274,7 @@ const AdminProfileModal = ({
               InputLabelProps={sharedLabelProps}
             />
             {password.length > 0 && (
-              <div className="col-span-2">
+              <div>
                 <div className="h-2 w-full rounded-full bg-gray-200 mt-2">
                   <div
                     className={`${getPasswordStrengthColor()} h-2 rounded-full transition-all duration-300`}
