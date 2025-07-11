@@ -23,23 +23,30 @@ export const fetchAllDonationRequests = createAsyncThunk(
 // [GET] Paginated Donation Requests
 export const fetchDonationRequests = createAsyncThunk(
   "donationRequests/fetchPaginated",
-  async ({ page = 1, size = 8 }, { rejectWithValue }) => {
+  async ({ page = 1, size = 8, searchParams = {} }, { rejectWithValue }) => {
     try {
       const queryString = new URLSearchParams({
         page: page.toString(),
         pageSize: size.toString(),
+        ...searchParams,
       }).toString();
 
-      const res = await getRequest(
-        `/api/DonationRequests/search?${queryString}`
-      );
+      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
       console.log("ResData: ", res.data);
-      return res.data; // { data, totalCount, totalPages, ... }
+
+      const { requests, totalCount, totalPages } = res.data.data;
+
+      return {
+        list: requests,
+        totalCount,
+        totalPages,
+      };
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
 
 // [GET] Single by ID
 export const fetchDonationRequestById = createAsyncThunk(
@@ -149,6 +156,46 @@ export const updateBloodDonationStatus = createAsyncThunk(
     }
   }
 );
+// @redux/features/bloodDonationSlice.js
+
+export const searchDonationRequests = createAsyncThunk(
+  "donationRequests/search",
+  async ({ page = 1, size = 10, filters = {} }, { rejectWithValue }) => {
+    try {
+      const params = {
+        page,
+        pageSize: size,
+        ...filters,
+      };
+
+      // Loại bỏ key có giá trị rỗng
+      Object.keys(params).forEach((key) => {
+        if (
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
+        ) {
+          delete params[key];
+        }
+      });
+
+      const queryString = new URLSearchParams(params).toString();
+      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
+
+      const { requests, totalCount, totalPages } = res.data.data;
+      return {
+        list: requests,
+        totalCount,
+        totalPages,
+        currentPage: page,
+        pageSize: size,
+      };
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
 
 const bloodDonationSlice = createSlice({
   name: "donationRequests",
@@ -185,20 +232,39 @@ const bloodDonationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+    //searchDonationRequests
+    .addCase(searchDonationRequests.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(searchDonationRequests.fulfilled, (state, action) => {
+  const payload = action.payload;
+  state.loading = false;
+  state.donationList = payload.list;
+  state.totalCount = payload.totalCount;
+  state.totalPages = payload.totalPages;
+  state.currentPage = payload.currentPage;
+  state.pageSize = payload.pageSize;
+})
+.addCase(searchDonationRequests.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+
       // Fetch paginated
       .addCase(fetchDonationRequests.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDonationRequests.fulfilled, (state, action) => {
-        const payload = action.payload;
-        state.loading = false;
-        state.donationList = payload.requests || [];
-        state.totalCount = payload.totalCount || 0;
-        state.totalPages = payload.totalPages || 0;
-        state.currentPage = payload.currentPage || 1;
-        state.pageSize = payload.pageSize || 8;
-      })
+   .addCase(fetchDonationRequests.fulfilled, (state, action) => {
+  const payload = action.payload;
+  state.loading = false;
+  state.donationList = payload.list || []; // ✅ Đúng key ở đây là `list`
+  state.totalCount = payload.totalCount || 0;
+  state.totalPages = payload.totalPages || 0;
+  // Nếu bạn muốn giữ currentPage và pageSize từ state, thì không cần ghi đè ở đây
+})
+
       .addCase(fetchDonationRequests.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

@@ -2,11 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
-  fetchDonationRequests,
+  searchDonationRequests,
+  updateBloodDonationStatus,
   setCurrentPage,
   setPageSize,
 } from "@redux/features/bloodDonationSlice";
-import { updateBloodDonationStatus } from "@redux/features/bloodDonationSlice"; // nhớ export
+import { fetchAllBloodTypes } from "@redux/features/bloodTypeSlice";
+import { fetchBloodComponents } from "@redux/features/bloodComponentSlice";
+
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
@@ -37,20 +40,34 @@ const BloodDonation = () => {
     pageSize,
   } = useSelector((state) => state.donationRequests);
 
-  const [searchParams, setSearchParams] = useState({
-    status: "",
-    location: "",
-  });
+  const bloodTypes = useSelector((state) => state.bloodType.bloodTypeList || []);
+  const bloodComponents = useSelector((state) => state.bloodComponent.bloodComponentList || []);
 
+  const [searchParams, setSearchParams] = useState({});
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
 
   useEffect(() => {
+    dispatch(fetchAllBloodTypes());
+    dispatch(fetchBloodComponents());
+  }, [dispatch]);
+
+  const getBloodTypeName = (id) => {
+    const item = bloodTypes.find(bt => bt.id === id);
+    return item ? item.name : `ID ${id}`;
+  };
+
+  const getBloodComponentName = (id) => {
+    const item = bloodComponents.find(bc => bc.id === id);
+    return item ? item.name : `ID ${id}`;
+  };
+
+  useEffect(() => {
     setLoadingDelay(true);
-    dispatch(fetchDonationRequests({ page: currentPage, size: pageSize, searchParams }))
+    dispatch(searchDonationRequests({ page: currentPage, size: pageSize, filters: searchParams }))
       .unwrap()
-      .catch((err) => console.error("Fetch failed:", err))
+      .catch((err) => console.error("Search failed:", err))
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
   }, [dispatch, currentPage, pageSize, searchParams]);
 
@@ -58,7 +75,7 @@ const BloodDonation = () => {
     try {
       await dispatch(updateBloodDonationStatus({ id: row.donateRequestId, status: value })).unwrap();
       toast.success("Status updated!");
-      await dispatch(fetchDonationRequests({ page: currentPage, size: pageSize, searchParams })).unwrap();
+      dispatch(searchDonationRequests({ page: currentPage, size: pageSize, filters: searchParams }));
     } catch (err) {
       console.error("Update failed:", err);
       toast.error("Failed to update status.");
@@ -71,13 +88,20 @@ const BloodDonation = () => {
   };
 
   const handleSearch = useCallback((params) => {
+    const parsedParams = {
+      keyword: params.keyword || undefined,
+      bloodTypeId: params.bloodTypeId ? parseInt(params.bloodTypeId) : undefined,
+      bloodComponentId: params.bloodComponentId ? parseInt(params.bloodComponentId) : undefined,
+      status: params.status !== "" ? parseInt(params.status) : undefined,
+    };
+
     dispatch(setCurrentPage(1));
-    setSearchParams(params);
+    setSearchParams(parsedParams);
   }, [dispatch]);
 
   const handleRefresh = () => {
     setLoadingDelay(true);
-    dispatch(fetchDonationRequests({ page: currentPage, size: pageSize, searchParams }))
+    dispatch(searchDonationRequests({ page: currentPage, size: pageSize, filters: searchParams }))
       .unwrap()
       .finally(() => setTimeout(() => setLoadingDelay(false), 800));
   };
@@ -130,14 +154,42 @@ const BloodDonation = () => {
   return (
     <div>
       <div className={`rounded-lg shadow-md ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
-        {/* Search */}
         <CollapsibleSearch
           searchFields={[
-            { key: "status", type: "text", placeholder: "Search by status" },
-            { key: "location", type: "text", placeholder: "Search by location" },
+            { key: "keyword", type: "text", placeholder: "Search by keyword (userId, location...)" },
+            {
+              key: "bloodTypeId",
+              type: "select",
+              options: [
+                { value: "", label: "All Blood Types" },
+                ...bloodTypes.map(bt => ({ value: bt.id, label: bt.name }))
+              ],
+              placeholder: "Select Blood Type"
+            },
+            {
+              key: "bloodComponentId",
+              type: "select",
+              options: [
+                { value: "", label: "All Components" },
+                ...bloodComponents.map(bc => ({ value: bc.id, label: bc.name }))
+              ],
+              placeholder: "Select Component"
+            },
+            {
+              key: "status",
+              type: "select",
+              options: [
+                { value: "", label: "All Status" },
+                ...statusOptions.map(opt => ({ value: opt.id, label: opt.label }))
+              ],
+              placeholder: "Select Status"
+            }
           ]}
           onSearch={handleSearch}
-          onClear={() => setSearchParams({ status: "", location: "" })}
+          onClear={() => {
+            dispatch(setCurrentPage(1));
+            setSearchParams({});
+          }}
         />
 
         <div className="p-2">
@@ -152,7 +204,6 @@ const BloodDonation = () => {
           )}
         </div>
 
-        {/* Refresh */}
         <div className="flex justify-end px-4 pb-4">
           <Button onClick={handleRefresh} loading={loading || loadingDelay}>
             Refresh
@@ -160,35 +211,32 @@ const BloodDonation = () => {
         </div>
       </div>
 
-      {/* Modal for Detail */}
       <Modal
         title="Donation Request Detail"
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         footer={null}
       >
-  {selectedDetail && (
-  <div className="space-y-2 text-sm">
-    <p><strong>ID:</strong> {selectedDetail.donateRequestId}</p>
-    <p><strong>User ID:</strong> {selectedDetail.userId}</p>
-    <p><strong>Blood Type ID:</strong> {selectedDetail.bloodTypeId}</p>
-    <p><strong>Blood Component ID:</strong> {selectedDetail.bloodComponentId}</p>
-    <p><strong>Preferred Date:</strong> {new Date(selectedDetail.preferredDate).toLocaleDateString()}</p>
-    <p><strong>Location:</strong> {selectedDetail.location}</p>
-    <p><strong>Created At:</strong> {new Date(selectedDetail.createdAt).toLocaleString()}</p>
-    <p><strong>Quantity:</strong> {selectedDetail.quantity} ml</p>
-    <p><strong>Height:</strong> {selectedDetail.heightCm} cm</p>
-    <p><strong>Weight:</strong> {selectedDetail.weightKg} kg</p>
-    <p><strong>Last Donation Date:</strong> {new Date(selectedDetail.lastDonationDate).toLocaleDateString()}</p>
-    <p><strong>Health Info:</strong> {selectedDetail.healthInfo}</p>
-    <p><strong>Date of Birth:</strong> {new Date(selectedDetail.dateOfBirth).toLocaleDateString()}</p>
-    <p><strong>Status:</strong> {statusOptions.find(s => s.id === selectedDetail.status)?.label}</p>
-  </div>
-)}
-
+        {selectedDetail && (
+          <div className="space-y-2 text-sm">
+            <p><strong>ID:</strong> {selectedDetail.donateRequestId}</p>
+            <p><strong>User ID:</strong> {selectedDetail.userId}</p>
+            <p><strong>Blood Type:</strong> {getBloodTypeName(selectedDetail.bloodTypeId)}</p>
+            <p><strong>Blood Component:</strong> {getBloodComponentName(selectedDetail.bloodComponentId)}</p>
+            <p><strong>Preferred Date:</strong> {new Date(selectedDetail.preferredDate).toLocaleDateString()}</p>
+            <p><strong>Location:</strong> {selectedDetail.location}</p>
+            <p><strong>Created At:</strong> {new Date(selectedDetail.createdAt).toLocaleString()}</p>
+            <p><strong>Quantity:</strong> {selectedDetail.quantity} ml</p>
+            <p><strong>Height:</strong> {selectedDetail.heightCm} cm</p>
+            <p><strong>Weight:</strong> {selectedDetail.weightKg} kg</p>
+            <p><strong>Last Donation Date:</strong> {new Date(selectedDetail.lastDonationDate).toLocaleDateString()}</p>
+            <p><strong>Health Info:</strong> {selectedDetail.healthInfo}</p>
+            <p><strong>Date of Birth:</strong> {new Date(selectedDetail.dateOfBirth).toLocaleDateString()}</p>
+            <p><strong>Status:</strong> {statusOptions.find(s => s.id === selectedDetail.status)?.label}</p>
+          </div>
+        )}
       </Modal>
 
-      {/* Pagination */}
       <Pagination
         totalCount={totalCount}
         pageSize={pageSize}
