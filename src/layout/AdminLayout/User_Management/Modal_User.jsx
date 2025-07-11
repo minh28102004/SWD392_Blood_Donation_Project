@@ -14,7 +14,6 @@ import { TextInput, PasswordInput, SelectInput } from "@components/Form_Input";
 import { createUser, updateUser } from "@redux/features/userSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import useOutsideClick from "@hooks/useOutsideClick";
 
 const UserCreationModal = ({
   isOpen,
@@ -27,8 +26,6 @@ const UserCreationModal = ({
   const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const modalRef = useRef(null);
-  useOutsideClick(modalRef, onClose);
 
   const {
     register,
@@ -271,32 +268,34 @@ const UserCreationModal = ({
                       />
 
                       {/* Username */}
-                      <TextInput
-                        label={
-                          <>
-                            {importantFields.includes("userName") && (
-                              <span className="text-red-600 mr-1">*</span>
-                            )}
-                            Username :
-                          </>
-                        }
-                        name="userName"
-                        register={register}
-                        errors={errors}
-                        validation={{
-                          required: "Username is required",
-                          minLength: {
-                            value: 3,
-                            message: "At least 3 characters",
-                          },
-                          maxLength: {
-                            value: 50,
-                            message: "Max 50 characters",
-                          },
-                        }}
-                        placeholder="Enter username"
-                        icon={FaUser}
-                      />
+                      {!selectedUser && (
+                        <TextInput
+                          label={
+                            <>
+                              {importantFields.includes("userName") && (
+                                <span className="text-red-600 mr-1">*</span>
+                              )}
+                              Username :
+                            </>
+                          }
+                          name="userName"
+                          register={register}
+                          errors={errors}
+                          validation={{
+                            required: "Username is required",
+                            minLength: {
+                              value: 3,
+                              message: "At least 3 characters",
+                            },
+                            maxLength: {
+                              value: 50,
+                              message: "Max 50 characters",
+                            },
+                          }}
+                          placeholder="Enter username"
+                          icon={FaUser}
+                        />
+                      )}
 
                       {/* Role */}
                       <SelectInput
@@ -315,7 +314,24 @@ const UserCreationModal = ({
                         placeholder="Select role"
                         icon={FaUserTag}
                       />
-
+                      {/* Status (only in edit) */}
+                      {selectedUser && (
+                        <SelectInput
+                          label={
+                            <>
+                              {importantFields.includes("status") && (
+                                <span className="text-red-600 mr-1">*</span>
+                              )}
+                              Status :
+                            </>
+                          }
+                          name="status"
+                          register={register}
+                          errors={errors}
+                          options={statusOptions}
+                          icon={FaToggleOn}
+                        />
+                      )}
                       {/* Password */}
                       <PasswordInput
                         label={
@@ -345,8 +361,8 @@ const UserCreationModal = ({
                         }
                         icon={FaLock}
                       />
-                      {/* Password strength (only in create mode) */}
-                      {!selectedUser && (
+                      {/* Password strength */}
+                      {(!selectedUser || (selectedUser && password)) && (
                         <div className="mt-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                             Strength: {getPasswordStrengthLabel()}
@@ -375,25 +391,6 @@ const UserCreationModal = ({
                             </p>
                           )}
                         </div>
-                      )}
-
-                      {/* Status (only in edit) */}
-                      {selectedUser && (
-                        <SelectInput
-                          label={
-                            <>
-                              {importantFields.includes("status") && (
-                                <span className="text-red-600 mr-1">*</span>
-                              )}
-                              Status :
-                            </>
-                          }
-                          name="status"
-                          register={register}
-                          errors={errors}
-                          options={statusOptions}
-                          icon={FaToggleOn}
-                        />
                       )}
                     </div>
 

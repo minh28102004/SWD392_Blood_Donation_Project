@@ -25,8 +25,14 @@ import CollapsibleSearch from "@components/Collapsible_Search";
 const BloodComponentManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
-  const { bloodComponentList, loading, error, totalCount, currentPage, pageSize } =
-    useSelector((state) => state.bloodComponent);
+  const {
+    bloodComponentList,
+    loading,
+    error,
+    totalCount,
+    currentPage,
+    pageSize,
+  } = useSelector((state) => state.bloodComponent);
   const [searchParams, setSearchParams] = useState({
     bloodComponentId: "",
     name: "",
@@ -42,7 +48,7 @@ const BloodComponentManagement = () => {
   const columns = [
     { key: "bloodComponentId", title: "Blood Component ID", width: "15%" },
     { key: "name", title: "Name", width: "20%" },
-    
+
     {
       key: "actions",
       title: "Actions",
@@ -71,10 +77,10 @@ const BloodComponentManagement = () => {
       ),
     },
   ];
-useEffect(() => {
-  console.log("FETCHED Blood Component:", bloodComponentList);
-  console.log("SEARCH PARAMS:", searchParams);
-}, [bloodComponentList, searchParams]);
+  useEffect(() => {
+    console.log("FETCHED Blood Component:", bloodComponentList);
+    console.log("SEARCH PARAMS:", searchParams);
+  }, [bloodComponentList, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,7 +127,9 @@ useEffect(() => {
       cancelText: "Cancel",
       onOk: async () => {
         try {
-          await dispatch(deleteBloodComponent(bloodComponent.bloodComponentId)).unwrap();
+          await dispatch(
+            deleteBloodComponent(bloodComponent.bloodComponentId)
+          ).unwrap();
           toast.success("Blood Component has been deleted!");
           dispatch(
             fetchBloodComponents({
@@ -132,7 +140,8 @@ useEffect(() => {
           );
         } catch (error) {
           toast.error(
-            error?.message || "An error occurred while deleting the blood Component!"
+            error?.message ||
+              "An error occurred while deleting the blood Component!"
           );
         }
       },
@@ -140,10 +149,13 @@ useEffect(() => {
     });
   };
   //[SEARCH]
-  const handleSearch = useCallback((params) => {
-  dispatch(setCurrentPage(1));
-  setSearchParams(params); // OK
-}, [dispatch]);
+  const handleSearch = useCallback(
+    (params) => {
+      dispatch(setCurrentPage(1));
+      setSearchParams(params); // OK
+    },
+    [dispatch]
+  );
 
   // [REFRESH]
   const handleRefresh = () => {
@@ -172,16 +184,22 @@ useEffect(() => {
       >
         <CollapsibleSearch
           searchFields={[
-            { key: "bloodComponentId", type: "text", placeholder: "Search By Id" },
-            { key: "name", type: "text", placeholder: "Search By Blood Component" },
-           
+            {
+              key: "bloodComponentId",
+              type: "text",
+              placeholder: "Search By Id",
+            },
+            {
+              key: "name",
+              type: "text",
+              placeholder: "Search By Blood Component",
+            },
           ]}
           onSearch={handleSearch}
           onClear={() =>
             setSearchParams({
               bloodComponentId: "",
               name: "",
-              
             })
           }
         />

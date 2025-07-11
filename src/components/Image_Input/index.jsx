@@ -1,7 +1,7 @@
 import { useDropzone } from "react-dropzone";
 import { FiUpload, FiX } from "react-icons/fi";
 import { useCallback, useState, useEffect } from "react";
-import { baseURL } from "@services/api";
+import { baseURL } from "@services/API/api";
 
 const ImageUploadInput = ({
   value, // This will be the image URL or File object

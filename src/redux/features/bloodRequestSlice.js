@@ -5,7 +5,7 @@ import {
   putRequestMultipartFormData,
   deleteRequest,
   patchRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] all blood requests with search parameters
 export const fetchBloodRequests = createAsyncThunk(
@@ -42,7 +42,7 @@ export const fetchBloodRequestById = createAsyncThunk(
 export const fetchBloodRequestsByUserId = createAsyncThunk(
   "bloodRequest/fetchByUserId",
   async (
-    { userId, page = 1, pageSize = 10, searchParams = {} },
+    { userId, page = 1, pageSize = 12, searchParams = {} },
     { rejectWithValue }
   ) => {
     try {
@@ -144,7 +144,7 @@ const bloodRequestSlice = createSlice({
     totalCount: 0,
     totalPages: 0,
     currentPage: 1,
-    pageSize: 7,
+    pageSize: 8,
   },
   reducers: {
     clearSelectedRequest: (state) => {

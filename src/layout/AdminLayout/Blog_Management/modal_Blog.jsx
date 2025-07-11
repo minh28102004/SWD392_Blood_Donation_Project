@@ -9,9 +9,15 @@ import { FaTimes } from "react-icons/fa";
 import { TextInput } from "@components/Form_Input";
 import ImageUploadInput from "@components/Image_Input";
 import { useDispatch } from "react-redux";
-import { createBlogPost, updateBlogPost } from "@redux/features/blogPostsSlice"; // Import actions
+import { createBlogPost, updateBlogPost } from "@redux/features/blogPostsSlice";
 
-const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
+const BlogPostModal = ({
+  isOpen,
+  onClose,
+  selectedPost,
+  onSuccess,
+  userId,
+}) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     content: selectedPost?.content || "",
@@ -28,7 +34,6 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
     reset,
   } = useForm({
     defaultValues: {
-      userId: selectedPost?.userId || "",
       title: selectedPost?.title || "",
       category: selectedPost?.category || "",
     },
@@ -49,10 +54,10 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
   const contentWithoutHtml = removeHtmlTags(formData.content);
 
   const onSubmit = async (data) => {
-    const { title, category, userId } = data;
+    const { title, category } = data;
     const formDataToSend = new FormData();
     if (!selectedPost) {
-      formDataToSend.append("UserId", userId); // Add userId for POST requests
+      formDataToSend.append("UserId", userId);
     }
     formDataToSend.append("Title", title);
     formDataToSend.append("Content", contentWithoutHtml);
@@ -141,28 +146,6 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
                       <TextInput
                         label={
                           <>
-                            {importantFields.includes("userId") && (
-                              <span className="text-red-600 mr-1">*</span>
-                            )}
-                            User ID :
-                          </>
-                        }
-                        name="userId"
-                        placeholder="Enter numeric user ID"
-                        register={register}
-                        errors={errors}
-                        validation={{
-                          required: "User ID is required",
-                          pattern: {
-                            value: /^\d+$/,
-                            message: "Only numeric user IDs allowed",
-                          },
-                        }}
-                      />
-
-                      <TextInput
-                        label={
-                          <>
                             {importantFields.includes("title") && (
                               <span className="text-red-600 mr-1">*</span>
                             )}
@@ -173,6 +156,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
                         placeholder="Enter blog title"
                         register={register}
                         errors={errors}
+                        colSpan={2}
                       />
 
                       <TextInput
@@ -217,7 +201,7 @@ const BlogPostModal = ({ isOpen, onClose, selectedPost, onSuccess }) => {
                         <span className="text-red-600 mr-1">*</span>
                         Content :
                       </label>
-                      <div className="h-[100px] dark:bg-white relative">
+                      <div className="h-[100px] dark:text-white relative">
                         <ReactQuill
                           value={formData.content}
                           onChange={(val) =>

@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 const initialState = {
   bloodComponentList: [],

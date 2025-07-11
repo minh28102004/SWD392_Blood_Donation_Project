@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] blog posts with pagination & search
 export const fetchBlogPosts = createAsyncThunk(

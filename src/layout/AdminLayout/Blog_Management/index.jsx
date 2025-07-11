@@ -15,15 +15,16 @@ import TableComponent from "@components/Table";
 import ActionButtons from "@components/Action_Button";
 import Tooltip from "@mui/material/Tooltip";
 import BlogPostModal from "./modal_Blog";
-import { Modal } from "antd";
 import { toast } from "react-toastify";
 import Pagination from "@components/Pagination";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
-import { baseURL } from "@services/api";
+import { baseURL } from "@services/API/api";
+import { useDeleteWithConfirm } from "@hooks/useDeleteWithConfirm";
 
 const BlogPostManagement = () => {
   const { darkMode } = useOutletContext();
+  const { userId } = useOutletContext();
   const dispatch = useDispatch();
   const { blogList, loading, error, pagination } = useSelector(
     (state) => state.blogPosts
@@ -33,7 +34,6 @@ const BlogPostManagement = () => {
     currentPage = 1,
     pageSize = 6,
     totalCount = 0,
-    totalPages = 0,
   } = pagination[componentKey] || {};
   const [searchParams, setSearchParams] = useState({
     id: "",
@@ -185,26 +185,19 @@ const BlogPostManagement = () => {
   };
 
   // [DELETE]
-  const handleDelete = async (blog) => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this blog post?",
-      content: "( Note: The blog post will be removed from the list )",
-      okText: "OK",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await dispatch(deleteBlogPost(blog.postId)).unwrap();
-          toast.success("Blog post has been deleted!");
-          dispatch(
-            fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
-          );
-        } catch (error) {
-          toast.error(
-            error?.message || "An error occurred while deleting the blog post!"
-          );
-        }
-      },
-      style: { top: "30%" },
+  const confirmDeleteBlogPost = useDeleteWithConfirm(
+    "skipDeleteBlogConfirm",
+    "Are you sure you want to delete this blog post?",
+    "Note: The blog post will be removed from the list"
+  );
+
+  const handleDelete = (blog) => {
+    confirmDeleteBlogPost(async () => {
+      await dispatch(deleteBlogPost(blog.postId)).unwrap();
+      toast.success("Blog post has been deleted!");
+      dispatch(
+        fetchBlogPosts({ page: currentPage, size: pageSize, searchParams })
+      );
     });
   };
 
@@ -299,6 +292,7 @@ const BlogPostManagement = () => {
         {/*Modal*/}
         <BlogPostModal
           key={formKey} // reset modal mỗi lần mở
+          userId = {userId}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedPost={selectedPost}

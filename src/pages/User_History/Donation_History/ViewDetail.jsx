@@ -1,4 +1,4 @@
-import { Fragment, useState} from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import {
   FaTimes,
@@ -7,18 +7,26 @@ import {
   FaPhone,
   FaMapMarkerAlt,
   FaHeartbeat,
+  FaBirthdayCake,
+  FaCalendarAlt,
+  FaClock,
 } from "react-icons/fa";
 
-const ViewDetailRequest = ({ data, isOpen, onClose }) => {
+const ViewDetailDonation = ({ data, isOpen, onClose }) => {
   if (!data) return null;
 
-  const getStatusClass = (status) => {
-    if (!status) return "text-gray-500";
-    const lowerStatus = status.toLowerCase();
+  const getStatusClass = (statusName) => {
+    if (!statusName) return "text-gray-500";
+    const lowerStatus = statusName.toLowerCase();
     if (lowerStatus === "pending") return "text-yellow-600 font-semibold";
     if (lowerStatus === "successful") return "text-green-600 font-semibold";
     if (lowerStatus === "cancelled") return "text-red-600 font-semibold";
     return "text-gray-500";
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString();
   };
 
   const DetailRow = ({ label, value, valueClass = "", icon = null }) => (
@@ -36,7 +44,7 @@ const ViewDetailRequest = ({ data, isOpen, onClose }) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* Overlay with smooth transition */}
+        {/* Overlay */}
         <div className="fixed inset-0 bg-black bg-opacity-70" />
 
         {/* Centered Content */}
@@ -68,11 +76,19 @@ const ViewDetailRequest = ({ data, isOpen, onClose }) => {
                     <FaUser className="mr-2" /> Personal Information
                   </h3>
                   <div className="space-y-4">
-                    <DetailRow label="Request ID" value={data.bloodRequestId} />
+                    <DetailRow
+                      label="Request ID"
+                      value={data.donateRequestId}
+                    />
                     <DetailRow
                       label="Phone"
                       value={data.phone || "N/A"}
                       icon={<FaPhone />}
+                    />
+                    <DetailRow
+                      label="Date of Birth"
+                      value={formatDate(data.dateOfBirth)}
+                      icon={<FaBirthdayCake />}
                     />
                     <DetailRow
                       label="Height (cm)"
@@ -101,25 +117,32 @@ const ViewDetailRequest = ({ data, isOpen, onClose }) => {
                     <FaTint className="mr-2" /> Blood Request Information
                   </h3>
                   <div className="space-y-4">
-                    <DetailRow label="Blood Type" value={data.bloodTypeName} />
+                    <DetailRow
+                      label="Blood Type"
+                      value={`${data.bloodType?.name || "?"}${
+                        data.bloodType?.rhFactor || ""
+                      }`}
+                    />
                     <DetailRow
                       label="Blood Component"
-                      value={data.bloodComponentName}
+                      value={data.bloodComponent?.name || "N/A"}
                     />
-                    <DetailRow
-                      label="Emergency"
-                      value={data.isEmergency ? "Yes" : "No"}
-                      valueClass={
-                        data.isEmergency
-                          ? "text-red-600 font-semibold"
-                          : "text-green-600 font-semibold"
-                      }
-                    />
+
                     <DetailRow label="Quantity (ml)" value={data.quantity} />
                     <DetailRow
+                      label="Preferred Date"
+                      value={formatDate(data.preferredDate)}
+                      icon={<FaCalendarAlt />}
+                    />
+                    <DetailRow
+                      label="Last Donation Date"
+                      value={formatDate(data.lastDonationDate)}
+                      icon={<FaClock />}
+                    />
+                    <DetailRow
                       label="Status"
-                      value={data.status?.name || "N/A"}
-                      valueClass={getStatusClass(data.status?.name)}
+                      value={data.statusName || "N/A"}
+                      valueClass={getStatusClass(data.statusName)}
                     />
                     <DetailRow
                       label="Created At"
@@ -136,4 +159,4 @@ const ViewDetailRequest = ({ data, isOpen, onClose }) => {
   );
 };
 
-export default ViewDetailRequest;
+export default ViewDetailDonation;

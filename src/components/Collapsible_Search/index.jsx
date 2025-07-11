@@ -80,7 +80,7 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
                     <div key={field.key} className="flex-1 min-w-[150px]">
                       <DatePicker
                         className="w-full"
-                        placeholder="Chọn ngày"
+                        placeholder={field.placeholder}
                         format="YYYY-MM-DD"
                         onChange={(value) =>
                           handleInputChange(
@@ -92,9 +92,6 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
                           searchValues[field.key]
                             ? dayjs(searchValues[field.key], "YYYY-MM-DD")
                             : null
-                        }
-                        disabledDate={(current) =>
-                          current && current.isAfter(dayjs())
                         }
                       />
                     </div>

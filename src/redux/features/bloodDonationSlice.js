@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-} from "@services/api";
+} from "@services/API/api";
 
 // [GET] All Donation Requests
 export const fetchAllDonationRequests = createAsyncThunk(
@@ -57,7 +57,7 @@ export const fetchDonationRequestById = createAsyncThunk(
 export const fetchDonationRequestsByUserId = createAsyncThunk(
   "donationRequests/fetchByUserId",
   async (
-    { userId, page = 1, pageSize = 10, searchParams = {} },
+    { userId, page = 1, pageSize = 12, searchParams = {} },
     { rejectWithValue }
   ) => {
     try {
@@ -90,7 +90,7 @@ export const fetchDonationRequestsByUserId = createAsyncThunk(
 // [POST]
 export const createDonationRequest = createAsyncThunk(
   "donationRequests/create",
-  async ({ formData }, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
       const res = await postRequestMultipartFormData({
         url: "/api/DonationRequests",

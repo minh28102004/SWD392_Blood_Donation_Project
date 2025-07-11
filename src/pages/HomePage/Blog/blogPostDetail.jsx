@@ -2,7 +2,7 @@ import React, { Fragment, useRef, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes, FaShare, FaClock, FaBookmark } from "react-icons/fa";
 import { format } from "date-fns";
-import { baseURL } from "@services/api";
+import { baseURL } from "@services/API/api";
 
 const BlogPostDetailModal = ({ isOpen, onClose, post }) => {
   const panelRef = useRef(null);

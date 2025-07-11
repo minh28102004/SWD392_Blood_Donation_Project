@@ -1,7 +1,10 @@
 import { postRequest, postRequestMultipartFormData } from "./api";
 
 export const loginAPI = async (formData) => {
-  return await postRequestMultipartFormData({ url: "/api/Auth/login", formData });
+  return await postRequestMultipartFormData({
+    url: "/api/Auth/login",
+    formData,
+  });
 };
 
 export const registerAPI = async (data) => {

@@ -8,7 +8,7 @@ import {
   setPageSize,
 } from "@redux/features/blogPostsSlice";
 import Pagination from "@components/Pagination";
-import { baseURL } from "@services/api";
+import { baseURL } from "@services/API/api";
 import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
