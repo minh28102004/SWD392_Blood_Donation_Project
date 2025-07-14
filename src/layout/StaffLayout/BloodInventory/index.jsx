@@ -23,6 +23,11 @@ import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
+
 const BloodInventoryManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
@@ -33,17 +38,28 @@ const BloodInventoryManagement = () => {
     bloodComponentId: "",
     bloodTypeId: "",
   });
-
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
+  const [loadingDelay, setLoadingDelay] = useState(true);
   const [selectedBloodInventory, setSelectedBloodInventory] = useState(null);
   const [formKey, setFormKey] = useState(0); // reset modal form key
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
+  useEffect(() => {
+    dispatch(fetchBloodTypes());
+    dispatch(fetchBloodComponents());
+  }, [dispatch]);
+
   // Columns tương ứng các field
   const columns = [
-    { key: "No.", title: "No.", width: "15%",  render: (_, __, index) => index + 1 },
-    { key: "bloodTypeName", title: "Blood Type Name", width: "20%" },
-    { key: "bloodComponentName", title: "Blood Component Name", width: "20%" },
+    {
+      key: "No.",
+      title: "No.",
+      width: "5%",
+      render: (_, __, index) => index + 1,
+    },
+    { key: "bloodTypeName", title: "Blood Type", width: "7%" },
+    { key: "bloodComponentName", title: "Blood Component", width: "10%" },
     { key: "quantity", title: "Quantity", width: "10%" },
     { key: "unit", title: "Unit", width: "10%" },
     {
@@ -61,11 +77,11 @@ const BloodInventoryManagement = () => {
         return formattedDate;
       },
     },
-    { key: "inventoryLocation", title: "Location", width: "10%" },
+    { key: "inventoryLocation", title: "Location", width: "15%" },
     {
       key: "actions",
       title: "Actions",
-      width: "12%",
+      width: "6%",
       render: (_, currentRow) => (
         <div className="flex justify-center gap-2">
           <Tooltip title="Edit Inventory">
@@ -180,6 +196,17 @@ const BloodInventoryManagement = () => {
         });
     }, 1000);
   };
+
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
+
   return (
     <div>
       <div
@@ -191,14 +218,16 @@ const BloodInventoryManagement = () => {
           searchFields={[
             { key: "id", type: "text", placeholder: "Search By Id" },
             {
-              key: "bloodType",
-              type: "text",
-              placeholder: "Search By BloodType",
+              key: "bloodTypeId",
+              type: "select",
+              options: bloodTypeOptions,
+              placeholder: "Select Blood Type",
             },
             {
-              key: "bloodComponent",
-              type: "text",
-              placeholder: "Search By Blood Component",
+              key: "bloodComponentId",
+              type: "select",
+              options: bloodComponentOptions,
+              placeholder: "Select Blood Component",
             },
           ]}
           onSearch={handleSearch}

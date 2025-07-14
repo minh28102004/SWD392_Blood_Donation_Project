@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,25 +21,17 @@ import BloodTypeModal from "./modal_BloodType";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
-import CollapsibleSearch from "@components/Collapsible_Search";
-import { bloodTypes } from "@pages/HomePage/About_blood/blood_Data";
+
 const BloodTypeManagement = () => {
   const { darkMode } = useOutletContext();
   const dispatch = useDispatch();
   const { bloodTypeList, loading, error, totalCount, currentPage, pageSize } =
     useSelector((state) => state.bloodType);
-  const [searchParams, setSearchParams] = useState({
-    bloodTypeId: "",
-    name: "",
-    rhFactor: "",
-  });
 
   const [selectedBloodType, setSelectedBloodType] = useState(null);
-  const [formKey, setFormKey] = useState(0); // reset modal form key
+  const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
-
-  // Columns tương ứng các field
 
   const columns = [
     { key: "bloodTypeId", title: "Blood Type ID", width: "15%" },
@@ -73,10 +65,6 @@ const BloodTypeManagement = () => {
       ),
     },
   ];
-  useEffect(() => {
-    console.log("FETCHED BLOOD TYPES:", bloodTypeList);
-    console.log("SEARCH PARAMS:", searchParams);
-  }, [bloodTypeList, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,7 +74,6 @@ const BloodTypeManagement = () => {
           fetchBloodTypes({
             page: currentPage,
             size: pageSize,
-            searchParams,
           })
         );
       } catch (error) {
@@ -97,24 +84,20 @@ const BloodTypeManagement = () => {
     };
 
     fetchData();
-  }, [dispatch, currentPage, pageSize, searchParams]);
+  }, [dispatch, currentPage, pageSize]);
 
-  // [CREATE]
   const handleCreateBloodType = () => {
     setSelectedBloodType(null);
-    setFormKey((prev) => prev + 1); // reset form modal
+    setFormKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
-  // [EDIT]
   const handleEdit = (bloodType) => {
     setSelectedBloodType(bloodType);
-    setFormKey((prev) => prev + 1); // reset form modal
+    setFormKey((prev) => prev + 1);
     setModalOpen(true);
-    console.log("Editing blood type:", bloodType);
   };
 
-  // [DELETE]
   const handleDelete = async (bloodType) => {
     Modal.confirm({
       title: "Are you sure you want to delete this blood type?",
@@ -129,7 +112,6 @@ const BloodTypeManagement = () => {
             fetchBloodTypes({
               page: currentPage,
               size: pageSize,
-              searchParams,
             })
           );
         } catch (error) {
@@ -141,16 +123,7 @@ const BloodTypeManagement = () => {
       style: { top: "30%" },
     });
   };
-  //[SEARCH]
-  const handleSearch = useCallback(
-    (params) => {
-      dispatch(setCurrentPage(1));
-      setSearchParams(params); // OK
-    },
-    [dispatch]
-  );
 
-  // [REFRESH]
   const handleRefresh = () => {
     startLoading();
     setTimeout(() => {
@@ -158,7 +131,6 @@ const BloodTypeManagement = () => {
         fetchBloodTypes({
           page: currentPage,
           size: pageSize,
-          searchParams,
         })
       )
         .unwrap()
@@ -175,25 +147,6 @@ const BloodTypeManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
-        <CollapsibleSearch
-          searchFields={[
-            { key: "bloodTypeId", type: "text", placeholder: "Search By Id" },
-            { key: "name", type: "text", placeholder: "Search By Blood Type" },
-            {
-              key: "rhFactor",
-              type: "text",
-              placeholder: "Search By Rh Factor (+ or -)",
-            },
-          ]}
-          onSearch={handleSearch}
-          onClear={() =>
-            setSearchParams({
-              bloodTypeId: "",
-              name: "",
-              rhFactor: "",
-            })
-          }
-        />
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
@@ -224,7 +177,6 @@ const BloodTypeManagement = () => {
             dispatch(setCurrentPage(1));
           }}
         />
-        {/*Button*/}
         <ActionButtons
           loading={loading}
           loadingDelay={isLoadingDelay}
@@ -232,9 +184,8 @@ const BloodTypeManagement = () => {
           onCreate={handleCreateBloodType}
           createLabel="Blood Type"
         />
-        {/*Modal*/}
         <BloodTypeModal
-          key={formKey} // reset modal mỗi lần mở
+          key={formKey}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedBloodType={selectedBloodType}
@@ -243,7 +194,6 @@ const BloodTypeManagement = () => {
               fetchBloodTypes({
                 page: currentPage,
                 size: 5,
-                searchParams,
               })
             )
           }

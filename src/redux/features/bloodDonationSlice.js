@@ -4,7 +4,7 @@ import {
   postRequestMultipartFormData,
   putRequestMultipartFormData,
   deleteRequest,
-  patchRequest
+  patchRequest,
 } from "@services/API/api";
 
 // [GET] All Donation Requests
@@ -31,7 +31,9 @@ export const fetchDonationRequests = createAsyncThunk(
         ...searchParams,
       }).toString();
 
-      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
+      const res = await getRequest(
+        `/api/DonationRequests/search?${queryString}`
+      );
       console.log("ResData: ", res.data);
 
       const { requests, totalCount, totalPages } = res.data.data;
@@ -46,7 +48,6 @@ export const fetchDonationRequests = createAsyncThunk(
     }
   }
 );
-
 
 // [GET] Single by ID
 export const fetchDonationRequestById = createAsyncThunk(
@@ -140,7 +141,6 @@ export const deleteDonationRequest = createAsyncThunk(
   }
 );
 
-
 // [PATCH]
 export const updateBloodDonationStatus = createAsyncThunk(
   "donationRequest/updateStatus",
@@ -156,7 +156,6 @@ export const updateBloodDonationStatus = createAsyncThunk(
     }
   }
 );
-// @redux/features/bloodDonationSlice.js
 
 export const searchDonationRequests = createAsyncThunk(
   "donationRequests/search",
@@ -180,7 +179,9 @@ export const searchDonationRequests = createAsyncThunk(
       });
 
       const queryString = new URLSearchParams(params).toString();
-      const res = await getRequest(`/api/DonationRequests/search?${queryString}`);
+      const res = await getRequest(
+        `/api/DonationRequests/search?${queryString}`
+      );
 
       const { requests, totalCount, totalPages } = res.data.data;
       return {
@@ -195,7 +196,6 @@ export const searchDonationRequests = createAsyncThunk(
     }
   }
 );
-
 
 const bloodDonationSlice = createSlice({
   name: "donationRequests",
@@ -232,38 +232,38 @@ const bloodDonationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-    //searchDonationRequests
-    .addCase(searchDonationRequests.pending, (state) => {
-  state.loading = true;
-  state.error = null;
-})
-.addCase(searchDonationRequests.fulfilled, (state, action) => {
-  const payload = action.payload;
-  state.loading = false;
-  state.donationList = payload.list;
-  state.totalCount = payload.totalCount;
-  state.totalPages = payload.totalPages;
-  state.currentPage = payload.currentPage;
-  state.pageSize = payload.pageSize;
-})
-.addCase(searchDonationRequests.rejected, (state, action) => {
-  state.loading = false;
-  state.error = action.payload;
-})
+      //searchDonationRequests
+      .addCase(searchDonationRequests.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchDonationRequests.fulfilled, (state, action) => {
+        const payload = action.payload;
+        state.loading = false;
+        state.donationList = payload.list;
+        state.totalCount = payload.totalCount;
+        state.totalPages = payload.totalPages;
+        state.currentPage = payload.currentPage;
+        state.pageSize = payload.pageSize;
+      })
+      .addCase(searchDonationRequests.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
       // Fetch paginated
       .addCase(fetchDonationRequests.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-   .addCase(fetchDonationRequests.fulfilled, (state, action) => {
-  const payload = action.payload;
-  state.loading = false;
-  state.donationList = payload.list || []; // ✅ Đúng key ở đây là `list`
-  state.totalCount = payload.totalCount || 0;
-  state.totalPages = payload.totalPages || 0;
-  // Nếu bạn muốn giữ currentPage và pageSize từ state, thì không cần ghi đè ở đây
-})
+      .addCase(fetchDonationRequests.fulfilled, (state, action) => {
+        const payload = action.payload;
+        state.loading = false;
+        state.donationList = payload.list || []; // ✅ Đúng key ở đây là `list`
+        state.totalCount = payload.totalCount || 0;
+        state.totalPages = payload.totalPages || 0;
+        // Nếu bạn muốn giữ currentPage và pageSize từ state, thì không cần ghi đè ở đây
+      })
 
       .addCase(fetchDonationRequests.rejected, (state, action) => {
         state.loading = false;

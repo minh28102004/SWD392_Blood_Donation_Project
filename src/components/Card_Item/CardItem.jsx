@@ -1,5 +1,5 @@
 import React from "react";
-import { FaEdit, FaEye, FaTrash } from "react-icons/fa";
+import { FaEye, FaTrash } from "react-icons/fa";
 import Tooltip from "@mui/material/Tooltip";
 
 const CardItem = ({
