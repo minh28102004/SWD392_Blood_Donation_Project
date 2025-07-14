@@ -135,6 +135,36 @@ export const deleteBloodRequest = createAsyncThunk(
     }
   }
 );
+// [GET] blood requests with filters (search API)
+export const searchBloodRequests = createAsyncThunk(
+  "bloodRequest/search",
+  async ({ page = 1, pageSize = 10, filters = {} }, { rejectWithValue }) => {
+    try {
+      const params = {
+        page,
+        pageSize,
+        ...filters,
+      };
+
+      // Xoá params không hợp lệ
+      Object.keys(params).forEach((key) => {
+        if (
+          params[key] === "" ||
+          params[key] === null ||
+          params[key] === undefined
+        ) {
+          delete params[key];
+        }
+      });
+
+      const queryString = new URLSearchParams(params).toString();
+      const res = await getRequest(`/api/BloodRequests/search?${queryString}`);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
 
 const bloodRequestSlice = createSlice({
   name: "bloodRequest",
@@ -276,6 +306,24 @@ const bloodRequestSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      // --- SEARCH BLOOD REQUESTS ---
+.addCase(searchBloodRequests.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(searchBloodRequests.fulfilled, (state, action) => {
+  state.loading = false;
+  state.bloodRequestList = action.payload.requests || [];
+  state.totalCount = action.payload.totalCount;
+  state.totalPages = action.payload.totalPages;
+  state.currentPage = action.payload.currentPage;
+  state.pageSize = action.payload.pageSize;
+})
+.addCase(searchBloodRequests.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
+
       // --- DELETE BLOOD REQUESTS ---
       .addCase(deleteBloodRequest.pending, (state) => {
         state.loading = true;

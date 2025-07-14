@@ -17,6 +17,8 @@ import { Button, Modal, Select } from "antd";
 import { toast } from "react-toastify";
 import { Checkbox } from "@mui/material";
 import CollapsibleSearch from "@components/Collapsible_Search";
+import { fetchAllBloodTypes } from "@redux/features/bloodTypeSlice";
+import { fetchBloodComponents } from "@redux/features/bloodComponentSlice";
 
 const { Option } = Select;
 
@@ -42,11 +44,22 @@ const BloodRequests = () => {
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
-  const [searchParams, setSearchParams] = useState({
-    name: "",
-    bloodType: "",
-    bloodComponent: "",
-  });
+const [searchParams, setSearchParams] = useState({
+  keyword: "",
+  bloodTypeId: "",
+  bloodComponentId: "",
+  isEmergency: "",
+  status: "",
+});
+const bloodTypes = useSelector((state) => state.bloodType.bloodTypeList || []);
+const bloodComponents = useSelector((state) => state.bloodComponent.bloodComponentList || []);
+
+useEffect(() => {
+  dispatch(fetchAllBloodTypes()); // ✅ GỌI đúng thunk
+  dispatch(fetchBloodComponents());
+}, [dispatch]);
+
+
 
   useEffect(() => {
     setLoadingDelay(true);
@@ -94,13 +107,19 @@ const BloodRequests = () => {
     }
   };
 
-  const handleSearch = useCallback(
-    (params) => {
-      dispatch(setCurrentPage(1));
-      setSearchParams(params);
-    },
-    [dispatch]
-  );
+const handleSearch = useCallback((params) => {
+  // Chuyển các trường sang đúng kiểu dữ liệu
+  const parsedParams = {
+    keyword: params.keyword || "",
+    bloodTypeId: params.bloodTypeId ? parseInt(params.bloodTypeId) : "",
+    bloodComponentId: params.bloodComponentId ? parseInt(params.bloodComponentId) : "",
+    isEmergency: params.isEmergency === "" ? "" : params.isEmergency === "true" || params.isEmergency === true,
+    status: params.status !== "" ? parseInt(params.status) : "",
+  };
+
+  dispatch(setCurrentPage(1));
+  setSearchParams(parsedParams);
+}, [dispatch]);
 
   const handleRefresh = () => {
     setLoadingDelay(true);
@@ -170,29 +189,61 @@ const BloodRequests = () => {
         }`}
       >
         {/* Search */}
-        <CollapsibleSearch
-          searchFields={[
-            { key: "name", type: "text", placeholder: "Search by Name" },
-            {
-              key: "bloodType",
-              type: "text",
-              placeholder: "Search by Blood Type",
-            },
-            {
-              key: "bloodComponent",
-              type: "text",
-              placeholder: "Search by Component",
-            },
-          ]}
-          onSearch={handleSearch}
-          onClear={() =>
-            setSearchParams({
-              name: "",
-              bloodType: "",
-              bloodComponent: "",
-            })
-          }
-        />
+<CollapsibleSearch
+  searchFields={[
+    { key: "keyword", type: "text", placeholder: "Search by keyword (e.g. name, phone...)" },
+    {
+      key: "bloodTypeId",
+      type: "select",
+      options: [
+        { value: "", label: "All" },
+        ...bloodTypes.map((bt) => ({ value: bt.id, label: bt.name })),
+      ],
+      placeholder: "Select Blood Type",
+    },
+    {
+      key: "bloodComponentId",
+      type: "select",
+      options: [
+        { value: "", label: "All" },
+        ...bloodComponents.map((bc) => ({ value: bc.id, label: bc.name })),
+      ],
+      placeholder: "Select Component",
+    },
+    {
+      key: "isEmergency",
+      type: "select",
+      options: [
+        { value: "", label: "All" },
+        { value: true, label: "Yes" },
+        { value: false, label: "No" },
+      ],
+      placeholder: "Emergency?",
+    },
+    {
+      key: "status",
+      type: "select",
+      options: [
+        { value: "", label: "All" },
+        { value: 0, label: "Pending" },
+        { value: 1, label: "Successful" },
+        { value: 2, label: "Cancel" },
+      ],
+      placeholder: "Status",
+    },
+  ]}
+  onSearch={handleSearch}
+  onClear={() =>
+    setSearchParams({
+      keyword: "",
+      bloodTypeId: "",
+      bloodComponentId: "",
+      isEmergency: "",
+      status: "",
+    })
+  }
+/>
+
 
         <div className="p-2">
           {loading || loadingDelay ? (
