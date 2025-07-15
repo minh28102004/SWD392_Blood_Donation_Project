@@ -24,8 +24,6 @@ import {
 } from "@redux/features/bloodSlice";
 import { Tag, Dropdown, Menu } from "antd";
 
-const { Option } = Select;
-
 const statusOptions = [
   { id: 0, label: "Pending" },
   { id: 1, label: "Successful" },
@@ -167,25 +165,66 @@ const BloodRequests = () => {
           2: "Cancelled",
         };
 
+        const handleStatusConfirm = (newStatus) => {
+          if (newStatus === row.status.id) return;
+
+          Modal.confirm({
+            title: "Confirm Status Update",
+            content: (
+              <span>
+                Are you sure you want to update the status of this blood request
+                to{" "}
+                <span
+                  style={{
+                    color: statusColorMap[newStatus],
+                    fontWeight: "semibold",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {statusLabelMap[newStatus]}
+                </span>
+                ?
+              </span>
+            ),
+            okText: "Confirm",
+            cancelText: "Cancel",
+            onOk: () => handleStatusChange(newStatus, row),
+            centered: false,
+            style: { top: "30%" },
+          });
+        };
+
         const menu = (
-          <Menu
-            onClick={({ key }) => handleStatusChange(parseInt(key), row)}
-            items={statusOptions.map((opt) => ({
-              key: opt.id,
-              label: opt.label,
-            }))}
-          />
+          <Menu>
+            {statusOptions.map((opt) => (
+              <Menu.Item
+                key={opt.id}
+                onClick={() => handleStatusConfirm(opt.id)}
+                disabled={opt.id === row.status.id}
+              >
+                {opt.label}
+              </Menu.Item>
+            ))}
+          </Menu>
         );
 
-        return (
+        const tagElement = (
+          <Tag
+            color={statusColorMap[row.status.id]}
+            className={
+              row.status.id === 0 ? "cursor-pointer font-medium" : "font-medium"
+            }
+          >
+            {statusLabelMap[row.status.id]}
+          </Tag>
+        );
+
+        return row.status.id === 0 ? (
           <Dropdown overlay={menu} trigger={["click"]}>
-            <Tag
-              color={statusColorMap[row.status.id]}
-              className="cursor-pointer font-medium"
-            >
-              {statusLabelMap[row.status.id]}
-            </Tag>
+            <Tooltip title="Update status">{tagElement}</Tooltip>
           </Dropdown>
+        ) : (
+          tagElement
         );
       },
     },

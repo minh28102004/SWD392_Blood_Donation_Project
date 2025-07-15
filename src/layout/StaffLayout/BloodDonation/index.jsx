@@ -121,8 +121,6 @@ const BloodDonation = () => {
   const columns = [
     { key: "donateRequestId", title: "Donation ID", width: "6%" },
     { key: "name", title: "Name", width: "12%" },
-
-    // ✅ Chỉnh sửa chỗ này
     {
       key: "bloodType",
       title: "Blood Type",
