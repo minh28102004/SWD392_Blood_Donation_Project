@@ -183,27 +183,7 @@ const BloodComponentManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
-        <CollapsibleSearch
-          searchFields={[
-            {
-              key: "bloodComponentId",
-              type: "text",
-              placeholder: "Search By Id",
-            },
-            {
-              key: "name",
-              type: "text",
-              placeholder: "Search By Blood Component",
-            },
-          ]}
-          onSearch={handleSearch}
-          onClear={() =>
-            setSearchParams({
-              bloodComponentId: "",
-              name: "",
-            })
-          }
-        />
+        
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />

@@ -175,25 +175,7 @@ const BloodTypeManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
-        <CollapsibleSearch
-          searchFields={[
-            { key: "bloodTypeId", type: "text", placeholder: "Search By Id" },
-            { key: "name", type: "text", placeholder: "Search By Blood Type" },
-            {
-              key: "rhFactor",
-              type: "text",
-              placeholder: "Search By Rh Factor (+ or -)",
-            },
-          ]}
-          onSearch={handleSearch}
-          onClear={() =>
-            setSearchParams({
-              bloodTypeId: "",
-              name: "",
-              rhFactor: "",
-            })
-          }
-        />
+       
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
