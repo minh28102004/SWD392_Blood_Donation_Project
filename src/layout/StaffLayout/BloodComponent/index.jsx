@@ -1,12 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { MdArticle } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
 import {
   fetchBloodComponents,
-  createBloodComponent,
-  updateBloodComponent,
   deleteBloodComponent,
   setCurrentPage,
   setPageSize,
@@ -20,7 +18,6 @@ import BloodComponentModal from "./modal_BloodComponent";
 import { Modal } from "antd";
 import { toast } from "react-toastify";
 import { useLoadingDelay } from "@hooks/useLoadingDelay";
-import CollapsibleSearch from "@components/Collapsible_Search";
 import Pagination from "@components/Pagination";
 
 const BloodComponentManagement = () => {
@@ -34,33 +31,31 @@ const BloodComponentManagement = () => {
     currentPage,
     pageSize,
   } = useSelector((state) => state.bloodComponent);
-  const [searchParams, setSearchParams] = useState({
-    bloodComponentId: "",
-    name: "",
-  });
 
   const [selectedBloodComponent, setSelectedBloodComponent] = useState(null);
-  const [formKey, setFormKey] = useState(0); // reset modal form key
+  const [formKey, setFormKey] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [isLoadingDelay, startLoading, stopLoading] = useLoadingDelay(1000);
 
-  // Columns tương ứng các field
-
   const columns = [
-    { key: "No.", title: "No.", width: "15%", render: (_, __, index) => index + 1 },
+    {
+      key: "No.",
+      title: "No.",
+      width: "15%",
+      render: (_, __, index) => (currentPage - 1) * pageSize + index + 1,
+    },
     { key: "name", title: "Name", width: "20%" },
-
     {
       key: "actions",
       title: "Actions",
       width: "12%",
       render: (_, currentRow) => (
         <div className="flex justify-center gap-2">
-          <Tooltip title="Edit post">
+          <Tooltip title="Edit component">
             <button
               className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-500 transform transition-transform hover:scale-110"
               onClick={() => handleEdit(currentRow)}
-              aria-label="Edit Blood Type"
+              aria-label="Edit Blood Component"
             >
               <FaEdit size={20} />
             </button>
@@ -78,21 +73,13 @@ const BloodComponentManagement = () => {
       ),
     },
   ];
-  useEffect(() => {
-    console.log("FETCHED Blood Component:", bloodComponentList);
-    console.log("SEARCH PARAMS:", searchParams);
-  }, [bloodComponentList, searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
       startLoading();
       try {
         await dispatch(
-          fetchBloodComponents({
-            page: currentPage,
-            size: pageSize,
-            searchParams,
-          })
+          fetchBloodComponents({ page: currentPage, size: pageSize })
         );
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -102,28 +89,24 @@ const BloodComponentManagement = () => {
     };
 
     fetchData();
-  }, [dispatch, currentPage, pageSize, searchParams]);
+  }, [dispatch, currentPage, pageSize]);
 
-  // [CREATE]
   const handleCreateBloodComponent = () => {
     setSelectedBloodComponent(null);
-    setFormKey((prev) => prev + 1); // reset form modal
+    setFormKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
-  // [EDIT]
   const handleEdit = (bloodComponent) => {
     setSelectedBloodComponent(bloodComponent);
-    setFormKey((prev) => prev + 1); // reset form modal
+    setFormKey((prev) => prev + 1);
     setModalOpen(true);
-    console.log("Editing blood Component:", bloodComponent);
   };
 
-  // [DELETE]
   const handleDelete = async (bloodComponent) => {
     Modal.confirm({
       title: "Are you sure you want to delete this blood component?",
-      content: "( Note: The blood component will be removed from the list )",
+      content: "(Note: The blood component will be removed from the list)",
       okText: "OK",
       cancelText: "Cancel",
       onOk: async () => {
@@ -132,43 +115,22 @@ const BloodComponentManagement = () => {
             deleteBloodComponent(bloodComponent.bloodComponentId)
           ).unwrap();
           toast.success("Blood Component has been deleted!");
-          dispatch(
-            fetchBloodComponents({
-              page: currentPage,
-              size: pageSize,
-              searchParams,
-            })
-          );
+          dispatch(fetchBloodComponents({ page: currentPage, size: pageSize }));
         } catch (error) {
           toast.error(
             error?.message ||
-              "An error occurred while deleting the blood Component!"
+              "An error occurred while deleting the blood component!"
           );
         }
       },
       style: { top: "30%" },
     });
   };
-  //[SEARCH]
-  const handleSearch = useCallback(
-    (params) => {
-      dispatch(setCurrentPage(1));
-      setSearchParams(params); // OK
-    },
-    [dispatch]
-  );
 
-  // [REFRESH]
   const handleRefresh = () => {
     startLoading();
     setTimeout(() => {
-      dispatch(
-        fetchBloodComponents({
-          page: currentPage,
-          size: pageSize,
-          searchParams,
-        })
-      )
+      dispatch(fetchBloodComponents({ page: currentPage, size: pageSize }))
         .unwrap()
         .finally(() => {
           stopLoading();
@@ -183,7 +145,7 @@ const BloodComponentManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
-        
+
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
@@ -214,17 +176,6 @@ const BloodComponentManagement = () => {
             dispatch(setCurrentPage(1));
           }}
         />
-        {/*Button*/}
-        <ActionButtons
-          loading={loading}
-          currentPage={currentPage}
-          onPageChange={(page) => dispatch(setCurrentPage(page))}
-          onPageSizeChange={(size) => {
-            dispatch(setPageSize(size));
-            dispatch(setCurrentPage(1));
-          }}
-        />
-        {/*Button*/}
         <ActionButtons
           loading={loading}
           loadingDelay={isLoadingDelay}
@@ -232,19 +183,14 @@ const BloodComponentManagement = () => {
           onCreate={handleCreateBloodComponent}
           createLabel="Blood Component"
         />
-        {/*Modal*/}
         <BloodComponentModal
-          key={formKey} // reset modal mỗi lần mở
+          key={formKey}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           selectedBloodComponent={selectedBloodComponent}
           onSuccess={() =>
             dispatch(
-              fetchBloodComponents({
-                page: currentPage,
-                size: pageSize,
-                searchParams,
-              })
+              fetchBloodComponents({ page: currentPage, size: pageSize })
             )
           }
         />

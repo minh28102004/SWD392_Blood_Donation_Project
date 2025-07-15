@@ -12,7 +12,7 @@ import { baseURL } from "@services/API/api";
 import { fetchBlogPosts } from "@redux/features/blogPostsSlice";
 import BloodDonationModal from "@pages/Modal_Form_Registration/ModalForm";
 import BlogPostDetailModal from "../Blog/blogPostDetail";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Content = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

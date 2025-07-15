@@ -8,14 +8,15 @@ import {
 } from "@redux/features/bloodSlice";
 import RequestHistory from "./Request_History";
 import DonationHistory from "./Donation_History";
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 const BloodHistoryPage = () => {
   const dispatch = useDispatch();
   const [selectedTab, setSelectedTab] = useState(0);
-  const location = useLocation();
-  const selectedUser = location.state?.user;
+  // const location = useLocation();
+  // const selectedUser = location.state?.user;
+  const { selectedUser } = useSelector((state) => state.user);
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
 
   useEffect(() => {

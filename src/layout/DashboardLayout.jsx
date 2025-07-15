@@ -113,6 +113,11 @@ const DashboardLayout = () => {
       path: "/dashboard/bloodRequests",
     },
     {
+      name: "Blood Donation",
+      icon: <MdInventory />,
+      path: "/dashboard/bloodDonation",
+    },
+    {
       name: "Blood Inventory",
       icon: <MdInventory />,
       path: "/dashboard/bloodInventory",
@@ -122,11 +127,6 @@ const DashboardLayout = () => {
       name: "Blood Component",
       icon: <MdBloodtype />,
       path: "/dashboard/bloodComponent",
-    },
-    {
-      name: "Blood Donation",
-      icon: <MdInventory />,
-      path: "/dashboard/bloodDonation",
     },
   ];
 

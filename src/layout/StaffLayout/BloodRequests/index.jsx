@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "@components/Pagination";
 import { useOutletContext } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
 import ActionButtons from "@components/Action_Button";
 import {
   fetchBloodRequests,
@@ -17,8 +18,11 @@ import { Button, Modal, Select } from "antd";
 import { toast } from "react-toastify";
 import { Checkbox } from "@mui/material";
 import CollapsibleSearch from "@components/Collapsible_Search";
-import { fetchAllBloodTypes } from "@redux/features/bloodTypeSlice";
-import { fetchBloodComponents } from "@redux/features/bloodComponentSlice";
+import {
+  fetchBloodComponents,
+  fetchBloodTypes,
+} from "@redux/features/bloodSlice";
+import { Tag, Dropdown, Menu } from "antd";
 
 const { Option } = Select;
 
@@ -40,26 +44,22 @@ const BloodRequests = () => {
     pageSize,
     totalCount,
   } = useSelector((state) => state.bloodRequest);
-
+  const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
   const [loadingDelay, setLoadingDelay] = useState(true);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState(null);
-const [searchParams, setSearchParams] = useState({
-  keyword: "",
-  bloodTypeId: "",
-  bloodComponentId: "",
-  isEmergency: "",
-  status: "",
-});
-const bloodTypes = useSelector((state) => state.bloodType.bloodTypeList || []);
-const bloodComponents = useSelector((state) => state.bloodComponent.bloodComponentList || []);
+  const [searchParams, setSearchParams] = useState({
+    keyword: "",
+    bloodTypeId: "",
+    bloodComponentId: "",
+    isEmergency: "",
+    status: "",
+  });
 
-useEffect(() => {
-  dispatch(fetchAllBloodTypes()); // ✅ GỌI đúng thunk
-  dispatch(fetchBloodComponents());
-}, [dispatch]);
-
-
+  useEffect(() => {
+    dispatch(fetchBloodTypes());
+    dispatch(fetchBloodComponents());
+  }, [dispatch]);
 
   useEffect(() => {
     setLoadingDelay(true);
@@ -107,19 +107,27 @@ useEffect(() => {
     }
   };
 
-const handleSearch = useCallback((params) => {
-  // Chuyển các trường sang đúng kiểu dữ liệu
-  const parsedParams = {
-    keyword: params.keyword || "",
-    bloodTypeId: params.bloodTypeId ? parseInt(params.bloodTypeId) : "",
-    bloodComponentId: params.bloodComponentId ? parseInt(params.bloodComponentId) : "",
-    isEmergency: params.isEmergency === "" ? "" : params.isEmergency === "true" || params.isEmergency === true,
-    status: params.status !== "" ? parseInt(params.status) : "",
-  };
+  const handleSearch = useCallback(
+    (params) => {
+      // Chuyển các trường sang đúng kiểu dữ liệu
+      const parsedParams = {
+        keyword: params.keyword || "",
+        bloodTypeId: params.bloodTypeId ? parseInt(params.bloodTypeId) : "",
+        bloodComponentId: params.bloodComponentId
+          ? parseInt(params.bloodComponentId)
+          : "",
+        isEmergency:
+          params.isEmergency === ""
+            ? ""
+            : params.isEmergency === "true" || params.isEmergency === true,
+        status: params.status !== "" ? parseInt(params.status) : "",
+      };
 
-  dispatch(setCurrentPage(1));
-  setSearchParams(parsedParams);
-}, [dispatch]);
+      dispatch(setCurrentPage(1));
+      setSearchParams(parsedParams);
+    },
+    [dispatch]
+  );
 
   const handleRefresh = () => {
     setLoadingDelay(true);
@@ -133,9 +141,9 @@ const handleSearch = useCallback((params) => {
   const columns = [
     { key: "bloodRequestId", title: "Blood ID", width: "6%" },
     { key: "name", title: "Name", width: "12%" },
-    { key: "bloodTypeName", title: "Blood Type", width: "10%" },
+    { key: "bloodTypeName", title: "Blood Type", width: "7%" },
     { key: "bloodComponentName", title: "Component", width: "12%" },
-    { key: "quantity", title: "Qty", width: "8%" },
+    { key: "quantity", title: "Quantity", width: "8%" },
     {
       key: "isEmergency",
       title: "Emergency",
@@ -145,41 +153,68 @@ const handleSearch = useCallback((params) => {
     {
       key: "status",
       title: "Status",
-      width: "15%",
-      render: (_, row) => (
-        <Select
-          value={row.status.id}
-          onChange={(val) => handleStatusChange(val, row)}
-          size="small"
-          style={{ width: "100%" }}
-        >
-          {statusOptions.map((opt) => (
-            <Option key={opt.id} value={opt.id}>
-              {opt.label}
-            </Option>
-          ))}
-        </Select>
-      ),
+      width: "10%",
+      render: (_, row) => {
+        const statusColorMap = {
+          0: "gold",
+          1: "green",
+          2: "red",
+        };
+
+        const statusLabelMap = {
+          0: "Pending",
+          1: "Successful",
+          2: "Cancelled",
+        };
+
+        const menu = (
+          <Menu
+            onClick={({ key }) => handleStatusChange(parseInt(key), row)}
+            items={statusOptions.map((opt) => ({
+              key: opt.id,
+              label: opt.label,
+            }))}
+          />
+        );
+
+        return (
+          <Dropdown overlay={menu} trigger={["click"]}>
+            <Tag
+              color={statusColorMap[row.status.id]}
+              className="cursor-pointer font-medium"
+            >
+              {statusLabelMap[row.status.id]}
+            </Tag>
+          </Dropdown>
+        );
+      },
     },
     {
       key: "actions",
       title: "Actions",
-      width: "12%",
+      width: "5%",
       render: (_, row) => (
-        <div className="flex gap-2 justify-center">
-          <Tooltip title="View Detail">
-            <Button
-              type="default"
-              size="small"
-              onClick={() => handleShowDetail(row)}
-            >
-              Detail
-            </Button>
-          </Tooltip>
-        </div>
+        <Tooltip title="View detail request">
+          <button
+            className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-500"
+            onClick={() => handleShowDetail(row)}
+          >
+            <FaEye size={18} />
+          </button>
+        </Tooltip>
       ),
     },
   ];
+
+  const bloodTypeOptions = bloodTypes.map((bt) => ({
+    value: bt.bloodTypeId.toString(),
+    label: `${bt.name}${bt.rhFactor}`,
+  }));
+
+  const bloodComponentOptions = bloodComponents.map((bc) => ({
+    value: bc.bloodComponentId.toString(),
+    label: bc.name,
+  }));
 
   return (
     <div>
@@ -189,61 +224,58 @@ const handleSearch = useCallback((params) => {
         }`}
       >
         {/* Search */}
-<CollapsibleSearch
-  searchFields={[
-    { key: "keyword", type: "text", placeholder: "Search by keyword (e.g. name, phone...)" },
-    {
-      key: "bloodTypeId",
-      type: "select",
-      options: [
-        { value: "", label: "All" },
-        ...bloodTypes.map((bt) => ({ value: bt.id, label: bt.name })),
-      ],
-      placeholder: "Select Blood Type",
-    },
-    {
-      key: "bloodComponentId",
-      type: "select",
-      options: [
-        { value: "", label: "All" },
-        ...bloodComponents.map((bc) => ({ value: bc.id, label: bc.name })),
-      ],
-      placeholder: "Select Component",
-    },
-    {
-      key: "isEmergency",
-      type: "select",
-      options: [
-        { value: "", label: "All" },
-        { value: true, label: "Yes" },
-        { value: false, label: "No" },
-      ],
-      placeholder: "Emergency?",
-    },
-    {
-      key: "status",
-      type: "select",
-      options: [
-        { value: "", label: "All" },
-        { value: 0, label: "Pending" },
-        { value: 1, label: "Successful" },
-        { value: 2, label: "Cancel" },
-      ],
-      placeholder: "Status",
-    },
-  ]}
-  onSearch={handleSearch}
-  onClear={() =>
-    setSearchParams({
-      keyword: "",
-      bloodTypeId: "",
-      bloodComponentId: "",
-      isEmergency: "",
-      status: "",
-    })
-  }
-/>
-
+        <CollapsibleSearch
+          searchFields={[
+            {
+              key: "keyword",
+              type: "text",
+              placeholder: "Search by keyword (e.g. name, phone...)",
+            },
+            {
+              key: "bloodTypeId",
+              type: "select",
+              options: bloodTypeOptions,
+              placeholder: "Select Blood Type",
+            },
+            {
+              key: "bloodComponentId",
+              type: "select",
+              options: bloodComponentOptions,
+              placeholder: "Select Blood Component",
+            },
+            {
+              key: "isEmergency",
+              type: "select",
+              options: [
+                { value: "", label: "All" },
+                { value: true, label: "Yes" },
+                { value: false, label: "No" },
+              ],
+              placeholder: "Emergency?",
+            },
+            {
+              key: "status",
+              type: "select",
+              options: [
+                { value: "", label: "All" },
+                { value: 0, label: "Pending" },
+                { value: 1, label: "Successful" },
+                { value: 2, label: "Cancel" },
+              ],
+              placeholder: "Status",
+            },
+          ]}
+          onSearch={handleSearch}
+          onClear={() =>
+            setSearchParams({
+              keyword: "",
+              bloodTypeId: "",
+              bloodComponentId: "",
+              isEmergency: "",
+              status: "",
+            })
+          }
+        />
 
         <div className="p-2">
           {loading || loadingDelay ? (
@@ -278,64 +310,114 @@ const handleSearch = useCallback((params) => {
 
       {/* Modal for Detail */}
       <Modal
-        title="Blood Request Detail"
+        title={
+          <div className="text-center text-2xl font-semibold">
+            Blood Request Detail
+            {selectedDetail ? ` - [${selectedDetail.bloodRequestId}]` : ""}
+          </div>
+        }
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         footer={null}
+        width={500}
       >
         {selectedDetail && (
-          <div className="space-y-2 text-sm">
-            <p>
-              <strong>ID:</strong> {selectedDetail.bloodRequestId}
-            </p>
-            <p>
-              <strong>Name:</strong> {selectedDetail.name}
-            </p>
-            <p>
-              <strong>User ID:</strong> {selectedDetail.userId}
-            </p>
-            <p>
-              <strong>Phone:</strong> {selectedDetail.phone}
-            </p>
-            <p>
-              <strong>Blood Type:</strong> {selectedDetail.bloodTypeName}
-            </p>
-            <p>
-              <strong>Component:</strong> {selectedDetail.bloodComponentName}
-            </p>
-            <p>
-              <strong>Emergency:</strong>{" "}
-              {selectedDetail.isEmergency ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>Quantity:</strong> {selectedDetail.quantity}
-            </p>
-            <p>
-              <strong>Location:</strong> {selectedDetail.location}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedDetail.status.name}
-            </p>
-            <p>
-              <strong>Fulfilled:</strong>{" "}
-              {selectedDetail.fulfilled ? "Yes" : "No"}
-            </p>
-            <p>
-              <strong>Health Info:</strong> {selectedDetail.healthInfo}
-            </p>
-            <p>
-              <strong>Height:</strong> {selectedDetail.heightCm} cm
-            </p>
-            <p>
-              <strong>Weight:</strong> {selectedDetail.weightKg} kg
-            </p>
-            <p>
-              <strong>Date of Birth:</strong> {selectedDetail.dateOfBirth}
-            </p>
-            <p>
-              <strong>Created At:</strong>{" "}
-              {new Date(selectedDetail.createdAt).toLocaleString()}
-            </p>
+          <div className="space-y-6 text-sm">
+            {/* Info section */}
+            <div>
+              <h3 className="text-base font-semibold text-gray-700 mb-2">
+                👤 Personal Info
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                <div>
+                  <strong>Name:</strong> {selectedDetail.name}
+                </div>
+                <div>
+                  <strong>Phone:</strong> {selectedDetail.phone}
+                </div>
+                <div>
+                  <strong>Date of Birth:</strong> {selectedDetail.dateOfBirth}
+                </div>
+              </div>
+            </div>
+
+            {/* Request section */}
+            <div>
+              <h3 className="text-base font-semibold text-gray-700 mb-2">
+                🩸 Request Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                <div>
+                  <strong>Blood Type:</strong> {selectedDetail.bloodTypeName}
+                </div>
+                <div>
+                  <strong>Component:</strong>{" "}
+                  {selectedDetail.bloodComponentName}
+                </div>
+                <div>
+                  <strong>Quantity:</strong> {selectedDetail.quantity}
+                </div>
+                <div>
+                  <strong>Emergency:</strong>{" "}
+                  <span
+                    className={
+                      selectedDetail.isEmergency
+                        ? "text-red-500 font-semibold"
+                        : "text-green-600"
+                    }
+                  >
+                    {selectedDetail.isEmergency ? "Yes" : "No"}
+                  </span>
+                </div>
+                <div>
+                  <strong>Status:</strong>{" "}
+                  <span
+                    className={
+                      selectedDetail.status.id === 0
+                        ? "text-yellow-600"
+                        : selectedDetail.status.id === 1
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }
+                  >
+                    {selectedDetail.status.name}
+                  </span>
+                </div>
+                <div>
+                  <strong>Fulfilled:</strong>{" "}
+                  {selectedDetail.fulfilled ? "Yes" : "No"}
+                </div>
+              </div>
+            </div>
+
+            {/* Health & Location */}
+            <div>
+              <h3 className="text-base font-semibold text-gray-700 mb-2">
+                📍 Health & Location
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                <div>
+                  <strong>Height:</strong> {selectedDetail.heightCm} cm
+                </div>
+                <div>
+                  <strong>Weight:</strong> {selectedDetail.weightKg} kg
+                </div>
+                <div className="md:col-span-2">
+                  <strong>Location:</strong> {selectedDetail.location}
+                </div>
+                <div className="md:col-span-2">
+                  <strong>Health Info:</strong> {selectedDetail.healthInfo}
+                </div>
+              </div>
+            </div>
+
+            {/* Time */}
+            <div>
+              <h3 className="text-base font-semibold text-gray-700 mb-2">
+                🕒 Timestamp
+              </h3>
+              <div>{new Date(selectedDetail.createdAt).toLocaleString()}</div>
+            </div>
           </div>
         )}
       </Modal>

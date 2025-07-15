@@ -112,7 +112,7 @@ export const updateBloodRequestStatus = createAsyncThunk(
   async ({ id, status }, { rejectWithValue }) => {
     try {
       const res = await patchRequest({
-        url: `/api/BloodRequests/status`,
+        url: `/api/BloodRequests/status/staff`,
         data: { id, status },
       });
 

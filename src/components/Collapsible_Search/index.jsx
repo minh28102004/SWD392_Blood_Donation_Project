@@ -61,7 +61,7 @@ const CollapsibleSearch = ({ searchFields, onSearch, onClear }) => {
               switch (field.type) {
                 case "select":
                   return (
-                    <div key={field.key} className="flex-1 min-w-[200px]">
+                    <div key={field.key} className="flex-1 min-w-[170px]">
                       <Select
                         className="w-full"
                         placeholder={field.placeholder}
