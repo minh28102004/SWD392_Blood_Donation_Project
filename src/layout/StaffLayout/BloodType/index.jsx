@@ -147,6 +147,7 @@ const BloodTypeManagement = () => {
           darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
         }`}
       >
+
         <div className="p-2">
           {loading || isLoadingDelay ? (
             <LoadingSpinner color="blue" size="8" />
