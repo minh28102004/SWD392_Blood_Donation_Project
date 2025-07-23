@@ -60,8 +60,7 @@ export const createBloodInventory = createAsyncThunk(
         url: "/api/BloodInventories",
         formData,
       });
-      console.log("Create Blood Inventory Response:", res.data);
-      
+
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -141,10 +140,11 @@ const bloodInventorySlice = createSlice({
         state.bloodList = action.payload.inventories || [];
         state.totalCount = action.payload.totalCount;
         state.totalPages = action.payload.totalPages;
-        console.log("Total Pages:", action.payload.totalPages);
-        console.log("Total Count:", action.payload.totalCount);
-        console.log("Current Page:", action.payload.currentPage);
-        if (action.payload.totalPages < action.payload.currentPage && action.payload.totalPages > 0) {
+
+        if (
+          action.payload.totalPages < action.payload.currentPage &&
+          action.payload.totalPages > 0
+        ) {
           action.payload.currentPage = action.payload.totalPages;
         }
         state.currentPage = action.payload.currentPage;
@@ -154,7 +154,6 @@ const bloodInventorySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-     
 
       // FETCH BLOOD INVENTORY BY ID
       .addCase(fetchBloodInventoryById.pending, (state) => {
@@ -177,9 +176,8 @@ const bloodInventorySlice = createSlice({
       })
       .addCase(createBloodInventory.fulfilled, (state, action) => {
         state.loading = false;
-        
       })
-      
+
       .addCase(createBloodInventory.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;

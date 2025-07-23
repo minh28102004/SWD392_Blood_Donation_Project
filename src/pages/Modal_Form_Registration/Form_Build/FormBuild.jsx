@@ -119,6 +119,7 @@ const TextAreaField = ({
   rows = 3,
   error,
   placeholder,
+  ...props // includes onClick, readOnly, etc.
 }) => (
   <div className={getColSpanClass(colSpan)}>
     <label
@@ -134,11 +135,14 @@ const TextAreaField = ({
       {...(register && register(name, validation))}
       required={required}
       aria-invalid={!!error}
+      readOnly 
+      {...props} 
       className={`w-full px-4 py-2 border ${
         error ? "border-red-500" : "border-gray-300 dark:border-gray-600"
       } bg-white dark:bg-gray-700 text-black dark:text-white rounded-lg
-      hover:border-blue-500 focus:border-blue-600 dark:hover:border-white focus:outline-none focus:ring-1 transition-all duration-200`}
-    ></textarea>
+      hover:border-blue-500 focus:border-blue-600 dark:hover:border-white focus:outline-none focus:ring-1 transition-all duration-200
+      cursor-pointer`}
+    />
     {error && (
       <p className="text-sm text-red-500 mt-1">{error.message || error}</p>
     )}

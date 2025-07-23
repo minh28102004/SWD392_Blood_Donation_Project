@@ -86,9 +86,20 @@ const DashboardLayout = () => {
     }, 250);
   };
 
-  let menuItems = [];
+  const sharedMenuItems = [
+    {
+      name: "Blood Type",
+      icon: <MdInventory />,
+      path: "/dashboard/bloodType",
+    },
+    {
+      name: "Blood Component",
+      icon: <MdBloodtype />,
+      path: "/dashboard/bloodComponent",
+    },
+  ];
 
-  const menuItemsAdmin = [
+  const adminMenuItems = [
     {
       name: "Statistic",
       icon: <BarChartOutlined />,
@@ -106,7 +117,7 @@ const DashboardLayout = () => {
     },
   ];
 
-  const menuItemsStaff = [
+  const staffMenuItems = [
     {
       name: "Blood Requests",
       icon: <MdRequestPage />,
@@ -122,18 +133,15 @@ const DashboardLayout = () => {
       icon: <MdInventory />,
       path: "/dashboard/bloodInventory",
     },
-    { name: "Blood Type", icon: <MdInventory />, path: "/dashboard/bloodType" },
-    {
-      name: "Blood Component",
-      icon: <MdBloodtype />,
-      path: "/dashboard/bloodComponent",
-    },
   ];
 
+  // Gộp menu theo role
+  let menuItems = [];
+
   if (role === "Admin") {
-    menuItems = menuItemsAdmin;
+    menuItems = [...adminMenuItems, ...sharedMenuItems];
   } else if (role === "Staff") {
-    menuItems = menuItemsStaff;
+    menuItems = [...staffMenuItems, ...sharedMenuItems];
   }
 
   return (

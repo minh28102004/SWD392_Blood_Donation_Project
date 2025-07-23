@@ -6,6 +6,7 @@ import ErrorBoundary from "@components/Error_Boundary";
 import { PersistGate } from "redux-persist/integration/react";
 import ProtectedRoute from "@services/RouteApp/protectedRoute";
 import RoleRedirectWrapper from "@services/RouteApp/roleRedirectWrapper";
+
 // Pages
 import AuthPage from "@pages/AuthPage";
 import Login from "@pages/AuthPage/Login";
@@ -56,7 +57,7 @@ function AppRoutes() {
           element={<UnauthorizedPage />}
         />
 
-        {/* Dashboard Layout */}
+        {/* ADMIN Layout & Routes */}
         <Route
           path="/dashboard"
           element={
@@ -66,12 +67,26 @@ function AppRoutes() {
             />
           }
         >
-          {/* Admin Pages */}
           <Route path="statistic" element={<Statistic />} />
           <Route path="userManagement" element={<UserManagement />} />
           <Route path="blogManagement" element={<BlogManagement />} />
         </Route>
 
+        {/* Shared for Admin & Staff */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute
+              element={<DashBoardLayout />}
+              requiredRoles={["Admin", "Staff"]}
+            />
+          }
+        >
+          <Route path="bloodType" element={<BloodType />} />
+          <Route path="bloodComponent" element={<BloodComponentManagement />} />
+        </Route>
+
+        {/* STAFF Layout & Routes */}
         <Route
           path="/dashboard"
           element={
@@ -81,15 +96,12 @@ function AppRoutes() {
             />
           }
         >
-          {/* Staff Pages */}
           <Route path="bloodRequests" element={<BloodRequests />} />
           <Route path="bloodInventory" element={<BloodInventory />} />
           <Route path="bloodDonation" element={<BloodDonation />} />
-          <Route path="bloodType" element={<BloodType />} />
-          <Route path="bloodComponent" element={<BloodComponentManagement />} />
         </Route>
 
-        {/* Auth Pages */}
+        {/* Auth Routes */}
         <Route path={endPoint.AUTHPAGE} element={<AuthPage />}>
           <Route path={endPoint.LOGIN} element={<Login />} />
           <Route path={endPoint.REGISTER} element={<Register />} />

@@ -5,6 +5,7 @@ import {
   TextAreaField,
 } from "@pages/Modal_Form_Registration/Form_Build/FormBuild";
 import LocationSelector from "@pages/Modal_Form_Registration/Form_Build/LocationSelector";
+import MedicalDeclarationModal from "@pages/Modal_Form_Registration/Form_Build/MedicalDeclarationForm";
 
 const DonateForm = ({
   register,
@@ -13,6 +14,8 @@ const DonateForm = ({
   errors,
   setValue,
   watch,
+  showMedicalModal,
+  setShowMedicalModal,
 }) => {
   const bloodTypeOptions = bloodTypes.map((bt) => ({
     value: bt.bloodTypeId.toString(),
@@ -98,17 +101,22 @@ const DonateForm = ({
           validation={{ required: "Select component" }}
         />
         <InputField
-          label="Quantity (ml)"
+          label="Blood Quantity (ml)"
           name="quantityUnit"
+          type="number"
+          step={10}
+          min={50}
+          max={500}
           required
           register={register}
-          placeholder="E.g: 250, 300, 350"
+          placeholder="e.g. 250, 300, 350"
           validation={{
             required: "Quantity is required",
-            pattern: {
-              value: /^[1-9][0-9]*$/,
-              message: "Must be a positive number",
-            },
+            min: { value: 50, message: "Minimum allowed is 50 ml" },
+            max: { value: 500, message: "Maximum allowed is 500 ml" },
+            validate: (val) =>
+              val % 10 === 0 ||
+              "Must be a multiple of 10 (e.g., 250, 300, 350...)",
           }}
           error={errors.quantityUnit}
         />
@@ -151,13 +159,23 @@ const DonateForm = ({
         errors={errors}
         required
       />
+
       <TextAreaField
         label="Medical History"
         name="medicalContext"
         register={register}
         rows={3}
         required
-        placeholder="E.g: Diabetes, Hypertension, Asthma... If none, write 'None'"
+        placeholder="Click to declare your medical status"
+        onClick={() => setShowMedicalModal(true)}
+      />
+      <MedicalDeclarationModal
+        isOpen={showMedicalModal}
+        onClose={() => setShowMedicalModal(false)}
+        onSubmit={(result) => {
+          setValue("medicalContext", result);
+          setShowMedicalModal(false);
+        }}
       />
     </>
   );

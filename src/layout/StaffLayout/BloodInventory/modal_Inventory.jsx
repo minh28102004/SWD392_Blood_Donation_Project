@@ -5,15 +5,14 @@ import { fetchBloodTypes } from "@redux/features/bloodTypeSlice";
 import { toast } from "react-toastify";
 import { Dialog, Transition } from "@headlessui/react";
 import { FaTimes } from "react-icons/fa";
-import { TextInput } from "@components/Form_Input";
+import { TextInput, SelectInput, NumberInput } from "@components/Form_Input";
 import { fetchBloodComponents } from "@redux/features/bloodComponentSlice";
 import {
   createBloodInventory,
   updateBloodInventory,
 } from "@redux/features/bloodInvSlice";
 import { useDispatch } from "react-redux";
-
-
+import LocationSelector from "./LocationSelector";
 
 const InventoryModal = ({
   isOpen,
@@ -31,6 +30,7 @@ const InventoryModal = ({
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    getValues,
   } = useForm({
     defaultValues: {
       bloodComponentId: selectedBloodInventory?.bloodComponentId || "",
@@ -84,7 +84,7 @@ const InventoryModal = ({
     formDataToSend.append("BloodTypeId", bloodTypeId);
     formDataToSend.append("Quantity", quantity);
     formDataToSend.append("Unit", unit);
-    formDataToSend.append("InventoryLocation", inventoryLocation);
+    formDataToSend.append("inventoryLocation", inventoryLocation);
 
     setLoading(true);
     try {
@@ -148,7 +148,7 @@ const InventoryModal = ({
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
-              <Dialog.Panel className="relative w-full max-w-2xl max-h-[95vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all py-6 pl-6 pr-2">
+              <Dialog.Panel className="relative w-full max-w-xl max-h-[120vh] transform rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all py-6 pl-6 pr-2">
                 <button
                   onClick={onClose}
                   className="absolute right-4 top-4 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white transition-colors"
@@ -166,67 +166,35 @@ const InventoryModal = ({
                 <hr className="border-gray-100 mb-6" />
                 <div className="custom-scrollbar max-h-[80vh] overflow-y-auto pl-1 pr-4">
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Blood Type Dropdown */}
-                      <div>
-                        <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-white">
-                          <span className="text-red-600 mr-1">*</span>Blood Type
-                        </label>
-                        <select
-                          {...register("bloodTypeId", {
-                            required: "Blood Type is required",
-                          })}
-                          defaultValue={
-                            selectedBloodInventory?.bloodTypeId || ""
-                          }
-                          className="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
-                        >
-                          <option value="">-- Select Blood Type --</option>
-                          {bloodTypeOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.bloodTypeId && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.bloodTypeId.message}
-                          </p>
-                        )}
-                      </div>
-                      {/* Spacer for layout */}
+                      <SelectInput
+                        label="Blood Type :"
+                        name="bloodTypeId"
+                        register={register}
+                        placeholder={"Select Blood Type"}
+                        errors={errors}
+                        options={bloodTypeOptions}
+                        validation={{
+                          required: "Blood Type is required",
+                        }}
+                      />
                       {/* Blood Component Dropdown */}
-                      <div>
-                        <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-white">
-                          <span className="text-red-600 mr-1">*</span>Blood
-                          Component
-                        </label>
-                        <select
-                          {...register("bloodComponentId", {
-                            required: "Blood Component is required",
-                          })}
-                          defaultValue={
-                            selectedBloodInventory?.bloodComponentId || ""
-                          }
-                          className="w-full border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-200 dark:bg-gray-700 dark:text-white"
-                        >
-                          <option value="">-- Select Blood Component --</option>
-                          {bloodComponentOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.bloodComponentId && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {errors.bloodComponentId.message}
-                          </p>
-                        )}
-                      </div>
+                      <SelectInput
+                        label="Blood Component :"
+                        name="bloodComponentId"
+                        register={register}
+                        placeholder={"Select Blood Component"}
+                        validation={{
+                          required: "Blood Component is required",
+                        }}
+                        errors={errors}
+                        options={bloodComponentOptions}
+                      />
 
                       {/* Quantity */}
-                      <TextInput
-                        label="Quantity:"
+                      <NumberInput
+                        label="Quantity :"
                         name="quantity"
                         placeholder="Enter Quantity"
                         register={register}
@@ -238,7 +206,7 @@ const InventoryModal = ({
 
                       {/* Unit */}
                       <TextInput
-                        label="Unit:"
+                        label="Unit :"
                         name="unit"
                         placeholder="Enter Unit"
                         register={register}
@@ -247,16 +215,15 @@ const InventoryModal = ({
                           required: "Unit is required",
                         }}
                       />
-
-                      {/* Location */}
-                      <TextInput
-                        label="Location:"
-                        name="inventoryLocation"
-                        placeholder="Enter Location"
-                        register={register}
-                        errors={errors}
-                      />
                     </div>
+                    {/* Location */}
+                    <LocationSelector
+                      register={register}
+                      setValue={setValue}
+                      getValues={getValues}
+                      errors={errors}
+                      required={true}
+                    />
 
                     <div className="flex justify-end space-x-4 pt-2">
                       <button
@@ -269,7 +236,7 @@ const InventoryModal = ({
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-400 to-blue-500 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
+                        className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-t from-rose-400 via-rose-500 to-red-400 rounded-lg hover:brightness-90 transition-all duration-200 shadow-sm"
                       >
                         {isSubmitting
                           ? selectedBloodInventory

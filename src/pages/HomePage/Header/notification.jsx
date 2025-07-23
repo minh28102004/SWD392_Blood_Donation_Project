@@ -110,8 +110,8 @@ const Notification = ({ user }) => {
 
   const getBackgroundColor = (type, status) => {
     if (status !== "Unread") return "bg-gray-50 dark:bg-gray-900 ";
-    if (type === "DonationRequest") return "bg-green-100 dark:bg-green-900/30";
-    if (type === "BloodRequest") return "bg-rose-100 dark:bg-red-900/30";
+    if (type === "DonationRequest") return "bg-green-50 dark:bg-green-900/30";
+    if (type === "BloodRequest") return "bg-rose-50 dark:bg-red-900/30";
     return "bg-blue-100 dark:bg-blue-900/30";
   };
 

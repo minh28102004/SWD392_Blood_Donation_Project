@@ -144,8 +144,6 @@ const bloodTypeSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAllBloodTypes.fulfilled, (state, action) => {
-        console.log("FETCHED BLOOD TYPES:", action.payload);
-
         state.loading = false;
         state.bloodTypeList = action.payload.list;
         state.totalCount = action.payload.totalCount;

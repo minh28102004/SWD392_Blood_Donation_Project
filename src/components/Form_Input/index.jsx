@@ -13,13 +13,13 @@ export function TextInput({
   validation,
   placeholder,
   icon: Icon,
-  colSpan, 
+  colSpan,
 }) {
   return (
     <label
       className={`block text-sm font-medium text-gray-700 dark:text-gray-300 relative ${
         colSpan ? `col-span-${colSpan}` : ""
-      }`} 
+      }`}
     >
       {label}
       <div className="relative">
@@ -119,13 +119,23 @@ export function SelectInput({
   label,
   register,
   name,
-  errors,
-  options,
+  errors = {},
+  options = [],
   validation,
   placeholder,
   icon: Icon,
   disabled,
+  value,
+  onChange,
 }) {
+  const baseClass =
+    "border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-black dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500";
+
+  const hasRegister = typeof register === "function";
+  const fieldProps = hasRegister
+    ? { ...register(name, validation) }
+    : { name, value, onChange };
+
   return (
     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 relative">
       {label}
@@ -136,11 +146,11 @@ export function SelectInput({
           </div>
         )}
         <select
-          {...register(name, validation)}
+          {...fieldProps}
           className={`${baseClass} mt-1 block w-full px-2 py-1.5 h-9 ${
             Icon ? "pl-8" : ""
-          } ${errors[name] ? "border-red-500 dark:border-red-400" : ""}`}
-          defaultValue=""
+          } ${errors?.[name] ? "border-red-500 dark:border-red-400" : ""}`}
+          defaultValue={hasRegister ? "" : undefined}
           disabled={disabled}
         >
           {placeholder && (
@@ -155,7 +165,7 @@ export function SelectInput({
           ))}
         </select>
       </div>
-      {errors[name] && (
+      {errors?.[name] && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">
           {errors[name].message}
         </p>
@@ -246,7 +256,7 @@ export function NumberInput({
   placeholder,
   icon: Icon,
   step = "any",
-  min,
+  min = 0,
   max,
 }) {
   return (

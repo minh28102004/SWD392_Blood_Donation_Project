@@ -19,8 +19,7 @@ const BloodDonationModal = ({ isOpen, userId, onClose }) => {
   const [activeTab, setActiveTab] = useState("donate");
   const dispatch = useDispatch();
   const { bloodComponents, bloodTypes } = useSelector((state) => state.blood);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [formData, setFormData] = useState(null);
+  const [showMedicalModal, setShowMedicalModal] = useState(false);
 
   const {
     register,
@@ -29,7 +28,13 @@ const BloodDonationModal = ({ isOpen, userId, onClose }) => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      bloodTypeId: "",
+      bloodComponentId: "",
+      quantityUnit: "",
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,17 +43,6 @@ const BloodDonationModal = ({ isOpen, userId, onClose }) => {
     };
     fetchData();
   }, [dispatch]);
-
-  useEffect(() => {
-    if (bloodTypes.length && bloodComponents.length) {
-      setValue("bloodTypeId", bloodTypes[0].bloodTypeId.toString());
-      setValue(
-        "bloodComponentId",
-        bloodComponents[0].bloodComponentId.toString()
-      );
-      setValue("urgencyLevel", "false");
-    }
-  }, [bloodTypes, bloodComponents, setValue]);
 
   const handleClose = () => {
     reset();
@@ -163,6 +157,8 @@ const BloodDonationModal = ({ isOpen, userId, onClose }) => {
                       errors={errors}
                       bloodTypes={bloodTypes}
                       bloodComponents={bloodComponents}
+                      setShowMedicalModal={setShowMedicalModal}
+                      showMedicalModal={showMedicalModal}
                     />
                   ) : (
                     <RequestForm
@@ -172,6 +168,8 @@ const BloodDonationModal = ({ isOpen, userId, onClose }) => {
                       errors={errors}
                       bloodTypes={bloodTypes}
                       bloodComponents={bloodComponents}
+                      setShowMedicalModal={setShowMedicalModal}
+                      showMedicalModal={showMedicalModal}
                     />
                   )}
                   <div className="flex items-start gap-2 mt-2">
