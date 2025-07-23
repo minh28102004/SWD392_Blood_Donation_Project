@@ -17,19 +17,35 @@ import LoadingSpinner from "@components/Loading";
 import ErrorMessage from "@components/Error_Message";
 import TableComponent from "@components/Table";
 import Tooltip from "@mui/material/Tooltip";
-import { Button, Modal, Select } from "antd";
+import { Modal } from "antd";
 import { toast } from "react-toastify";
 import CollapsibleSearch from "@components/Collapsible_Search";
 import Pagination from "@components/Pagination";
 import { Tag, Dropdown, Menu } from "antd";
 
-const { Option } = Select;
-
 const statusOptions = [
   { id: 0, label: "Pending" },
   { id: 1, label: "Successful" },
-  { id: 2, label: "Cancel" },
+  { id: 2, label: "Cancelled" },
+  { id: 3, label: "Done" },
+  { id: 4, label: "Stocked" },
 ];
+
+const statusColorMap = {
+  0: "gold",
+  1: "green",
+  2: "red",
+  3: "blue",
+  4: "purple",
+};
+
+const statusColorTextMap = {
+  0: "text-yellow-600",
+  1: "text-green-600",
+  2: "text-red-500",
+  3: "text-blue-500",
+  4: "text-purple-600",
+};
 
 const BloodDonation = () => {
   const { darkMode } = useOutletContext();
@@ -133,7 +149,6 @@ const BloodDonation = () => {
       width: "10%",
       render: (val) => val?.name || "N/A",
     },
-
     { key: "quantity", title: "Quantity (ml)", width: "10%" },
     {
       key: "preferredDate",
@@ -146,80 +161,78 @@ const BloodDonation = () => {
       title: "Status",
       width: "10%",
       render: (_, row) => {
-        const statusColorMap = {
-          0: "gold",
-          1: "green",
-          2: "red",
-        };
+  const statusId = typeof row.status === "object" ? row.status.id : row.status;
+  const statusLabelMap = {
+    0: "Pending",
+    1: "Successful",
+    2: "Cancelled",
+    3: "Done",
+    4: "Stocked",
+  };
 
-        const statusLabelMap = {
-          0: "Pending",
-          1: "Successful",
-          2: "Cancelled",
-        };
+  const statusColorMap = {
+    0: "gold",
+    1: "green",
+    2: "red",
+    3: "blue",
+    4: "purple",
+  };
 
-        const handleStatusConfirm = (newStatus) => {
-          if (newStatus === row.status.id) return;
+  if (statusId === undefined || statusId === null) return "—";
 
-          Modal.confirm({
-            title: "Confirm Status Update",
-            content: (
-              <span>
-                Are you sure you want to update the status of this donation request
-                to{" "}
-                <span
-                  style={{
-                    color: statusColorMap[newStatus],
-                    fontWeight: "semibold",
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {statusLabelMap[newStatus]}
-                </span>
-                ?
-              </span>
-            ),
-            okText: "Confirm",
-            cancelText: "Cancel",
-            onOk: () => handleStatusChange(newStatus, row),
-            centered: false,
-            style: { top: "30%" },
-          });
-        };
+  const handleStatusConfirm = (newStatus) => {
+    if (newStatus === statusId) return;
+    Modal.confirm({
+      title: "Confirm Status Update",
+      content: (
+        <span>
+          Are you sure you want to update the status to{" "}
+          <span style={{ color: statusColorMap[newStatus], fontWeight: "bold" }}>
+            {statusLabelMap[newStatus]}
+          </span>
+          ?
+        </span>
+      ),
+      okText: "Confirm",
+      cancelText: "Cancel",
+      onOk: () => handleStatusChange(newStatus, row),
+      centered: true,
+    });
+  };
 
-        const menu = (
-          <Menu>
-            {statusOptions.map((opt) => (
-              <Menu.Item
-                key={opt.id}
-                onClick={() => handleStatusConfirm(opt.id)}
-                disabled={opt.id === row.status.id}
-              >
-                {opt.label}
-              </Menu.Item>
-            ))}
-          </Menu>
-        );
+  const menu = (
+    <Menu>
+      {statusOptions.map((opt) => (
+        <Menu.Item
+          key={opt.id}
+          onClick={() => handleStatusConfirm(opt.id)}
+          disabled={opt.id === statusId}
+        >
+          {opt.label}
+        </Menu.Item>
+      ))}
+    </Menu>
+  );
 
-        const tagElement = (
-          <Tag
-            color={statusColorMap[row.status.id]}
-            className={
-              row.status.id === 0 ? "cursor-pointer font-medium" : "font-medium"
-            }
-          >
-            {statusLabelMap[row.status.id]}
-          </Tag>
-        );
+  const tagElement = (
+    <Tag
+      color={statusColorMap[statusId]}
+      className={statusId === 0 ? "cursor-pointer font-medium" : "font-medium"}
+    >
+      {statusLabelMap[statusId]}
+    </Tag>
+  );
 
-        return row.status.id === 0 ? (
-          <Dropdown overlay={menu} trigger={["click"]}>
-            <Tooltip title="Update status">{tagElement}</Tooltip>
-          </Dropdown>
-        ) : (
-          tagElement
-        );
-      },
+return [0, 1].includes(statusId) ? (
+  <Dropdown overlay={menu} trigger={["click"]}>
+    <Tooltip title="Update status">{tagElement}</Tooltip>
+  </Dropdown>
+) : (
+  tagElement
+);
+
+},
+
     },
     {
       key: "actions",
@@ -327,7 +340,7 @@ const BloodDonation = () => {
       <Modal
         title={
           <div className="text-center text-2xl font-semibold">
-            Dơnation Request Detail
+            Donation Request Detail
             {selectedDetail ? ` - [${selectedDetail.donateRequestId}]` : ""}
           </div>
         }
@@ -338,7 +351,6 @@ const BloodDonation = () => {
       >
         {selectedDetail && (
           <div className="space-y-6 text-sm">
-            {/* Info section */}
             <div>
               <h3 className="text-base font-semibold text-gray-700 mb-2">
                 👤 Personal Info
@@ -356,11 +368,9 @@ const BloodDonation = () => {
                 </div>
               </div>
             </div>
-
-            {/* Donation section */}
             <div>
               <h3 className="text-base font-semibold text-gray-700 mb-2">
-                🩸 Donation Details
+                🧨 Donation Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
                 <div>
@@ -373,7 +383,6 @@ const BloodDonation = () => {
                   <strong>Component:</strong>{" "}
                   {selectedDetail.bloodComponent?.name || "N/A"}
                 </div>
-
                 <div>
                   <strong>Quantity:</strong> {selectedDetail.quantity} ml
                 </div>
@@ -381,15 +390,14 @@ const BloodDonation = () => {
                   <strong>Status:</strong>{" "}
                   <span
                     className={
-                      selectedDetail.status === 0
-                        ? "text-yellow-600"
-                        : selectedDetail.status === 1
-                        ? "text-green-600"
-                        : "text-red-500"
+                      statusColorTextMap[selectedDetail.status] ||
+                      "text-gray-500"
                     }
                   >
-                    {statusOptions.find((s) => s.id === selectedDetail.status)
-                      ?.label || "Unknown"}
+                    {
+                      statusOptions.find((s) => s.id === selectedDetail.status)
+                        ?.label || "Unknown"
+                    }
                   </span>
                 </div>
                 <div className="md:col-span-2">
@@ -404,8 +412,6 @@ const BloodDonation = () => {
                 </div>
               </div>
             </div>
-
-            {/* Health & Location */}
             <div>
               <h3 className="text-base font-semibold text-gray-700 mb-2">
                 📍 Health & Location
@@ -425,8 +431,6 @@ const BloodDonation = () => {
                 </div>
               </div>
             </div>
-
-            {/* Time */}
             <div>
               <h3 className="text-base font-semibold text-gray-700 mb-2">
                 🕒 Timestamp
