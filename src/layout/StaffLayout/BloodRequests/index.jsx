@@ -7,7 +7,7 @@ import ActionButtons from "@components/Action_Button";
 import {
   fetchBloodRequests,
   updateBloodRequestStatus,
-  fetchBloodRequestById,
+  fetchBloodRequestById,  
   setCurrentPage,
 } from "@redux/features/bloodRequestSlice";
 import LoadingSpinner from "@components/Loading";
@@ -426,6 +426,7 @@ const BloodRequests = () => {
                   <strong>Fulfilled:</strong>{" "}
                   {selectedDetail.fulfilled ? "Yes" : "No"}
                 </div>
+                <strong>Source Filled: {selectedDetail.fulfilledSource}</strong>
               </div>
             </div>
 

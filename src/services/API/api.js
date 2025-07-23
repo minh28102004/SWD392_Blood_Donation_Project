@@ -13,7 +13,7 @@ const baseURL = "https://localhost:7210";
 
 // Set token (if have)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

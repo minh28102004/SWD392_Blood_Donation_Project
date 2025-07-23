@@ -4,22 +4,21 @@ import { getRequest, deleteRequest, patchRequest } from "@services/API/api";
 // [GET] notifications by userId with pagination only
 export const fetchNotifications = createAsyncThunk(
   "notification/fetchAll",
-  async ({ userId, page = 1, pageSize = 10 }, { rejectWithValue }) => {
+  async ({ page = 1, pageSize = 10 }, { rejectWithValue }) => {
     try {
       const query = new URLSearchParams({
         page: page.toString(),
         pageSize: pageSize.toString(),
       });
 
-      const res = await getRequest(
-        `/api/Notifications/user/${userId}?${query.toString()}`
-      );
+      const res = await getRequest(`/api/Notifications/user?${query.toString()}`);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
+
 
 // [PATCH] status "read" or "unread"
 export const markNotificationAsRead = createAsyncThunk(
