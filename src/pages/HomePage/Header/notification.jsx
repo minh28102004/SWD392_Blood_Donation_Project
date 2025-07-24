@@ -59,14 +59,15 @@ const Notification = ({ user }) => {
   }, [dispatch, shouldReloadList, user?.userId, currentPage, pageSize]);
 
   // Fetch total unread count (no matter dropdown state)
-  useEffect(() => {
-    if (user?.userId) {
-      fetchAllNotifications(user.userId).then((allNoti) => {
-        const unread = allNoti.filter((n) => n.status === "Unread").length;
-        setUnreadCount(unread);
-      });
-    }
-  }, [user?.userId, notificationList]);
+// ✅ Đếm từ Redux store (không gọi API)
+// ❌ XÓA hoàn toàn đoạn này
+// ✅ Đếm từ Redux store (không gọi API)
+useEffect(() => {
+  const unread = notificationList.filter((n) => n.status === "Unread").length;
+  setUnreadCount(unread);
+}, [notificationList]);
+
+
 
   useOutsideClick(dropdownRef, () => setIsOpen(false), isOpen);
 
